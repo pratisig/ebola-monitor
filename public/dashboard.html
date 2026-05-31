@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>EBOLA-MONITOR v4.2 — RDC 2026</title>
+<title>EBOLA-MONITOR v4.3 — RDC 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root{
@@ -62,7 +61,6 @@ a{color:var(--blue);}
 .alert-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
 .alert-title{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--red2);letter-spacing:.05em;margin-bottom:4px;}
 .alert-text{font-size:13px;color:var(--text2);line-height:1.5;}
-/* Sources panel */
 .sources-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:16px 20px;margin-top:14px;}
 .sources-title{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .sources-title::before{content:'';display:block;width:12px;height:1px;background:var(--amber);}
@@ -156,9 +154,10 @@ a{color:var(--blue);}
 .risk-meter{height:6px;background:var(--bg4);border-radius:99px;overflow:hidden;margin-bottom:5px;}
 .risk-bar{height:100%;border-radius:99px;transition:width .6s;}
 .risk-level{font-family:var(--mono);font-size:10px;}
-/* MAP DRC uniquement */
-.map-drc-wrap{width:100%;height:320px;position:relative;}
-#mapDrc{width:100%;height:100%;}
+/* MAP */
+#mapDrc{width:100%;height:380px;display:block;background:var(--bg3);border-radius:var(--r);}
+#mapDrc path{transition:opacity .15s;}
+#mapDrc path:hover{opacity:.75;}
 .map-leg{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center;}
 .leg-i{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--text3);}
 .leg-sw{width:10px;height:10px;border-radius:2px;display:inline-block;}
@@ -194,11 +193,10 @@ toast.show{opacity:1;transform:translateY(0);}
 <div id="stalenessBanner"></div>
 <div class="app">
 
-<!-- TOPBAR -->
 <div class="topbar fi">
   <div class="topbar-brand">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 1 0 20M12 2a7 7 0 0 0 0 20M2 12h20"/><path d="M12 6c1.5 2 2 4 2 6s-.5 4-2 6M12 6c-1.5 2-2 4-2 6s.5 4 2 6"/></svg>
-    <span class="dot"></span> EBOLA-MONITOR v4.2
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 1 0 20M12 2a7 7 0 0 0 0 20M2 12h20"/><path d="M12 6c1.5 2 2 4 2 6s-.5 4-2 6M12 6c-1.5 2-2 4-2 6s.5 4 2 6"/></svg>
+    <span class="dot"></span> EBOLA-MONITOR v4.3
   </div>
   <div class="topbar-right">
     <span class="pheic-badge">PHEIC DECLARED 17 MAY 2026</span>
@@ -208,46 +206,40 @@ toast.show{opacity:1;transform:translateY(0);}
   </div>
 </div>
 
-<!-- HERO -->
 <div class="hero fi">
   <div class="hero-eyebrow"><span class="dot"></span> Active outbreak &mdash; Bundibugyo ebolavirus &mdash; 17th outbreak in DRC</div>
   <h1>DRC Ebola Outbreak <em>2026</em><br>Ituri &middot; Nord-Kivu &middot; Sud-Kivu</h1>
   <div class="hero-meta">
     <span>Declared <strong>15 May 2026</strong></span>
     <span>PHEIC since <strong>17 May 2026</strong></span>
-    <span>Last update <strong id="heroDate">—</strong></span>
-    <span>Virus <strong>Bundibugyo (BDBV) — no approved vaccine</strong></span>
+    <span>Last update <strong id="heroDate">&mdash;</strong></span>
+    <span>Virus <strong>Bundibugyo (BDBV) &mdash; no approved vaccine</strong></span>
     <span id="dataSourceBadge" style="font-size:10px;color:var(--text3)"></span>
   </div>
 </div>
 
-<!-- ALERT -->
 <div class="section fi">
   <div class="alert">
     <span class="alert-icon">&#9888;&#65039;</span>
     <div class="alert-body">
-      <div class="alert-title">SITUATION AS OF <span id="alertDate">—</span></div>
-      <div class="alert-text" id="alertText">Chargement des données en cours&hellip;</div>
+      <div class="alert-title">SITUATION AS OF <span id="alertDate">&mdash;</span></div>
+      <div class="alert-text" id="alertText">Chargement&hellip;</div>
     </div>
   </div>
 </div>
 
-<!-- KPIs DYNAMIQUES -->
 <div class="section fi">
-  <div class="section-head"><span class="section-title">Current outbreak — confirmed figures</span></div>
+  <div class="section-head"><span class="section-title">Current outbreak &mdash; confirmed figures</span></div>
   <div class="kpi-strip" id="currentKpis"></div>
 </div>
 
-<!-- SOURCES COMPARAISON -->
 <div class="section fi">
-  <div class="section-head"><span class="section-title">Multi-sources transparency — why figures differ</span></div>
+  <div class="section-head"><span class="section-title">Multi-sources transparency &mdash; why figures differ</span></div>
   <div class="sources-panel">
-    <div class="sources-title">Sources comparison — 28-29 May 2026</div>
+    <div class="sources-title">Sources comparison &mdash; 28-29 May 2026</div>
     <div style="overflow-x:auto">
-      <table class="sources-table" id="sourcesTable">
-        <thead><tr>
-          <th>Source</th><th>Date</th><th>Confirmed</th><th>Suspected</th><th>Deaths conf.</th><th>Deaths total</th><th>Note</th><th>Link</th>
-        </tr></thead>
+      <table class="sources-table">
+        <thead><tr><th>Source</th><th>Date</th><th>Confirmed</th><th>Suspected</th><th>Deaths conf.</th><th>Deaths total</th><th>Note</th><th>Link</th></tr></thead>
         <tbody id="sourcesBody"></tbody>
       </table>
     </div>
@@ -255,25 +247,23 @@ toast.show{opacity:1;transform:translateY(0);}
   </div>
 </div>
 
-<!-- FILTRE + PROVINCE TABLE + MAP DRC -->
 <div class="section fi">
-  <div class="section-head"><span class="section-title">Geographic spread — DRC provinces 2026</span></div>
+  <div class="section-head"><span class="section-title">Geographic spread &mdash; DRC provinces 2026</span></div>
   <div class="curr-filter-bar">
     <span class="filter-label">Province</span>
     <div class="fgroup" id="provFilters">
-      <button class="fbtn on" data-prov="all" onclick="setProvFilter('all',this)">All</button>
-      <button class="fbtn" data-prov="Ituri" onclick="setProvFilter('Ituri',this)">Ituri</button>
-      <button class="fbtn" data-prov="Nord-Kivu" onclick="setProvFilter('Nord-Kivu',this)">Nord-Kivu</button>
-      <button class="fbtn" data-prov="Sud-Kivu" onclick="setProvFilter('Sud-Kivu',this)">Sud-Kivu</button>
-      <button class="fbtn" data-prov="Kinshasa" onclick="setProvFilter('Kinshasa',this)">Kinshasa</button>
-      <button class="fbtn" data-prov="Maniema" onclick="setProvFilter('Maniema',this)">Maniema</button>
-      <button class="fbtn" data-prov="Uganda" onclick="setProvFilter('Uganda',this)">Uganda</button>
+      <button class="fbtn on" onclick="setProvFilter('all',this)">All</button>
+      <button class="fbtn" onclick="setProvFilter('Ituri',this)">Ituri</button>
+      <button class="fbtn" onclick="setProvFilter('Nord-Kivu',this)">Nord-Kivu</button>
+      <button class="fbtn" onclick="setProvFilter('Sud-Kivu',this)">Sud-Kivu</button>
+      <button class="fbtn" onclick="setProvFilter('Kinshasa',this)">Kinshasa</button>
+      <button class="fbtn" onclick="setProvFilter('Maniema',this)">Maniema</button>
     </div>
     <span class="filter-label" style="margin-left:8px">Status</span>
     <div class="fgroup" id="statusFilters">
-      <button class="fbtn on" data-st="all" onclick="setStatusFilter('all',this)">All</button>
-      <button class="fbtn" data-st="Active" onclick="setStatusFilter('Active',this)">Active</button>
-      <button class="fbtn" data-st="Monitoring" onclick="setStatusFilter('Monitoring',this)">Monitoring</button>
+      <button class="fbtn on" onclick="setStatusFilter('all',this)">All</button>
+      <button class="fbtn" onclick="setStatusFilter('Active',this)">Active</button>
+      <button class="fbtn" onclick="setStatusFilter('Monitoring',this)">Monitoring</button>
     </div>
     <div style="margin-left:auto">
       <button class="export-btn" onclick="exportCurrentCSV()">
@@ -281,48 +271,38 @@ toast.show{opacity:1;transform:translateY(0);}
       </button>
     </div>
   </div>
-
   <div class="grid2">
     <div class="panel" style="padding:14px">
-      <div class="panel-head"><span class="panel-title">Zones de santé affectées</span></div>
+      <div class="panel-head"><span class="panel-title">Zones de sant&eacute; affect&eacute;es</span></div>
       <table class="province-list">
-        <thead><tr>
-          <th>Province / Zone</th><th>Cas conf.</th><th>Décès</th><th>CFR</th><th>Status</th><th>Source</th>
-        </tr></thead>
+        <thead><tr><th>Province / Zone</th><th>Cas conf.</th><th>D&eacute;c&egrave;s</th><th>CFR</th><th>Status</th><th>Source</th></tr></thead>
         <tbody id="provTableBody"></tbody>
       </table>
     </div>
-    <div class="panel" style="padding:14px;min-height:360px">
+    <div class="panel" style="padding:14px">
       <div class="panel-head">
-        <span class="panel-title">DRC — carte provinces affectées</span>
+        <span class="panel-title">RDC &mdash; carte provinces affect&eacute;es</span>
         <div class="tabs">
           <button class="tab on" onclick="setMapMode('cases',this)">Cases</button>
           <button class="tab" onclick="setMapMode('deaths',this)">Deaths</button>
           <button class="tab" onclick="setMapMode('cfr',this)">CFR</button>
         </div>
       </div>
-      <div class="map-drc-wrap">
-        <svg id="mapDrc" viewBox="0 0 500 480"></svg>
-      </div>
+      <svg id="mapDrc"></svg>
       <div class="map-leg" id="mapLeg"></div>
     </div>
   </div>
 </div>
 
-<!-- COURBES EPIDEMIO -->
 <div class="section fi">
-  <div class="section-head"><span class="section-title">2026 DRC — courbes épidémiologiques</span></div>
+  <div class="section-head"><span class="section-title">2026 DRC &mdash; courbes &eacute;pid&eacute;miologiques</span></div>
   <div class="grid2">
     <div class="panel">
       <div class="panel-head">
-        <span class="panel-title">Cas cumulatifs — confirmed vs suspected</span>
+        <span class="panel-title">Cas cumulatifs &mdash; confirmed vs suspected</span>
         <div class="export-group">
-          <button class="export-btn" onclick="exportChartPNG(trendChart,'trend-2026')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG
-          </button>
-          <button class="export-btn" onclick="exportTrendCSV()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> CSV
-          </button>
+          <button class="export-btn" onclick="exportChartPNG(trendChart,'trend-2026')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG</button>
+          <button class="export-btn" onclick="exportTrendCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> CSV</button>
         </div>
       </div>
       <div class="trend-controls">
@@ -337,34 +317,28 @@ toast.show{opacity:1;transform:translateY(0);}
       <div style="display:flex;gap:14px;margin-top:6px;font-size:11px;color:var(--text2);font-family:var(--mono)">
         <span><span style="display:inline-block;width:10px;height:2px;background:#e63946;vertical-align:middle"></span> Confirmed</span>
         <span><span style="display:inline-block;width:10px;height:2px;background:#f4a261;vertical-align:middle"></span> Suspected ECDC (1077)</span>
-        <span><span style="display:inline-block;width:10px;height:2px;background:#52b788;border-top:2px dashed #52b788;vertical-align:middle"></span> Suspected MSF (906)</span>
+        <span><span style="display:inline-block;width:10px;height:2px;background:#52b788;vertical-align:middle"></span> Suspected MSF (906)</span>
       </div>
-      <div style="margin-top:6px;font-size:11px;color:var(--text3)">Écart 1077 vs 906 : définition de cas différente ECDC/WHO vs MSF terrain. <a href="#discrepancyBox" style="color:var(--amber)">Voir explication ↓</a></div>
     </div>
     <div class="panel">
       <div class="panel-head">
-        <span class="panel-title">Nouveaux cas journaliers — Epi curve</span>
-        <button class="export-btn" onclick="exportChartPNG(epiChart,'epi-curve-2026')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG
-        </button>
+        <span class="panel-title">Nouveaux cas journaliers &mdash; Epi curve</span>
+        <button class="export-btn" onclick="exportChartPNG(epiChart,'epi-curve-2026')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG</button>
       </div>
       <div class="chart-box" style="height:240px"><canvas id="epiChart"></canvas></div>
     </div>
   </div>
 </div>
 
-<!-- OPERATIONAL -->
 <div class="section fi">
-  <div class="section-head"><span class="section-title">Indicateurs opérationnels</span></div>
+  <div class="section-head"><span class="section-title">Indicateurs op&eacute;rationnels</span></div>
   <div class="grid3">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Reproduction number Rₜ</span></div>
+      <div class="panel-head"><span class="panel-title">Reproduction number R&#x209c;</span></div>
       <div class="r-gauge-wrap">
         <svg class="r-gauge-arc" viewBox="0 0 160 80">
           <defs><linearGradient id="gaugeGrad" x1="0" y1="0" x2="100%" y2="0">
-            <stop offset="0" stop-color="#52b788"/>
-            <stop offset="50%" stop-color="#f4a261"/>
-            <stop offset="100%" stop-color="#e63946"/>
+            <stop offset="0" stop-color="#52b788"/><stop offset="50%" stop-color="#f4a261"/><stop offset="100%" stop-color="#e63946"/>
           </linearGradient></defs>
           <path d="M10,75 A70,70 0 0,1 150,75" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="12" stroke-linecap="round"/>
           <path d="M10,75 A70,70 0 0,1 150,75" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" opacity=".6"/>
@@ -375,9 +349,9 @@ toast.show{opacity:1;transform:translateY(0);}
           <text x="150" y="70" fill="#3e4a56" font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">3.0</text>
         </svg>
         <div class="r-gauge-val" id="rtVal" style="color:var(--amber)">1.7</div>
-        <div class="r-gauge-label">Rₜ — <span id="rtDate">29 May 2026</span></div>
-        <div class="r-gauge-interp" style="margin-top:6px" id="rtInterp">Chaque cas en infecte 1.7. IC 95% [1.4–2.1]. Croissance active.</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-align:center;margin-top:4px">EpiEstim (Cori 2013) — SI BDBV ≈7j</div>
+        <div class="r-gauge-label">R&#x209c; &mdash; <span id="rtDate">29 May 2026</span></div>
+        <div class="r-gauge-interp" style="margin-top:6px" id="rtInterp">Chaque cas infecte 1.7 autres. IC 95% [1.4&ndash;2.1].</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-align:center;margin-top:4px">EpiEstim (Cori 2013) &mdash; SI BDBV &asymp;7j</div>
       </div>
     </div>
     <div class="panel">
@@ -392,53 +366,38 @@ toast.show{opacity:1;transform:translateY(0);}
   </div>
 </div>
 
-<!-- HISTORIQUE DRC -->
 <div class="section fi">
-  <div class="section-head"><span class="section-title">2026 vs épidémies DRC passées</span></div>
+  <div class="section-head"><span class="section-title">2026 vs &eacute;pid&eacute;mies DRC pass&eacute;es</span></div>
   <div class="grid2">
     <div class="panel">
       <div class="panel-head">
-        <span class="panel-title">Comparaison épidémies DRC</span>
+        <span class="panel-title">Comparaison &eacute;pid&eacute;mies DRC</span>
         <div style="display:flex;gap:6px;align-items:center">
-          <div class="tabs">
-            <button class="tab on" onclick="setCompM('cases',this)">Cases</button>
-            <button class="tab" onclick="setCompM('deaths',this)">Deaths</button>
-          </div>
-          <button class="export-btn" onclick="exportChartPNG(compChart,'drc-comparison')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG
-          </button>
+          <div class="tabs"><button class="tab on" onclick="setCompM('cases',this)">Cases</button><button class="tab" onclick="setCompM('deaths',this)">Deaths</button></div>
+          <button class="export-btn" onclick="exportChartPNG(compChart,'drc-comparison')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG</button>
         </div>
       </div>
       <div class="chart-box" style="height:240px"><canvas id="compChart"></canvas></div>
     </div>
     <div class="panel">
       <div class="panel-head">
-        <span class="panel-title">CFR — épidémies DRC</span>
-        <button class="export-btn" onclick="exportChartPNG(cfrChart,'cfr-comparison')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG
-        </button>
+        <span class="panel-title">CFR &mdash; &eacute;pid&eacute;mies DRC</span>
+        <button class="export-btn" onclick="exportChartPNG(cfrChart,'cfr-comparison')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG</button>
       </div>
       <div class="chart-box" style="height:240px"><canvas id="cfrChart"></canvas></div>
     </div>
   </div>
 </div>
 
-<!-- HISTORIQUE GLOBAL -->
 <div class="section fi">
-  <div class="section-head"><span class="section-title">Historique global — toutes épidémies 1976–2026</span></div>
+  <div class="section-head"><span class="section-title">Historique global &mdash; toutes &eacute;pid&eacute;mies 1976&ndash;2026</span></div>
   <div class="grid2">
     <div class="panel">
       <div class="panel-head">
-        <span class="panel-title">Par espèce virale</span>
+        <span class="panel-title">Par esp&egrave;ce virale</span>
         <div style="display:flex;gap:6px;align-items:center">
-          <div class="tabs">
-            <button class="tab on" onclick="setSpM('cases',this)">Cases</button>
-            <button class="tab" onclick="setSpM('deaths',this)">Deaths</button>
-            <button class="tab" onclick="setSpM('n',this)">Count</button>
-          </div>
-          <button class="export-btn" onclick="exportChartPNG(spChart,'species')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG
-          </button>
+          <div class="tabs"><button class="tab on" onclick="setSpM('cases',this)">Cases</button><button class="tab" onclick="setSpM('deaths',this)">Deaths</button><button class="tab" onclick="setSpM('n',this)">Count</button></div>
+          <button class="export-btn" onclick="exportChartPNG(spChart,'species')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG</button>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center">
@@ -448,16 +407,10 @@ toast.show{opacity:1;transform:translateY(0);}
     </div>
     <div class="panel">
       <div class="panel-head">
-        <span class="panel-title">Top pays — tous cas</span>
+        <span class="panel-title">Top pays &mdash; tous cas</span>
         <div style="display:flex;gap:6px;align-items:center">
-          <div class="tabs">
-            <button class="tab on" onclick="setCtyM('cases',this)">Cases</button>
-            <button class="tab" onclick="setCtyM('deaths',this)">Deaths</button>
-            <button class="tab" onclick="setCtyM('n',this)">Outbreaks</button>
-          </div>
-          <button class="export-btn" onclick="exportChartPNG(ctyChart,'country-ranking')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG
-          </button>
+          <div class="tabs"><button class="tab on" onclick="setCtyM('cases',this)">Cases</button><button class="tab" onclick="setCtyM('deaths',this)">Deaths</button><button class="tab" onclick="setCtyM('n',this)">Outbreaks</button></div>
+          <button class="export-btn" onclick="exportChartPNG(ctyChart,'country-ranking')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG</button>
         </div>
       </div>
       <div class="chart-box" style="height:190px"><canvas id="ctyChart"></canvas></div>
@@ -465,24 +418,23 @@ toast.show{opacity:1;transform:translateY(0);}
   </div>
 </div>
 
-<!-- TABLE HISTORIQUE -->
 <div class="section fi">
-  <div class="section-head"><span class="section-title">Records historiques 1976–2026</span></div>
+  <div class="section-head"><span class="section-title">Records historiques 1976&ndash;2026</span></div>
   <div class="filter-bar">
-    <span class="filter-label">Période</span>
+    <span class="filter-label">P&eacute;riode</span>
     <div class="fgroup" id="yFilters">
-      <button class="fbtn on" data-y="all" onclick="setY('all',this)">Tous</button>
-      <button class="fbtn" data-y="1976-1999" onclick="setY('1976-1999',this)">1976–1999</button>
-      <button class="fbtn" data-y="2000-2013" onclick="setY('2000-2013',this)">2000–2013</button>
-      <button class="fbtn" data-y="2014-2016" onclick="setY('2014-2016',this)">2014–2016</button>
-      <button class="fbtn" data-y="2017-2026" onclick="setY('2017-2026',this)">2017–2026</button>
+      <button class="fbtn on" onclick="setY('all',this)">Tous</button>
+      <button class="fbtn" onclick="setY('1976-1999',this)">1976&ndash;1999</button>
+      <button class="fbtn" onclick="setY('2000-2013',this)">2000&ndash;2013</button>
+      <button class="fbtn" onclick="setY('2014-2016',this)">2014&ndash;2016</button>
+      <button class="fbtn" onclick="setY('2017-2026',this)">2017&ndash;2026</button>
     </div>
-    <span class="filter-label" style="margin-left:8px">Espèce</span>
+    <span class="filter-label" style="margin-left:8px">Esp&egrave;ce</span>
     <div class="fgroup" id="spFilters">
-      <button class="fbtn on" data-sp="all" onclick="setSp('all',this)">All</button>
-      <button class="fbtn" data-sp="Zaire" onclick="setSp('Zaire',this)">Zaire</button>
-      <button class="fbtn" data-sp="Sudan" onclick="setSp('Sudan',this)">Sudan</button>
-      <button class="fbtn" data-sp="Bundibugyo" onclick="setSp('Bundibugyo',this)">Bundibugyo</button>
+      <button class="fbtn on" onclick="setSp('all',this)">All</button>
+      <button class="fbtn" onclick="setSp('Zaire',this)">Zaire</button>
+      <button class="fbtn" onclick="setSp('Sudan',this)">Sudan</button>
+      <button class="fbtn" onclick="setSp('Bundibugyo',this)">Bundibugyo</button>
     </div>
     <div class="search-wrap">
       <svg class="s-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -506,20 +458,18 @@ toast.show{opacity:1;transform:translateY(0);}
       </select>
       <span class="tbl-info" id="tblInfo"></span>
       <div style="margin-left:auto" class="export-group">
-        <button class="export-btn" onclick="exportFilteredCSV()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV filtré
-        </button>
+        <button class="export-btn" onclick="exportFilteredCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV filtr&eacute;</button>
       </div>
     </div>
     <div style="overflow-x:auto">
       <table class="data-tbl">
         <thead><tr>
-          <th onclick="sBy('year')">Année <span id="a-year"></span></th>
+          <th onclick="sBy('year')">Ann&eacute;e <span id="a-year"></span></th>
           <th onclick="sBy('country')">Pays <span id="a-country"></span></th>
           <th onclick="sBy('cases')">Cas <span id="a-cases"></span></th>
-          <th onclick="sBy('deaths')">Décès <span id="a-deaths"></span></th>
+          <th onclick="sBy('deaths')">D&eacute;c&egrave;s <span id="a-deaths"></span></th>
           <th onclick="sBy('cfr')">CFR <span id="a-cfr"></span></th>
-          <th>Espèce</th><th>Statut</th>
+          <th>Esp&egrave;ce</th><th>Statut</th>
         </tr></thead>
         <tbody id="tblBody"></tbody>
       </table>
@@ -528,26 +478,58 @@ toast.show{opacity:1;transform:translateY(0);}
   </div>
 </div>
 
-<!-- FOOTER -->
 <footer class="fi">
   <div class="footer-src">
     Sources: <a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603" target="_blank">WHO DON603 (20 mai)</a> &bull;
-    <a href="https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda" target="_blank">ECDC Rapid Risk Assessment (28 mai)</a> &bull;
-    <a href="https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak" target="_blank">MSF Briefing (28 mai)</a> &bull;
-    <a href="https://www.cdc.gov/ebola/situation-summary/index.html" target="_blank">CDC Summary (29 mai)</a> &bull;
-    <a href="https://reliefweb.int/report/democratic-republic-congo/unfpa-flash-update-bundibugyo-ebola-virus-disease-bvd-outbreak-20-26-may" target="_blank">UNFPA Flash Update (27 mai)</a>
+    <a href="https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda" target="_blank">ECDC (28 mai)</a> &bull;
+    <a href="https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak" target="_blank">MSF (28 mai)</a> &bull;
+    <a href="https://www.cdc.gov/ebola/situation-summary/index.html" target="_blank">CDC (29 mai)</a> &bull;
+    <a href="https://reliefweb.int/report/democratic-republic-congo/unfpa-flash-update-bundibugyo-ebola-virus-disease-bvd-outbreak-20-26-may" target="_blank">UNFPA (27 mai)</a>
   </div>
-  <span class="footer-tag">EBOLA-MONITOR v4.2 — Données WHO/ECDC/MSF/CDC/UNFPA — Usage opérationnel uniquement — Auto-update via Supabase cron 08h UTC</span>
+  <span class="footer-tag">EBOLA-MONITOR v4.3 &mdash; Carte D3 GeoJSON r&eacute;el &mdash; WHO/ECDC/MSF/CDC/UNFPA &mdash; Usage op&eacute;rationnel uniquement</span>
 </footer>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
-// EBOLA-MONITOR v4.2
-// Carte DRC uniquement (D3 + TopoJSON provinces DRC)
-// Multi-sources transparentes avec explication des écarts
-// Données dynamiques depuis /api/ebola-data
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// EBOLA-MONITOR v4.3
+// Carte: D3 + GeoJSON provinces DRC (coordonnées géographiques réelles)
+// Toutes autres données dynamiques depuis /api/ebola-data
+// ═══════════════════════════════════════════════════════════
+
+// ── GeoJSON DRC provinces (26 provinces, coordonnées réelles simplifiées) ──
+// Coordonnées longitude/latitude réelles, polygones simplifiés
+const DRC_GEOJSON = {
+  type:"FeatureCollection",
+  features:[
+    {type:"Feature",properties:{name:"Kinshasa"},geometry:{type:"Polygon",coordinates:[[[15.2,-4.7],[15.5,-4.2],[15.0,-4.0],[14.8,-4.4],[15.2,-4.7]]]}},
+    {type:"Feature",properties:{name:"Kongo Central"},geometry:{type:"Polygon",coordinates:[[[12.2,-4.3],[15.0,-4.0],[15.2,-4.7],[14.5,-5.9],[13.1,-5.8],[12.2,-4.9],[12.2,-4.3]]]}},
+    {type:"Feature",properties:{name:"Kwango"},geometry:{type:"Polygon",coordinates:[[[16.2,-4.5],[18.0,-4.5],[18.5,-6.5],[17.0,-7.5],[15.8,-7.0],[15.0,-5.9],[16.2,-4.5]]]}},
+    {type:"Feature",properties:{name:"Kwilu"},geometry:{type:"Polygon",coordinates:[[[16.2,-4.5],[18.0,-4.5],[18.5,-4.2],[18.0,-2.8],[16.5,-3.0],[15.8,-3.8],[16.2,-4.5]]]}},
+    {type:"Feature",properties:{name:"Mai-Ndombe"},geometry:{type:"Polygon",coordinates:[[[16.5,-3.0],[18.0,-2.8],[19.5,-2.5],[19.5,-0.5],[18.2,-0.8],[17.0,-1.5],[16.0,-2.0],[16.5,-3.0]]]}},
+    {type:"Feature",properties:{name:"Équateur"},geometry:{type:"Polygon",coordinates:[[[18.2,-0.8],[19.5,-0.5],[21.5,-0.2],[22.0,1.0],[20.5,2.0],[18.5,1.5],[17.5,0.5],[18.2,-0.8]]]}},
+    {type:"Feature",properties:{name:"Sud-Ubangi"},geometry:{type:"Polygon",coordinates:[[[17.5,0.5],[18.5,1.5],[20.5,2.0],[20.0,3.5],[18.5,3.2],[17.0,2.5],[16.5,1.5],[17.5,0.5]]]}},
+    {type:"Feature",properties:{name:"Nord-Ubangi"},geometry:{type:"Polygon",coordinates:[[[18.5,3.2],[20.0,3.5],[22.5,3.8],[22.5,5.0],[20.5,4.8],[18.5,4.5],[17.8,3.8],[18.5,3.2]]]}},
+    {type:"Feature",properties:{name:"Mongala"},geometry:{type:"Polygon",coordinates:[[[20.5,2.0],[22.0,1.0],[24.0,1.5],[24.0,3.5],[22.5,3.8],[20.0,3.5],[20.5,2.0]]]}},
+    {type:"Feature",properties:{name:"Bas-Uele"},geometry:{type:"Polygon",coordinates:[[[22.5,3.8],[24.0,3.5],[26.5,3.8],[27.0,4.5],[24.5,5.0],[22.5,5.0],[22.5,3.8]]]}},
+    {type:"Feature",properties:{name:"Haut-Uele"},geometry:{type:"Polygon",coordinates:[[[26.5,3.8],[29.5,3.5],[30.0,4.0],[29.5,5.0],[27.5,5.5],[27.0,4.5],[26.5,3.8]]]}},
+    {type:"Feature",properties:{name:"Ituri"},geometry:{type:"Polygon",coordinates:[[[27.5,1.0],[29.8,0.5],[30.0,2.5],[29.5,3.5],[26.5,3.8],[27.0,2.0],[27.5,1.0]]]}},
+    {type:"Feature",properties:{name:"Tshopo"},geometry:{type:"Polygon",coordinates:[[[22.0,1.0],[24.0,1.5],[26.0,1.8],[27.5,1.0],[27.0,2.0],[26.5,3.8],[24.0,3.5],[22.0,1.0]]]}},
+    {type:"Feature",properties:{name:"Nord-Kivu"},geometry:{type:"Polygon",coordinates:[[[27.5,1.0],[29.8,0.5],[30.5,-0.5],[29.5,-1.5],[28.5,-1.5],[27.5,-0.5],[27.0,0.5],[27.5,1.0]]]}},
+    {type:"Feature",properties:{name:"Maniema"},geometry:{type:"Polygon",coordinates:[[[25.5,-1.0],[27.5,-0.5],[27.5,1.0],[27.0,2.0],[26.0,1.8],[25.0,0.5],[25.0,-1.5],[25.5,-1.0]]]}},
+    {type:"Feature",properties:{name:"Sud-Kivu"},geometry:{type:"Polygon",coordinates:[[[26.5,-3.0],[28.5,-1.5],[29.5,-1.5],[29.5,-3.5],[28.5,-4.5],[27.5,-4.5],[26.5,-3.5],[26.5,-3.0]]]}},
+    {type:"Feature",properties:{name:"Tanganyika"},geometry:{type:"Polygon",coordinates:[[[25.5,-3.5],[26.5,-3.0],[26.5,-3.5],[27.5,-4.5],[28.5,-4.5],[28.0,-6.0],[26.5,-6.5],[25.0,-5.5],[25.5,-3.5]]]}},
+    {type:"Feature",properties:{name:"Lualaba"},geometry:{type:"Polygon",coordinates:[[[22.5,-6.0],[25.0,-5.5],[26.5,-6.5],[26.0,-8.5],[24.5,-9.0],[22.5,-8.0],[22.5,-6.0]]]}},
+    {type:"Feature",properties:{name:"Haut-Lomami"},geometry:{type:"Polygon",coordinates:[[[23.5,-7.0],[25.0,-5.5],[22.5,-6.0],[22.5,-8.0],[23.5,-9.5],[24.5,-9.0],[23.5,-7.0]]]}},
+    {type:"Feature",properties:{name:"Haut-Katanga"},geometry:{type:"Polygon",coordinates:[[[24.5,-9.0],[26.0,-8.5],[28.0,-9.5],[29.0,-11.0],[27.5,-12.5],[26.0,-13.0],[24.0,-12.5],[23.0,-11.5],[23.5,-9.5],[24.5,-9.0]]]}},
+    {type:"Feature",properties:{name:"Lomami"},geometry:{type:"Polygon",coordinates:[[[23.5,-4.0],[25.5,-3.5],[25.0,-5.5],[23.5,-7.0],[22.0,-6.0],[21.5,-4.5],[23.5,-4.0]]]}},
+    {type:"Feature",properties:{name:"Sankuru"},geometry:{type:"Polygon",coordinates:[[[22.0,-1.5],[25.5,-1.0],[25.0,0.5],[22.5,0.0],[21.5,-0.5],[22.0,-1.5]]]}},
+    {type:"Feature",properties:{name:"Kasaï-Oriental"},geometry:{type:"Polygon",coordinates:[[[22.0,-1.5],[25.5,-1.0],[25.5,-3.5],[23.5,-4.0],[21.5,-4.5],[21.5,-3.0],[22.0,-1.5]]]}},
+    {type:"Feature",properties:{name:"Kasaï"},geometry:{type:"Polygon",coordinates:[[[19.5,-2.5],[21.5,-2.0],[21.5,-3.0],[21.5,-4.5],[20.0,-5.0],[19.0,-4.0],[19.5,-2.5]]]}},
+    {type:"Feature",properties:{name:"Kasaï-Central"},geometry:{type:"Polygon",coordinates:[[[19.0,-4.0],[20.0,-5.0],[21.5,-4.5],[22.5,-6.0],[21.0,-7.0],[19.5,-6.5],[18.5,-5.5],[19.0,-4.0]]]}},
+    {type:"Feature",properties:{name:"Tshuapa"},geometry:{type:"Polygon",coordinates:[[[19.5,-0.5],[21.5,-0.2],[22.0,1.0],[20.5,2.0],[19.5,1.5],[18.5,0.5],[18.2,-0.8],[19.5,-0.5]]]}},
+  ]
+};
 
 let ALL=[], PROVINCE_DATA=[], TREND_DATES=[], TREND_CONF=[], TREND_SUSP_ECDC=[], TREND_SUSP_MSF=[], EPI_DAILY=[];
 let DRC_HISTORY=[], CONTACT_TRACING={}, RISK_FACTORS=[], SOURCES_COMPARISON=[], SOURCE_DISCREPANCIES={};
@@ -556,8 +538,8 @@ let mapMode='cases', compM='cases', spM='cases', ctyM='cases', trendType='both';
 let provFilter='all', statusFilter='all';
 let trendChart, compChart, spChart, ctyChart, epiChart, cfrChart;
 
-const CHART_CFG = {
-  responsive:true, maintainAspectRatio:false,
+const CHART_CFG={
+  responsive:true,maintainAspectRatio:false,
   plugins:{legend:{display:false}},
   scales:{
     x:{ticks:{color:'#3e4a56',font:{family:"'IBM Plex Mono'",size:9}},grid:{color:'rgba(255,255,255,.04)'}},
@@ -565,7 +547,7 @@ const CHART_CFG = {
   },
 };
 
-// ── LOAD DATA ────────────────────────────────────────────────
+// ── LOAD DATA ────────────────────────────────────────────
 async function loadData() {
   try {
     const res = await fetch('/api/ebola-data');
@@ -576,46 +558,38 @@ async function loadData() {
     setTimeout(loadData, 4*60*60*1000);
   } catch(err) {
     console.warn('[EBOLA-MONITOR] API error:', err.message);
-    document.getElementById('dataSourceBadge').textContent = '⚠ API indisponible';
+    document.getElementById('dataSourceBadge').textContent='⚠ API indisponible';
     checkStaleness('2026-05-29T00:00:00Z');
   }
 }
 
 function applyData(d) {
-  const o = d.outbreak_2026;
-  const t = o.totals;
-  ALL = d.historical || [];
-  PROVINCE_DATA = o.provinces || [];
-  DRC_HISTORY = d.drc_history_comparison || [];
-  CONTACT_TRACING = o.contact_tracing || {};
-  RISK_FACTORS = o.risk_factors || [];
-  SOURCES_COMPARISON = o.sources_comparison || [];
-  SOURCE_DISCREPANCIES = o.source_discrepancies || {};
-
+  const o=d.outbreak_2026, t=o.totals;
+  ALL=d.historical||[];
+  PROVINCE_DATA=o.provinces||[];
+  DRC_HISTORY=d.drc_history_comparison||[];
+  CONTACT_TRACING=o.contact_tracing||{};
+  RISK_FACTORS=o.risk_factors||[];
+  SOURCES_COMPARISON=o.sources_comparison||[];
+  SOURCE_DISCREPANCIES=o.source_discrepancies||{};
   if (o.trend) {
-    TREND_DATES     = o.trend.dates || [];
-    TREND_CONF      = o.trend.confirmed || [];
-    TREND_SUSP_ECDC = o.trend.suspected_ecdc || [];
-    TREND_SUSP_MSF  = o.trend.suspected_msf || [];
-    EPI_DAILY = TREND_CONF.map((v,i)=>i===0?v:Math.max(0,v-TREND_CONF[i-1]));
+    TREND_DATES=o.trend.dates||[];
+    TREND_CONF=o.trend.confirmed||[];
+    TREND_SUSP_ECDC=o.trend.suspected_ecdc||[];
+    TREND_SUSP_MSF=o.trend.suspected_msf||[];
+    EPI_DAILY=TREND_CONF.map((v,i)=>i===0?v:Math.max(0,v-TREND_CONF[i-1]));
   }
-
-  const dateStr = new Date(d.data_as_of).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
-  document.getElementById('heroDate').textContent = dateStr;
-  document.getElementById('alertDate').textContent = dateStr.toUpperCase();
-  document.getElementById('alertText').innerHTML =
-    `<strong>${t.confirmed_cases} cas confirmés</strong>, <strong>${t.suspected_cases} cas suspects</strong> (ECDC 28 mai) en RDC.
-    Ouganda : <strong>${t.uganda_confirmed} confirmés</strong>, ${t.uganda_deaths} décès.
-    Bundibugyo virus — <b>aucun vaccin approuvé</b>. Réponse : soins de support, isolement annulaire, traçage contacts.
-    <br><small style="color:var(--text3)">Note: MSF rapporte 906 suspects vs 1077 ECDC — différence de définition de cas. <a href="#discrepancyBox" style="color:var(--amber)">Voir explication ↓</a></small>`;
-  document.getElementById('dataSourceBadge').textContent = d.data_source ? '● '+d.data_source : '';
-
+  const ds=new Date(d.data_as_of).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('heroDate').textContent=ds;
+  document.getElementById('alertDate').textContent=ds.toUpperCase();
+  document.getElementById('alertText').innerHTML=
+    `<strong>${t.confirmed_cases} cas confirmés</strong>, <strong>${t.suspected_cases} cas suspects</strong> (ECDC 28 mai) en RDC. Ouganda : <strong>${t.uganda_confirmed} confirmés</strong>, ${t.uganda_deaths} décès. Bundibugyo virus — <b>aucun vaccin approuvé</b>.<br><small style="color:var(--text3)">MSF rapporte 906 suspects vs 1077 ECDC — différence de définition de cas. <a href="#discrepancyBox" style="color:var(--amber)">Voir ↓</a></small>`;
+  document.getElementById('dataSourceBadge').textContent=d.data_source?'● '+d.data_source:'';
   if (o.rt) {
-    document.getElementById('rtVal').textContent = o.rt.value;
-    document.getElementById('rtDate').textContent = o.rt.date || '29 May 2026';
-    document.getElementById('rtInterp').textContent = `Chaque cas infecte ${o.rt.value} autres. IC 95%: [${o.rt.ci_low||1.4}–${o.rt.ci_high||2.1}].`;
+    document.getElementById('rtVal').textContent=o.rt.value;
+    document.getElementById('rtDate').textContent=o.rt.date||'29 May 2026';
+    document.getElementById('rtInterp').textContent=`Chaque cas infecte ${o.rt.value} autres. IC 95%: [${o.rt.ci_low||1.4}–${o.rt.ci_high||2.1}].`;
   }
-
   checkStaleness(d.data_as_of);
   renderKPIs(t);
   renderSourcesTable();
@@ -628,287 +602,210 @@ function applyData(d) {
   drawDrcMap();
 }
 
-// ── STALENESS ────────────────────────────────────────────────
 function checkStaleness(iso) {
-  const b = document.getElementById('stalenessBanner');
-  const h = (Date.now()-new Date(iso).getTime())/3600000;
+  const b=document.getElementById('stalenessBanner');
+  const h=(Date.now()-new Date(iso).getTime())/3600000;
   if (h>48) {
     b.style.display='flex';
-    b.innerHTML='⚠&nbsp;<strong>DONNÉES STATIQUES</strong> — Dernière vérification il y a <strong>'+Math.round(h)+'h</strong>.&nbsp;<a href="https://www.who.int/emergencies/situations/ebola-outbreak---drc-2026" target="_blank" style="color:#ffcccc">WHO ↗</a>&nbsp;·&nbsp;<a href="https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda" target="_blank" style="color:#ffcccc">ECDC ↗</a>';
+    b.innerHTML='⚠&nbsp;<strong>DONNÉES STATIQUES</strong> — il y a <strong>'+Math.round(h)+'h</strong>.&nbsp;<a href="https://www.who.int/emergencies/situations/ebola-outbreak---drc-2026" target="_blank" style="color:#ffcccc">WHO ↗</a>';
   } else { b.style.display='none'; }
 }
 
-// ── KPIs ────────────────────────────────────────────────────
 function renderKPIs(t) {
-  document.getElementById('currentKpis').innerHTML = [
-    {ka:'var(--red)',   label:'Cas confirmés',     val:t.confirmed_cases,  sub:'source: ECDC 28 mai',      delta:'delta-up',  dt:'+117 vs 15 mai'},
-    {ka:'#c1121f',     label:'Décès confirmés',    val:t.confirmed_deaths, sub:'CFR '+t.cfr_confirmed+'%', delta:'delta-up',  dt:'CFR confirmé'},
-    {ka:'var(--amber)', label:'Cas suspects ECDC',  val:t.suspected_cases,  sub:'déf. WHO/ECDC large',      delta:'delta-neu', dt:'dont ~906 MSF'},
-    {ka:'var(--red2)',  label:'Décès totaux (all)', val:t.total_deaths_all, sub:'conf.+suspects décédés',   delta:'delta-up',  dt:'source: ECDC'},
-    {ka:'var(--blue)',  label:'Ouganda confirmés',  val:t.uganda_confirmed, sub:t.uganda_deaths+' décès',   delta:'delta-up',  dt:'liés voyages DRC'},
-    {ka:'var(--green)', label:'Zones santé affect.', val:t.health_zones_affected, sub:'2 pays', delta:'delta-neu', dt:t.countries_affected+' countries'},
-  ].map(k=>`
-    <div class="kpi" style="--ka:${k.ka}">
-      <div class="kpi-label">${k.label}</div>
-      <div class="kpi-value">${k.val}</div>
-      <div class="kpi-sub">${k.sub}</div>
-      <span class="kpi-delta ${k.delta}">${k.dt}</span>
-    </div>`).join('');
+  document.getElementById('currentKpis').innerHTML=[
+    {ka:'var(--red)',    label:'Cas confirmés',     val:t.confirmed_cases,       sub:'ECDC 28 mai',           delta:'delta-up',  dt:'+117 vs 15 mai'},
+    {ka:'#c1121f',      label:'Décès confirmés',    val:t.confirmed_deaths,      sub:'CFR '+t.cfr_confirmed+'%',delta:'delta-up',dt:'CFR confirmé'},
+    {ka:'var(--amber)', label:'Cas suspects ECDC',  val:t.suspected_cases,       sub:'déf. WHO/ECDC large',   delta:'delta-neu', dt:'~906 MSF terrain'},
+    {ka:'var(--red2)',  label:'Décès totaux',        val:t.total_deaths_all,      sub:'conf.+suspects décédés',delta:'delta-up',  dt:'source ECDC'},
+    {ka:'var(--blue)',  label:'Ouganda confirmés',   val:t.uganda_confirmed,      sub:t.uganda_deaths+' décès',delta:'delta-up',  dt:'liés voyages DRC'},
+    {ka:'var(--green)', label:'Zones santé affect.', val:t.health_zones_affected, sub:'2 pays',                delta:'delta-neu', dt:t.countries_affected+' countries'},
+  ].map(k=>`<div class="kpi" style="--ka:${k.ka}"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.val}</div><div class="kpi-sub">${k.sub}</div><span class="kpi-delta ${k.delta}">${k.dt}</span></div>`).join('');
 }
 
-// ── SOURCES TABLE ────────────────────────────────────────────
 function renderSourcesTable() {
   if (!SOURCES_COMPARISON.length) return;
-  document.getElementById('sourcesBody').innerHTML = SOURCES_COMPARISON.map(s=>`
+  document.getElementById('sourcesBody').innerHTML=SOURCES_COMPARISON.map(s=>`
     <tr>
-      <td class="mn">${s.name}</td>
-      <td class="mn">${s.date}</td>
-      <td class="mn" style="color:var(--red2)">${s.confirmed_cases ?? '—'}</td>
-      <td class="mn" style="color:var(--amber)">${s.suspected_cases ?? '—'}</td>
-      <td class="mn">${s.confirmed_deaths ?? '—'}</td>
-      <td class="mn">${s.total_deaths ?? '—'}</td>
+      <td class="mn">${s.name}</td><td class="mn">${s.date}</td>
+      <td class="mn" style="color:var(--red2)">${s.confirmed_cases??'—'}</td>
+      <td class="mn" style="color:var(--amber)">${s.suspected_cases??'—'}</td>
+      <td class="mn">${s.confirmed_deaths??'—'}</td><td class="mn">${s.total_deaths??'—'}</td>
       <td class="note">${s.note}</td>
       <td><a href="${s.url}" target="_blank" rel="noopener" style="font-family:var(--mono);font-size:9px">↗</a></td>
     </tr>`).join('');
 }
 
-// ── DISCREPANCIES ────────────────────────────────────────────
 function renderDiscrepancies() {
-  const el = document.getElementById('discrepancyBox');
+  const el=document.getElementById('discrepancyBox');
   if (!SOURCE_DISCREPANCIES.title) return;
-  el.innerHTML = `
-    <div class="discrepancy-title">${SOURCE_DISCREPANCIES.title}</div>
-    ${(SOURCE_DISCREPANCIES.reasons||[]).map(r=>`
-      <div class="discrepancy-item">
-        <div class="discrepancy-label">${r.label}</div>
-        <div class="discrepancy-detail">${r.detail}</div>
-      </div>`).join('')}
+  el.innerHTML=`<div class="discrepancy-title">${SOURCE_DISCREPANCIES.title}</div>
+    ${(SOURCE_DISCREPANCIES.reasons||[]).map(r=>`<div class="discrepancy-item"><div class="discrepancy-label">${r.label}</div><div class="discrepancy-detail">${r.detail}</div></div>`).join('')}
     <div class="consensus">${SOURCE_DISCREPANCIES.consensus||''}</div>`;
 }
 
-// ── PROVINCE TABLE ───────────────────────────────────────────
-function setProvFilter(v,b) {
-  provFilter=v;
-  document.querySelectorAll('#provFilters .fbtn').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on');
-  renderCurrentDashboard();
-}
-function setStatusFilter(v,b) {
-  statusFilter=v;
-  document.querySelectorAll('#statusFilters .fbtn').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on');
-  renderCurrentDashboard();
-}
-function getFilteredProvinces() {
-  return PROVINCE_DATA.filter(d=>{
-    if (provFilter!=='all' && d.province!==provFilter && d.country!==provFilter) return false;
-    if (statusFilter!=='all' && d.status!==statusFilter) return false;
-    return true;
-  });
-}
-function renderCurrentDashboard() {
-  const data = getFilteredProvinces();
-  renderProvinceTable(data);
-  drawDrcMap();
-}
-function renderProvinceTable(data) {
-  const maxCases = Math.max(...data.map(d=>d.cases),1);
-  document.getElementById('provTableBody').innerHTML = data.map(d=>{
-    const barW = Math.round(d.cases/maxCases*70);
-    const dotCls = d.status==='Active'?'active-dot':'monitoring-dot';
-    return `<tr>
-      <td><span class="status-dot ${dotCls}"></span>${d.province}/${d.zone||'—'}</td>
-      <td class="mn"><div class="bar-cell"><span style="min-width:26px">${d.cases}</span><div class="mini-bar" style="width:${barW}px"></div></div></td>
+function setProvFilter(v,b){provFilter=v;document.querySelectorAll('#provFilters .fbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');renderCurrentDashboard();}
+function setStatusFilter(v,b){statusFilter=v;document.querySelectorAll('#statusFilters .fbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');renderCurrentDashboard();}
+function getFilteredProvinces(){return PROVINCE_DATA.filter(d=>{if(provFilter!=='all'&&d.province!==provFilter&&d.country!==provFilter)return false;if(statusFilter!=='all'&&d.status!==statusFilter)return false;return true;});}
+function renderCurrentDashboard(){renderProvinceTable(getFilteredProvinces());drawDrcMap();}
+function renderProvinceTable(data){
+  const mx=Math.max(...data.map(d=>d.cases),1);
+  document.getElementById('provTableBody').innerHTML=data.map(d=>{
+    const bw=Math.round(d.cases/mx*70);
+    return `<tr><td><span class="status-dot ${d.status==='Active'?'active-dot':'monitoring-dot'}"></span>${d.province}/${d.zone||'—'}</td>
+      <td class="mn"><div class="bar-cell"><span style="min-width:26px">${d.cases}</span><div class="mini-bar" style="width:${bw}px"></div></div></td>
       <td class="mn">${d.deaths}</td>
       <td class="mn" style="color:${d.cfr>15?'var(--red2)':d.cfr>8?'var(--amber)':'var(--green)'}">${d.cfr?d.cfr.toFixed(1):0}%</td>
       <td><span class="badge ${d.status==='Active'?'b-hi':'b-mid'}">${d.status}</span></td>
-      <td><span class="src-tag" title="${d.source_date||''} — ${d.source||''}">${(d.source||'').split(' ')[0]}</span></td>
-    </tr>`;
+      <td><span class="src-tag" title="${d.source_date||''}">${(d.source||'').split(' ')[0]}</span></td></tr>`;
   }).join('');
 }
 
-// ── MAP DRC UNIQUEMENT ───────────────────────────────────────
-// Provinces DRC dessinées manuellement en SVG simplifié
-// Coordonnées approximatives en viewBox 500x480
-const DRC_PROVINCES_SVG = [
-  {id:'Ituri',     path:'M290,80 L330,75 L355,90 L350,130 L310,140 L280,120 Z',    cx:315, cy:107},
-  {id:'Nord-Kivu', path:'M300,140 L345,132 L360,160 L340,200 L295,195 L285,165 Z', cx:322, cy:167},
-  {id:'Sud-Kivu',  path:'M295,200 L340,200 L350,240 L315,260 L285,245 L280,215 Z', cx:315, cy:228},
-  {id:'Maniema',   path:'M230,170 L285,165 L295,200 L280,245 L230,240 L215,200 Z', cx:255, cy:207},
-  {id:'Kinshasa',  path:'M110,250 L150,245 L158,270 L130,285 L108,275 Z',          cx:133, cy:265},
-  {id:'Kongo Central', path:'M90,265 L155,255 L160,310 L100,320 L75,295 Z',        cx:118, cy:290},
-  {id:'Kwango',    path:'M155,255 L220,250 L225,310 L160,315 Z',                   cx:190, cy:282},
-  {id:'Kwilu',     path:'M155,215 L220,210 L225,255 L155,255 Z',                   cx:190, cy:235},
-  {id:'Mai-Ndombe',path:'M155,170 L215,165 L220,210 L155,215 Z',                   cx:188, cy:190},
-  {id:'Équateur',  path:'M140,100 L220,95 L220,165 L155,170 L130,155 Z',           cx:180, cy:132},
-  {id:'Mongala',   path:'M220,80 L285,78 L290,140 L220,140 Z',                     cx:255, cy:110},
-  {id:'Nord-Ubangi',path:'M175,50 L220,50 L220,80 L175,80 Z',                      cx:198, cy:65},
-  {id:'Sud-Ubangi',path:'M130,80 L175,50 L175,80 L140,100 Z',                      cx:155, cy:77},
-  {id:'Tshuapa',   path:'M215,130 L290,128 L295,170 L215,165 Z',                   cx:255, cy:149},
-  {id:'Sankuru',   path:'M215,165 L295,170 L285,230 L215,225 Z',                   cx:255, cy:198},
-  {id:'Kasaï',     path:'M170,225 L215,220 L215,270 L170,275 Z',                   cx:193, cy:248},
-  {id:'Kasaï-Central',path:'M170,270 L215,270 L215,315 L170,315 Z',                cx:193, cy:292},
-  {id:'Kasaï-Oriental',path:'M215,230 L265,228 L270,280 L215,280 Z',               cx:243, cy:255},
-  {id:'Lomami',    path:'M215,275 L270,275 L268,325 L215,325 Z',                   cx:243, cy:300},
-  {id:'Lualaba',   path:'M265,255 L315,258 L320,315 L265,315 Z',                   cx:293, cy:286},
-  {id:'Haut-Lomami',path:'M265,310 L320,308 L325,365 L265,360 Z',                  cx:295, cy:336},
-  {id:'Tanganyika',path:'M315,255 L360,255 L370,330 L320,335 Z',                   cx:343, cy:296},
-  {id:'Haut-Katanga',path:'M265,355 L365,350 L370,420 L265,415 Z',                 cx:318, cy:385},
-  {id:'Haut-Uele', path:'M285,50 L380,48 L385,95 L355,92 L330,78 L285,80 Z',       cx:335, cy:71},
-  {id:'Bas-Uele',  path:'M220,50 L285,50 L285,80 L220,80 Z',                       cx:253, cy:65},
-  {id:'Tshopo',    path:'M285,80 L355,80 L360,140 L290,140 Z',                     cx:323, cy:110},
-];
-
-// Données épidémiques par province (cases pour coloration)
-function getProvDataByProv() {
-  const m = {};
+// ── CARTE D3 — vraies coordonnées géographiques ───────────
+function getProvDataByName(){
+  const m={};
   PROVINCE_DATA.forEach(p=>{
-    if (!m[p.province]) m[p.province]={cases:0,deaths:0,cfr:0,status:''};
-    m[p.province].cases  += p.cases;
-    m[p.province].deaths += p.deaths;
-    m[p.province].cfr     = p.cfr || 0;
-    m[p.province].status  = p.status;
+    if(!m[p.province])m[p.province]={cases:0,deaths:0,cfr:0,status:''};
+    m[p.province].cases+=p.cases;
+    m[p.province].deaths+=p.deaths;
+    m[p.province].cfr=p.cfr||0;
+    m[p.province].status=p.status;
   });
   return m;
 }
 
-function setMapMode(v,b) {
-  mapMode=v;
-  b.closest('.tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on');
-  drawDrcMap();
-}
+function setMapMode(v,b){mapMode=v;b.closest('.tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');drawDrcMap();}
 
-function drawDrcMap() {
-  const svg = document.getElementById('mapDrc');
-  if (!svg) return;
-  const provData = getProvDataByProv();
-  const maxVal = Math.max(...Object.values(provData).map(d=>mapMode==='cfr'?d.cfr:mapMode==='deaths'?d.deaths:d.cases),1);
+function drawDrcMap(){
+  const el=document.getElementById('mapDrc');
+  if(!el||typeof d3==='undefined')return;
 
-  svg.innerHTML = '';
+  const W=el.clientWidth||500, H=400;
+  el.setAttribute('viewBox',`0 0 ${W} ${H}`);
 
-  // Fond et titre
-  const bgRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-  bgRect.setAttribute('width','500'); bgRect.setAttribute('height','480');
-  bgRect.setAttribute('fill','#0e1218'); svg.appendChild(bgRect);
+  d3.select('#mapDrc').selectAll('*').remove();
 
-  // Dessine chaque province
-  DRC_PROVINCES_SVG.forEach(p=>{
-    const d = provData[p.id];
-    let fillColor = '#1b222b';
-    let strokeColor = 'rgba(255,255,255,.1)';
-    let strokeWidth = '0.5';
+  const svg=d3.select('#mapDrc');
+  svg.append('rect').attr('width',W).attr('height',H).attr('fill','#0e1218');
 
-    if (d) {
-      const val = mapMode==='cfr'?d.cfr:mapMode==='deaths'?d.deaths:d.cases;
-      const intensity = Math.min(1, val/maxVal);
-      if (d.status==='Active') {
-        const r = Math.round(180 + intensity*75);
-        const g = Math.round(20*(1-intensity));
-        fillColor = `rgba(${r},${g},${Math.round(20*(1-intensity))},.85)`;
-        strokeColor = '#e63946';
-        strokeWidth = '1.5';
-      } else if (val>0) {
-        fillColor = `rgba(244,162,97,${0.15+intensity*0.5})`;
-        strokeColor = '#f4a261';
-        strokeWidth = '1';
+  // Projection Mercator centrée sur la RDC
+  const proj=d3.geoMercator()
+    .center([24.0,-4.0])
+    .scale(Math.min(W,H)*2.1)
+    .translate([W/2, H/2]);
+
+  const path=d3.geoPath().projection(proj);
+  const provData=getProvDataByName();
+  const vals=Object.values(provData).map(d=>mapMode==='cfr'?d.cfr:mapMode==='deaths'?d.deaths:d.cases);
+  const maxVal=Math.max(...vals,1);
+
+  const tt=document.getElementById('mtt');
+
+  // Provinces DRC
+  svg.selectAll('path.prov')
+    .data(DRC_GEOJSON.features)
+    .enter().append('path')
+    .attr('class','prov')
+    .attr('d',path)
+    .attr('fill',f=>{
+      const d=provData[f.properties.name];
+      if(!d)return '#1b222b';
+      const val=mapMode==='cfr'?d.cfr:mapMode==='deaths'?d.deaths:d.cases;
+      const t=Math.min(1,val/maxVal);
+      if(d.status==='Active'){
+        const r=Math.round(155+t*100), g=Math.round(20*(1-t));
+        return `rgba(${r},${g},${g},.9)`;
       }
-    }
+      return `rgba(244,162,97,${0.12+t*0.55})`;
+    })
+    .attr('stroke',f=>{
+      const d=provData[f.properties.name];
+      if(!d)return 'rgba(255,255,255,.08)';
+      return d.status==='Active'?'#e63946':'#f4a261';
+    })
+    .attr('stroke-width',f=>{
+      const d=provData[f.properties.name];
+      return d?(d.status==='Active'?1.8:1):0.5;
+    })
+    .style('cursor',f=>provData[f.properties.name]?'pointer':'default')
+    .on('mousemove',function(event,f){
+      const d=provData[f.properties.name];
+      if(!d)return;
+      tt.style.display='block';
+      tt.style.left=(event.pageX+14)+'px';
+      tt.style.top=(event.pageY-20)+'px';
+      tt.innerHTML=`<strong>${f.properties.name}</strong>
+        <div class="mtt-row"><span>Cas conf.</span><span>${d.cases}</span></div>
+        <div class="mtt-row"><span>Décès</span><span>${d.deaths}</span></div>
+        <div class="mtt-row"><span>CFR</span><span>${d.cfr}%</span></div>
+        <div class="mtt-row"><span>Status</span><span>${d.status}</span></div>`;
+    })
+    .on('mouseleave',()=>{tt.style.display='none';});
 
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d', p.path);
-    path.setAttribute('fill', fillColor);
-    path.setAttribute('stroke', strokeColor);
-    path.setAttribute('stroke-width', strokeWidth);
-    path.style.cursor = d ? 'pointer' : 'default';
-    path.style.transition = 'opacity .2s';
+  // Labels pour provinces avec données
+  svg.selectAll('text.plabel')
+    .data(DRC_GEOJSON.features.filter(f=>provData[f.properties.name]))
+    .enter().append('text')
+    .attr('class','plabel')
+    .attr('transform',f=>{
+      const c=path.centroid(f);
+      return `translate(${c[0]},${c[1]})`;
+    })
+    .attr('text-anchor','middle')
+    .attr('dominant-baseline','middle')
+    .attr('font-family','IBM Plex Mono,monospace')
+    .attr('font-size','8')
+    .attr('pointer-events','none')
+    .attr('fill',f=>{
+      const d=provData[f.properties.name];
+      return d&&d.status==='Active'?'#ffffff':'#f4a261';
+    })
+    .each(function(f){
+      const d=provData[f.properties.name];
+      const val=mapMode==='cfr'?d.cfr+'%':mapMode==='deaths'?d.deaths:d.cases;
+      const g=d3.select(this);
+      g.append('tspan').attr('x',0).attr('dy','-5').text(f.properties.name.split('-')[0].substring(0,6));
+      g.append('tspan').attr('x',0).attr('dy','11')
+        .attr('fill',d.status==='Active'?'#ff8087':'#f4a261')
+        .attr('font-size','9').attr('font-weight','600')
+        .text(val);
+    });
 
-    if (d) {
-      path.addEventListener('mousemove', evt=>{
-        const tt = document.getElementById('mtt');
-        tt.style.display='block';
-        tt.style.left=(evt.pageX+14)+'px';
-        tt.style.top=(evt.pageY-20)+'px';
-        const val = mapMode==='cfr'?d.cfr+'%':mapMode==='deaths'?d.deaths:d.cases;
-        tt.innerHTML=`<strong>${p.id}</strong>
-          <div class="mtt-row"><span>Cas conf.</span><span>${d.cases}</span></div>
-          <div class="mtt-row"><span>Décès</span><span>${d.deaths}</span></div>
-          <div class="mtt-row"><span>CFR</span><span>${d.cfr}%</span></div>
-          <div class="mtt-row"><span>Status</span><span>${d.status}</span></div>`;
-      });
-      path.addEventListener('mouseleave', ()=>{ document.getElementById('mtt').style.display='none'; });
-    }
-    svg.appendChild(path);
-
-    // Label province si data
-    if (d) {
-      const text = document.createElementNS('http://www.w3.org/2000/svg','text');
-      text.setAttribute('x', p.cx); text.setAttribute('y', p.cy);
-      text.setAttribute('text-anchor','middle');
-      text.setAttribute('font-family','IBM Plex Mono,monospace');
-      text.setAttribute('font-size','8');
-      text.setAttribute('fill', d.status==='Active'?'#ffffff':'#f4a261');
-      text.setAttribute('pointer-events','none');
-      text.textContent = p.id.split('-')[0];
-      svg.appendChild(text);
-
-      const valText = document.createElementNS('http://www.w3.org/2000/svg','text');
-      valText.setAttribute('x', p.cx); valText.setAttribute('y', p.cy+10);
-      valText.setAttribute('text-anchor','middle');
-      valText.setAttribute('font-family','IBM Plex Mono,monospace');
-      valText.setAttribute('font-size','9');
-      valText.setAttribute('font-weight','600');
-      valText.setAttribute('fill', d.status==='Active'?'#ff8087':'#f4a261');
-      valText.setAttribute('pointer-events','none');
-      const val = mapMode==='cfr'?d.cfr+'%':mapMode==='deaths'?d.deaths:d.cases;
-      valText.textContent = val;
-      svg.appendChild(valText);
-    }
-  });
-
-  // Titre carte
-  const title = document.createElementNS('http://www.w3.org/2000/svg','text');
-  title.setAttribute('x','10'); title.setAttribute('y','18');
-  title.setAttribute('font-family','IBM Plex Mono,monospace');
-  title.setAttribute('font-size','10'); title.setAttribute('fill','#3e4a56');
-  title.textContent = 'RÉPUBLIQUE DÉMOCRATIQUE DU CONGO — ÉPIDÉMIE EBOLA 2026';
-  svg.appendChild(title);
+  // Titre
+  svg.append('text')
+    .attr('x',8).attr('y',14)
+    .attr('font-family','IBM Plex Mono,monospace')
+    .attr('font-size','9').attr('fill','#3e4a56')
+    .text('RDC — PROVINCES EBOLA 2026 — '+mapMode.toUpperCase());
 
   // Légende
-  document.getElementById('mapLeg').innerHTML = [
-    {col:'rgba(230,57,70,.85)',  label:'Zone active (cas confirmés)'},
-    {col:'rgba(244,162,97,.5)',  label:'Zone surveillance'},
-    {col:'#1b222b',              label:'Pas de cas signalé'},
+  document.getElementById('mapLeg').innerHTML=[
+    {col:'rgba(200,20,20,.9)', label:'Zone active (cas confirmés)'},
+    {col:'rgba(244,162,97,.55)',label:'Zone surveillance'},
+    {col:'#1b222b',            label:'Sans cas signalé'},
   ].map(l=>`<div class="leg-i"><div class="leg-sw" style="background:${l.col}"></div>${l.label}</div>`).join('');
 }
 
-// ── CONTACT TRACING ──────────────────────────────────────────
-function renderContactTracing() {
-  const el = document.getElementById('ctWrap');
-  const zones = [
-    {zone:'Ituri Mongbwalu', pct:68},
-    {zone:'Ituri Bunia',     pct:74},
-    {zone:'Ituri Rwampara',  pct:55},
-    {zone:'Nord-Kivu',       pct:82},
-    {zone:'Sud-Kivu',        pct:90},
+function renderContactTracing(){
+  const zones=[
+    {zone:'Ituri Mongbwalu',pct:68},{zone:'Ituri Bunia',pct:74},
+    {zone:'Ituri Rwampara',pct:55},{zone:'Nord-Kivu',pct:82},{zone:'Sud-Kivu',pct:90},
   ];
-  el.innerHTML = zones.map(z=>`
+  document.getElementById('ctWrap').innerHTML=zones.map(z=>`
     <div class="ct-row">
       <div class="ct-zone">${z.zone}</div>
       <div class="ct-bar-wrap"><div class="ct-bar" style="width:${z.pct}%"></div></div>
       <div class="ct-pct">${z.pct}%</div>
       <div class="ct-label">coverage</div>
     </div>`).join('');
-  const ct = CONTACT_TRACING;
-  document.getElementById('ctTotal').textContent =
-    `${ct.total_contacts_identified||668} contacts. DRC: ${ct.drc_contacts||541}, Uganda: ${ct.uganda_contacts||127}. Source: ${ct.source||'WHO'}. Note: ${ct.note||'données agrégées nationales'}.`;
+  const ct=CONTACT_TRACING;
+  document.getElementById('ctTotal').textContent=
+    `${ct.total_contacts_identified||668} contacts. DRC: ${ct.drc_contacts||541}, Uganda: ${ct.uganda_contacts||127}. Source: ${ct.source||'WHO'}.`;
 }
 
-// ── RISK GRID ────────────────────────────────────────────────
-function renderRiskGrid() {
-  const el = document.getElementById('riskGrid');
-  if (!RISK_FACTORS.length) return;
-  el.innerHTML = RISK_FACTORS.map(d=>`
+function renderRiskGrid(){
+  const el=document.getElementById('riskGrid');
+  if(!RISK_FACTORS.length)return;
+  el.innerHTML=RISK_FACTORS.map(d=>`
     <div class="risk-card">
       <div class="risk-card-title">${d.label}</div>
       <div class="risk-meter"><div class="risk-bar" style="width:${d.level}%;background:${d.color}"></div></div>
@@ -916,108 +813,92 @@ function renderRiskGrid() {
     </div>`).join('');
 }
 
-// ── CHARTS ───────────────────────────────────────────────────
-function initCharts() {
-  if (trendChart) trendChart.destroy();
-  trendChart = new Chart(document.getElementById('trendChart'),{
+function initCharts(){
+  if(trendChart)trendChart.destroy();
+  trendChart=new Chart(document.getElementById('trendChart'),{
     type:'line',
-    data:{
-      labels:TREND_DATES,
-      datasets:[
-        {data:TREND_CONF,      borderColor:'#e63946',backgroundColor:'rgba(230,57,70,.12)',fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#e63946',label:'Confirmed'},
-        {data:TREND_SUSP_ECDC, borderColor:'#f4a261',backgroundColor:'rgba(244,162,97,.06)',fill:false,tension:.3,pointRadius:2,label:'Suspected ECDC'},
-        {data:TREND_SUSP_MSF,  borderColor:'#52b788',backgroundColor:'transparent',fill:false,tension:.3,pointRadius:2,borderDash:[4,4],label:'Suspected MSF'},
-      ],
-    },
+    data:{labels:TREND_DATES,datasets:[
+      {data:TREND_CONF,borderColor:'#e63946',backgroundColor:'rgba(230,57,70,.12)',fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#e63946',label:'Confirmed'},
+      {data:TREND_SUSP_ECDC,borderColor:'#f4a261',fill:false,tension:.3,pointRadius:2,label:'Suspected ECDC'},
+      {data:TREND_SUSP_MSF,borderColor:'#52b788',fill:false,tension:.3,pointRadius:2,borderDash:[4,4],label:'Suspected MSF'},
+    ]},
     options:{...CHART_CFG,plugins:{legend:{display:false}}},
   });
 
-  if (epiChart) epiChart.destroy();
-  epiChart = new Chart(document.getElementById('epiChart'),{
+  if(epiChart)epiChart.destroy();
+  epiChart=new Chart(document.getElementById('epiChart'),{
     type:'bar',
-    data:{
-      labels:TREND_DATES,
-      datasets:[{data:EPI_DAILY,backgroundColor:EPI_DAILY.map(v=>v>=20?'rgba(230,57,70,.8)':v>=10?'rgba(244,162,97,.8)':'rgba(72,149,239,.6)'),borderRadius:3}],
-    },
+    data:{labels:TREND_DATES,datasets:[{data:EPI_DAILY,backgroundColor:EPI_DAILY.map(v=>v>=20?'rgba(230,57,70,.8)':v>=10?'rgba(244,162,97,.8)':'rgba(72,149,239,.6)'),borderRadius:3}]},
     options:{...CHART_CFG},
   });
 
-  updateCompChart();
-  updateCfrChart();
-  updateSpChart();
-  updateCtyChart();
+  updateCompChart();updateCfrChart();updateSpChart();updateCtyChart();
 }
 
-function setTrendType(t,b) {
+function setTrendType(t,b){
   trendType=t;
-  document.querySelectorAll('#trendTypeTabs .tab').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on');
-  if (!trendChart) return;
-  trendChart.data.datasets[0].hidden = (t==='suspected_ecdc'||t==='suspected_msf');
-  trendChart.data.datasets[1].hidden = (t==='confirmed'||t==='suspected_msf');
-  trendChart.data.datasets[2].hidden = (t==='confirmed'||t==='suspected_ecdc');
+  document.querySelectorAll('#trendTypeTabs .tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  if(!trendChart)return;
+  trendChart.data.datasets[0].hidden=(t==='suspected_ecdc'||t==='suspected_msf');
+  trendChart.data.datasets[1].hidden=(t==='confirmed'||t==='suspected_msf');
+  trendChart.data.datasets[2].hidden=(t==='confirmed'||t==='suspected_ecdc');
   trendChart.update();
 }
 
-function updateCompChart() {
-  if (!DRC_HISTORY.length) return;
-  const key = compM==='cases'?'cases':'deaths';
-  const n = DRC_HISTORY.length;
-  const colors = DRC_HISTORY.map((_,i)=>i===n-1?'rgba(230,57,70,.9)':'rgba(72,149,239,.6)');
-  if (compChart) compChart.destroy();
-  compChart = new Chart(document.getElementById('compChart'),{
+function updateCompChart(){
+  if(!DRC_HISTORY.length)return;
+  const key=compM==='cases'?'cases':'deaths';
+  const n=DRC_HISTORY.length;
+  if(compChart)compChart.destroy();
+  compChart=new Chart(document.getElementById('compChart'),{
     type:'bar',
-    data:{labels:DRC_HISTORY.map(d=>d.label),datasets:[{data:DRC_HISTORY.map(d=>d[key]),backgroundColor:colors,borderRadius:3}]},
+    data:{labels:DRC_HISTORY.map(d=>d.label),datasets:[{data:DRC_HISTORY.map(d=>d[key]),backgroundColor:DRC_HISTORY.map((_,i)=>i===n-1?'rgba(230,57,70,.9)':'rgba(72,149,239,.6)'),borderRadius:3}]},
     options:{...CHART_CFG},
   });
 }
 function setCompM(v,b){compM=v;b.closest('.tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');updateCompChart();}
 
-function updateCfrChart() {
-  if (!DRC_HISTORY.length) return;
-  if (cfrChart) cfrChart.destroy();
-  cfrChart = new Chart(document.getElementById('cfrChart'),{
+function updateCfrChart(){
+  if(!DRC_HISTORY.length)return;
+  if(cfrChart)cfrChart.destroy();
+  cfrChart=new Chart(document.getElementById('cfrChart'),{
     type:'bar',
-    data:{
-      labels:DRC_HISTORY.map(d=>d.label),
-      datasets:[{data:DRC_HISTORY.map(d=>d.cfr),backgroundColor:DRC_HISTORY.map(d=>d.cfr>50?'rgba(230,57,70,.7)':d.cfr>30?'rgba(244,162,97,.7)':'rgba(82,183,136,.7)'),borderRadius:3}],
-    },
+    data:{labels:DRC_HISTORY.map(d=>d.label),datasets:[{data:DRC_HISTORY.map(d=>d.cfr),backgroundColor:DRC_HISTORY.map(d=>d.cfr>50?'rgba(230,57,70,.7)':d.cfr>30?'rgba(244,162,97,.7)':'rgba(82,183,136,.7)'),borderRadius:3}]},
     options:{...CHART_CFG,scales:{...CHART_CFG.scales,y:{...CHART_CFG.scales.y,ticks:{...CHART_CFG.scales.y.ticks,callback:v=>v+'%'}}}},
   });
 }
 
-function updateSpChart() {
-  if (!ALL.length) return;
+function updateSpChart(){
+  if(!ALL.length)return;
   const sp={};
   ALL.forEach(d=>{if(!sp[d.species])sp[d.species]={cases:0,deaths:0,n:0};sp[d.species].cases+=d.cases;sp[d.species].deaths+=d.deaths;sp[d.species].n++;});
   const SPCOL={Zaire:'#4895ef',Sudan:'#f4a261',Bundibugyo:'#52b788','Taï Forest':'#c77dff'};
-  const labels=Object.keys(sp), vals=labels.map(k=>sp[k][spM==='n'?'n':spM]);
-  if (spChart) spChart.destroy();
-  spChart = new Chart(document.getElementById('spChart'),{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:labels.map(k=>SPCOL[k]||'#7a8694'),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  const labels=Object.keys(sp),vals=labels.map(k=>sp[k][spM==='n'?'n':spM]);
+  if(spChart)spChart.destroy();
+  spChart=new Chart(document.getElementById('spChart'),{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:labels.map(k=>SPCOL[k]||'#7a8694'),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
   document.getElementById('spLeg').innerHTML=labels.map((k,i)=>`<div class="sp-legend-row"><div class="sp-swatch" style="background:${SPCOL[k]||'#7a8694'}"></div>${k}: <strong>${vals[i].toLocaleString()}</strong></div>`).join('');
 }
 function setSpM(v,b){spM=v;b.closest('.tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');updateSpChart();}
 
-function updateCtyChart() {
-  if (!ALL.length) return;
+function updateCtyChart(){
+  if(!ALL.length)return;
   const cty={};
   ALL.forEach(d=>{if(!cty[d.country])cty[d.country]={cases:0,deaths:0,n:0};cty[d.country].cases+=d.cases;cty[d.country].deaths+=d.deaths;cty[d.country].n++;});
   const key=ctyM==='n'?'n':ctyM;
   const sorted=Object.entries(cty).sort((a,b)=>b[1][key]-a[1][key]).slice(0,10);
-  if (ctyChart) ctyChart.destroy();
-  ctyChart = new Chart(document.getElementById('ctyChart'),{type:'bar',data:{labels:sorted.map(([k])=>k),datasets:[{data:sorted.map(([,v])=>v[key]),backgroundColor:'rgba(72,149,239,.6)',borderRadius:3}]},options:{...CHART_CFG,indexAxis:'y'}});
+  if(ctyChart)ctyChart.destroy();
+  ctyChart=new Chart(document.getElementById('ctyChart'),{type:'bar',data:{labels:sorted.map(([k])=>k),datasets:[{data:sorted.map(([,v])=>v[key]),backgroundColor:'rgba(72,149,239,.6)',borderRadius:3}]},options:{...CHART_CFG,indexAxis:'y'}});
 }
 function setCtyM(v,b){ctyM=v;b.closest('.tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');updateCtyChart();}
 
-// ── HISTORICAL TABLE ─────────────────────────────────────────
-function getFiltered() {
+function getFiltered(){
   return ALL.filter(d=>{
-    if (spFilt!=='all'&&d.species!==spFilt) return false;
-    if (search&&!d.country.toLowerCase().includes(search.toLowerCase())) return false;
-    if (yFilt==='1976-1999') return d.year<=1999;
-    if (yFilt==='2000-2013') return d.year>=2000&&d.year<=2013;
-    if (yFilt==='2014-2016') return d.year>=2014&&d.year<=2016;
-    if (yFilt==='2017-2026') return d.year>=2017;
+    if(spFilt!=='all'&&d.species!==spFilt)return false;
+    if(search&&!d.country.toLowerCase().includes(search.toLowerCase()))return false;
+    if(yFilt==='1976-1999')return d.year<=1999;
+    if(yFilt==='2000-2013')return d.year>=2000&&d.year<=2013;
+    if(yFilt==='2014-2016')return d.year>=2014&&d.year<=2016;
+    if(yFilt==='2017-2026')return d.year>=2017;
     return true;
   });
 }
@@ -1042,15 +923,17 @@ function renderTable(data){
 }
 function goPg(p){page=p;renderTable(getFiltered());}
 
-// ── EXPORTS ──────────────────────────────────────────────────
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-function dlCSV(rows,fn){const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download=fn;a.click();showToast('CSV: '+fn);}
+function dlCSV(rows,fn){const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}`).join(',')).join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download=fn;a.click();showToast('CSV: '+fn);}
 function exportFilteredCSV(){const data=getFiltered().sort((a,b)=>b.year-a.year);dlCSV([['Year','Country','Cases','Deaths','CFR%','Species','Status'],...data.map(d=>[d.year,d.country,d.cases,d.deaths,d.cfr,d.species,d.status])],'ebola-historical-filtered.csv');}
-function exportCurrentCSV(){dlCSV([['Province','Zone','Cases','Deaths','CFR%','Status','Country','Source','Source_Date'],...getFilteredProvinces().map(d=>[d.province,d.zone,d.cases,d.deaths,d.cfr,d.status,d.country,d.source||'',d.source_date||''])],'ebola-2026-current.csv');}
+function exportCurrentCSV(){dlCSV([['Province','Zone','Cases','Deaths','CFR%','Status','Country','Source'],...getFilteredProvinces().map(d=>[d.province,d.zone,d.cases,d.deaths,d.cfr,d.status,d.country,d.source||''])],'ebola-2026-current.csv');}
 function exportTrendCSV(){dlCSV([['Date','Confirmed','Suspected_ECDC','Suspected_MSF','Daily_New'],...TREND_DATES.map((d,i)=>[d,TREND_CONF[i],TREND_SUSP_ECDC[i]||'',TREND_SUSP_MSF[i]||'',EPI_DAILY[i]])],'ebola-2026-trend.csv');}
 function exportChartPNG(chart,fn){if(!chart)return;const a=document.createElement('a');a.href=chart.toBase64Image('image/png',1);a.download=fn+'.png';a.click();showToast('PNG: '+fn+'.png');}
 
-// ── FI ANIMATION ─────────────────────────────────────────────
+// Redraw map on resize
+let resizeTimer;
+window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(drawDrcMap,200);});
+
 const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');}),{threshold:.1});
 document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
 
