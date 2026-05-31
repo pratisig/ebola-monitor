@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EBOLA-MONITOR v4.0 — RDC 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    :root {
+      --bg:     #0d1117;
+      --bg2:    #0d1520;
+      --bg3:    #141a21;
+      --bg4:    #1a2130;
+      --border: rgba(255,255,255,.07);
+      --text:   #dde3ea;
+      --text2:  #a8b3c0;
+      --text3:  #3e4a56;
+      --red:    #e63946;
+      --red2:   #ff8087;
+      --amber:  #f4a261;
+      --amber3: rgba(244,162,97,.1);
+      --blue:   #4895ef;
+      --green:  #52b788;
+      --mono:   'IBM Plex Mono', monospace;
+      --sans:   'IBM Plex Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    a { color: var(--blue); }
+
+    /* ── Layout ── */
+    .shell { display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .topbar-title {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--red);
+      letter-spacing: .05em;
+    }
+    .topbar-meta { font-size: 11px; color: var(--text3); margin-top: 3px; }
+    .topbar-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+    .badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid;
+    }
+    .badge-red    { color: var(--red2);   border-color: rgba(230,57,70,.4);  background: rgba(230,57,70,.08); }
+    .badge-amber  { color: var(--amber);  border-color: rgba(244,162,97,.4); background: rgba(244,162,97,.08); }
+    .badge-blue   { color: var(--blue);   border-color: rgba(72,149,239,.4); background: rgba(72,149,239,.08); }
+    .badge-green  { color: var(--green);  border-color: rgba(82,183,136,.4); background: rgba(82,183,136,.08); }
+
+    .main { display: grid; grid-template-columns: 300px 1fr; gap: 0; flex: 1; }
+    .sidebar {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+    .content { padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .card-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--text3);
+      margin-bottom: 10px;
+    }
+
+    /* ── KPI grid ── */
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .kpi {
+      background: var(--bg4);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+    .kpi-val {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .kpi-val.red    { color: var(--red2); }
+    .kpi-val.amber  { color: var(--amber); }
+    .kpi-val.blue   { color: var(--blue); }
+    .kpi-val.green  { color: var(--green); }
+    .kpi-label { font-size: 10px; color: var(--text3); margin-top: 3px; }
+    .kpi-sub   { font-size: 9px;  color: var(--text3); margin-top: 1px; }
+
+    /* ── Province table ── */
+    .prov-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .prov-table th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text3);
+      padding: 4px 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .prov-table td { padding: 6px 6px; border-bottom: 1px solid var(--border); color: var(--text2); }
+    .prov-table tr:last-child td { border-bottom: none; }
+    .prov-table tr:hover td { background: var(--bg4); }
+    .status-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    /* ── Risk grid ── */
+    .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .risk-card { background: var(--bg4); border-radius: 6px; padding: 10px; }
+    .risk-card-title { font-size: 10px; color: var(--text2); margin-bottom: 6px; line-height: 1.3; }
+    .risk-meter { background: var(--bg); border-radius: 3px; height: 4px; margin-bottom: 4px; overflow: hidden; }
+    .risk-bar   { height: 4px; border-radius: 3px; transition: width .6s ease; }
+    .risk-level { font-family: var(--mono); font-size: 9px; font-weight: 600; }
+
+    /* ── Chart containers ── */
+    .chart-wrap { position: relative; }
+
+    /* ── Disclaimer ── */
+    .disclaimer {
+      background: rgba(230,57,70,.06);
+      border: 1px solid rgba(230,57,70,.2);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 10px;
+      color: var(--text3);
+      line-height: 1.6;
+    }
+    .disclaimer strong { color: var(--red2); }
+
+    /* ── Staleness banner ── */
+    #stalenessBanner {
+      display: none;
+      background: #7b0000;
+      color: #ffcccc;
+      padding: 10px 20px;
+      font-family: var(--mono);
+      font-size: 11px;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border-bottom: 2px solid var(--red);
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      width: 100%;
+    }
+
+    /* ── Loading state ── */
+    .loading-pulse {
+      animation: pulse 1.5s ease-in-out infinite;
+      background: var(--bg4);
+      border-radius: 4px;
+      height: 20px;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: .4; }
+      50%       { opacity: 1; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .main { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .risk-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- STALENESS BANNER -->
+<div id="stalenessBanner"></div>
+
+<div class="shell">
+
+  <!-- ── TOPBAR ── -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">⬡ EBOLA-MONITOR v4.0</div>
+      <div class="topbar-meta">Epidemie Bundibugyo (BDBV) &mdash; RDC / Uganda 2026 &mdash; URGENCE SANTE PUBLIQUE MONDIALE (PHEIC)</div>
+      <div id="dataTimestamp" style="font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--mono)"></div>
+      <div id="sourcePanel" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
+    </div>
+    <div style="margin-left:auto">
+      <div class="topbar-badges">
+        <span class="badge badge-red">PHEIC DECLARE</span>
+        <span class="badge badge-red">BDBV — PAS DE VACCIN</span>
+        <span class="badge badge-amber">Rt = <span id="rtBadge">1.7</span></span>
+        <span class="badge badge-blue">2 PAYS TOUCHES</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <!-- ════ SIDEBAR ════ -->
+    <div class="sidebar">
+
+      <!-- KPIs -->
+      <div class="card">
+        <div class="card-title">Situation au <span id="kpiDate">29 mai 2026</span></div>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-val red" id="kpiConfirmed"><div class="loading-pulse"></div></div>
+            <div class="kpi-label">Cas confirmes</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val amber" id="kpiSuspected"><div class="loading-pulse"></div></div>
+            <div class="kpi-label">Cas suspects</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val red" id="kpiDeaths"><div class="loading-pulse"></div></div>
+            <div class="kpi-label">Deces confirmes</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val amber" id="kpiCFR"><div class="loading-pulse"></div></div>
+            <div class="kpi-label">CFR confirme</div>
+            <div class="kpi-sub" id="cfrMethodNote"></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val blue" id="kpiUganda"><div class="loading-pulse"></div></div>
+            <div class="kpi-label">Cas Uganda</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val green" id="kpiZones"><div class="loading-pulse"></div></div>
+            <div class="kpi-label">Zones de sante</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rt Widget -->
+      <div class="card">
+        <div class="card-title">Taux de reproduction (Rt)</div>
+        <div id="rtWidget"><div class="loading-pulse" style="height:80px"></div></div>
+      </div>
+
+      <!-- Contact Tracing -->
+      <div class="card">
+        <div class="card-title">Tracage des contacts</div>
+        <div id="ctWrap"><div class="loading-pulse" style="height:80px"></div></div>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="disclaimer">
+        <strong>AVERTISSEMENT</strong> — Outil d'aide a la decision base sur sources publiques officielles (WHO, ECDC, MSF).
+        Ne remplace pas les SitReps officiels du Ministere de la Sante de la RDC.
+        Donnees mises a jour automatiquement toutes les 4h via WHO/ECDC.
+      </div>
+
+    </div>
+    <!-- ════ /SIDEBAR ════ -->
+
+    <!-- ════ CONTENT ════ -->
+    <div class="content">
+
+      <!-- Province Table -->
+      <div class="card">
+        <div class="card-title">Repartition geographique par zone de sante</div>
+        <div style="overflow-x:auto">
+          <table class="prov-table" id="provTable">
+            <thead>
+              <tr>
+                <th>Province</th>
+                <th>Zone</th>
+                <th>Cas conf.</th>
+                <th>Deces</th>
+                <th>CFR %</th>
+                <th>Statut</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody id="provTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Trend Charts -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="card-title">Evolution cumulative — Cas confirmes</div>
+          <div class="chart-wrap" style="height:200px">
+            <canvas id="chartConfirmed"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Evolution — Cas suspects</div>
+          <div class="chart-wrap" style="height:200px">
+            <canvas id="chartSuspected"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Epi curve daily -->
+      <div class="card">
+        <div class="card-title">Courbe epidemique — Nouveaux cas confirmes par jour</div>
+        <div class="chart-wrap" style="height:180px">
+          <canvas id="chartEpi"></canvas>
+        </div>
+      </div>
+
+      <!-- Risk Grid -->
+      <div class="card">
+        <div class="card-title">Evaluation des facteurs de risque — ECDC / WHO</div>
+        <div class="risk-grid" id="riskGrid"></div>
+      </div>
+
+      <!-- Historical comparison -->
+      <div class="card">
+        <div class="card-title">Comparaison historique — Epidemies Ebola en RDC</div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="chartHistory"></canvas>
+        </div>
+      </div>
+
+    </div>
+    <!-- ════ /CONTENT ════ -->
+
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   EBOLA-MONITOR v4.0 — Dashboard dynamique
+   Donnees chargees depuis /api/ebola-data (Supabase via Next.js)
+   Mise a jour automatique toutes les 4h
+   Sources: WHO DON603, ECDC 28 mai 2026, MSF 28 mai 2026
+═══════════════════════════════════════════════════════════════════════════ */
+
+// ── Graphiques Chart.js ──────────────────────────────────────────────────
+let chartConf, chartSusp, chartEpi, chartHist;
+
+const CHART_DEFAULTS = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { ticks: { color: '#3e4a56', font: { family: "'IBM Plex Mono'", size: 9 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+    y: { ticks: { color: '#3e4a56', font: { family: "'IBM Plex Mono'", size: 9 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+  },
+};
+
+function initCharts(trend, drcHistory) {
+  const dates     = trend.dates;
+  const confirmed = trend.confirmed;
+  const suspected = trend.suspected;
+  const daily     = confirmed.map((v,i) => i === 0 ? v : Math.max(0, v - confirmed[i-1]));
+
+  // Chart 1 — Confirmes cumulatifs
+  if (chartConf) chartConf.destroy();
+  chartConf = new Chart(document.getElementById('chartConfirmed'), {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        data: confirmed,
+        borderColor: '#e63946',
+        backgroundColor: 'rgba(230,57,70,.12)',
+        fill: true,
+        tension: .3,
+        pointRadius: 3,
+        pointBackgroundColor: '#e63946',
+      }],
+    },
+    options: { ...CHART_DEFAULTS },
+  });
+
+  // Chart 2 — Suspects
+  if (chartSusp) chartSusp.destroy();
+  chartSusp = new Chart(document.getElementById('chartSuspected'), {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        data: suspected,
+        borderColor: '#f4a261',
+        backgroundColor: 'rgba(244,162,97,.1)',
+        fill: true,
+        tension: .3,
+        pointRadius: 3,
+        pointBackgroundColor: '#f4a261',
+      }],
+    },
+    options: { ...CHART_DEFAULTS },
+  });
+
+  // Chart 3 — Courbe epi
+  if (chartEpi) chartEpi.destroy();
+  chartEpi = new Chart(document.getElementById('chartEpi'), {
+    type: 'bar',
+    data: {
+      labels: dates,
+      datasets: [{
+        data: daily,
+        backgroundColor: daily.map(v => v >= 20 ? 'rgba(230,57,70,.8)' : v >= 10 ? 'rgba(244,162,97,.8)' : 'rgba(72,149,239,.6)'),
+        borderRadius: 3,
+      }],
+    },
+    options: { ...CHART_DEFAULTS },
+  });
+
+  // Chart 4 — Historique DRC
+  if (chartHist) chartHist.destroy();
+  chartHist = new Chart(document.getElementById('chartHistory'), {
+    type: 'bar',
+    data: {
+      labels: drcHistory.map(d => d.label),
+      datasets: [
+        {
+          label: 'Cas confirmes',
+          data: drcHistory.map(d => d.cases),
+          backgroundColor: 'rgba(72,149,239,.7)',
+          borderRadius: 3,
+        },
+        {
+          label: 'Deces',
+          data: drcHistory.map(d => d.deaths),
+          backgroundColor: 'rgba(230,57,70,.7)',
+          borderRadius: 3,
+        },
+      ],
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: '#7a8694', font: { size: 10 } },
+        },
+      },
+    },
+  });
+}
+
+// ── Rendu province table ─────────────────────────────────────────────────
+function renderProvinces(provinces) {
+  const tbody = document.getElementById('provTbody');
+  if (!tbody || !provinces) return;
+  tbody.innerHTML = provinces.map(p => {
+    const dotColor = p.status === 'Active' ? '#e63946' : '#f4a261';
+    return `
+      <tr>
+        <td>${p.province}</td>
+        <td>${p.zone}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;color:#ff8087">${p.cases}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;color:#e63946">${p.deaths}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;color:var(--amber)">${p.cfr}%</td>
+        <td><span class="status-dot" style="background:${dotColor}"></span>${p.status}</td>
+        <td><a href="${p.source_url}" target="_blank" style="color:#4895ef;font-size:10px">${p.source} &#8599;</a></td>
+      </tr>`;
+  }).join('');
+}
+
+// ── Rendu Rt widget ──────────────────────────────────────────────────────
+function renderRtWidget(rt) {
+  const el = document.getElementById('rtWidget');
+  if (!el || !rt) return;
+  document.getElementById('rtBadge').textContent = rt.value;
+  el.innerHTML = `
+    <div style="margin-bottom:6px">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:32px;font-weight:600;color:#e63946">${rt.value}</span>
+      <span style="font-size:11px;color:#7a8694;margin-left:8px">IC 95%: [${rt.ci_low} &ndash; ${rt.ci_high}]</span>
+    </div>
+    <div style="font-size:11px;color:#7a8694;margin-bottom:8px">Chaque cas infecte ~${rt.value} autres. Croissance active.</div>
+    <div style="background:#0d1117;border-radius:6px;padding:8px;font-size:10px;color:#3e4a56;line-height:1.7">
+      <div><span style="color:#7a8694">Methode:</span> ${rt.method}</div>
+      <div><span style="color:#7a8694">Intervalle serial BDBV:</span> ~${rt.serial_interval_days} jours</div>
+      <div><span style="color:#7a8694">Estimation au:</span> ${rt.date}</div>
+      <div style="margin-top:4px"><a href="${rt.source_url}" target="_blank" style="color:#4895ef">${rt.source} &#8599;</a></div>
+    </div>`;
+}
+
+// ── Rendu contact tracing ────────────────────────────────────────────────
+function renderContactTracing(ct) {
+  const el = document.getElementById('ctWrap');
+  if (!el || !ct) return;
+  el.innerHTML = `
+    <div style="font-size:10px;color:#3e4a56;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Donnees nationales agregees</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">
+      <div style="background:#0d1117;border-radius:6px;padding:8px;text-align:center">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;color:#dde3ea">${ct.total_contacts_identified}</div>
+        <div style="font-size:9px;color:#3e4a56;margin-top:2px">Total</div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:8px;text-align:center">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;color:#ff8087">${ct.drc_contacts}</div>
+        <div style="font-size:9px;color:#3e4a56;margin-top:2px">RDC</div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:8px;text-align:center">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;color:#4895ef">${ct.uganda_contacts}</div>
+        <div style="font-size:9px;color:#3e4a56;margin-top:2px">Uganda</div>
+      </div>
+    </div>
+    <div style="background:rgba(244,162,97,.1);border:1px solid #f4a261;border-radius:6px;padding:7px;font-size:10px;color:#f4a261;margin-bottom:6px">&#9888; ${ct.note}</div>
+    <div style="font-size:10px;color:#3e4a56">Source: <a href="${ct.source_url}" target="_blank" style="color:#4895ef">${ct.source} &#8599;</a></div>`;
+}
+
+// ── Rendu risk grid ──────────────────────────────────────────────────────
+function renderRiskGrid(factors) {
+  const el = document.getElementById('riskGrid');
+  if (!el || !factors) return;
+  el.innerHTML = factors.map(d => `
+    <div class="risk-card" title="${d.basis || ''}">
+      <div class="risk-card-title">${d.label}</div>
+      <div class="risk-meter"><div class="risk-bar" style="width:${d.level}%;background:${d.color}"></div></div>
+      <div class="risk-level" style="color:${d.color}">${d.level >= 80 ? 'ELEVE' : d.level >= 50 ? 'MODERE' : 'FAIBLE'}</div>
+      ${d.basis ? `<div style="font-size:9px;color:#3e4a56;margin-top:3px">${d.basis}</div>` : ''}
+    </div>`).join('') +
+    `<div style="grid-column:1/-1;font-size:9px;color:#3e4a56;padding-top:6px;border-top:1px solid rgba(255,255,255,.07)">
+      &#9888; Scores qualitatifs &mdash; ECDC Rapid Risk Assessment + WHO SitRep. Non quantitatifs officiels.
+    </div>`;
+}
+
+// ── Rendu KPIs ───────────────────────────────────────────────────────────
+function renderKPIs(t, dataAsOf) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('kpiConfirmed', t.confirmed_cases.toLocaleString('fr-FR'));
+  set('kpiSuspected', t.suspected_cases.toLocaleString('fr-FR'));
+  set('kpiDeaths',    t.confirmed_deaths.toLocaleString('fr-FR'));
+  set('kpiCFR',       t.cfr_confirmed + '%');
+  set('kpiUganda',    t.uganda_confirmed);
+  set('kpiZones',     t.health_zones_affected);
+  set('cfrMethodNote', t.cfr_note || '');
+  if (dataAsOf) {
+    set('kpiDate', new Date(dataAsOf).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }));
+  }
+}
+
+// ── Staleness banner ─────────────────────────────────────────────────────
+function checkStaleness(isoDate) {
+  const b = document.getElementById('stalenessBanner');
+  if (!b || !isoDate) return;
+  const h = (Date.now() - new Date(isoDate).getTime()) / 3600000;
+  if (h > 48) {
+    b.style.display = 'flex';
+    b.innerHTML = '&#9888;&nbsp;&nbsp;<strong>DONNEES STATIQUES</strong> &mdash; Verifiees il y a <strong>' + Math.round(h) + 'h</strong>.&nbsp;'
+      + 'Consulter&nbsp;<a href="https://www.who.int/emergencies/situations/ebola-outbreak---drc-2026" target="_blank" style="color:#ffcccc">WHO &#8599;</a>&nbsp;et&nbsp;'
+      + '<a href="https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda" target="_blank" style="color:#ffcccc">ECDC &#8599;</a>&nbsp;pour les derniers chiffres.';
+  } else {
+    b.style.display = 'none';
+  }
+}
+
+// ── Timestamp + source badges ────────────────────────────────────────────
+function renderMeta(dataAsOf, sources) {
+  const el = document.getElementById('dataTimestamp');
+  if (el && dataAsOf) {
+    const h = Math.round((Date.now() - new Date(dataAsOf).getTime()) / 3600000);
+    const col = h > 48 ? '#e63946' : h > 24 ? '#f4a261' : '#52b788';
+    el.innerHTML = '<span style="color:' + col + '">&#11044;</span> Donnees au '
+      + new Date(dataAsOf).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' })
+      + ' &mdash; il y a ' + h + 'h';
+  }
+  const sp = document.getElementById('sourcePanel');
+  if (sp && sources) {
+    sp.innerHTML = sources.map(s =>
+      '<a href="' + s.url + '" target="_blank" style="font-size:10px;font-family:\'IBM Plex Mono\',monospace;color:#4895ef;text-decoration:none;border:1px solid rgba(72,149,239,.3);border-radius:4px;padding:2px 8px;white-space:nowrap">'
+      + s.name + ' &#8599;</a>'
+    ).join('');
+  }
+}
+
+// ── Application des donnees ───────────────────────────────────────────────
+function applyData(d) {
+  const o = d.outbreak_2026;
+  renderKPIs(o.totals, d.data_as_of);
+  renderProvinces(o.provinces);
+  renderRtWidget(o.rt);
+  renderContactTracing(o.contact_tracing);
+  renderRiskGrid(o.risk_factors);
+  renderMeta(d.data_as_of, o.meta.sources);
+  checkStaleness(d.data_as_of);
+  if (o.trend && d.drc_history_comparison) {
+    initCharts(o.trend, d.drc_history_comparison);
+  }
+}
+
+// ── Chargement depuis /api/ebola-data ─────────────────────────────────────
+async function loadData() {
+  try {
+    const res = await fetch('/api/ebola-data');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data.success) {
+      applyData(data);
+      // Refresh automatique toutes les 4h
+      setTimeout(loadData, 4 * 60 * 60 * 1000);
+    }
+  } catch (err) {
+    console.warn('[EBOLA-MONITOR] API indisponible:', err.message);
+    // Afficher le bandeau d'alerte avec date statique
+    checkStaleness('2026-05-29T00:00:00Z');
+    document.getElementById('dataTimestamp').textContent = 'API indisponible — donnees statiques en attente';
+  }
+}
+
+// ── Demarrage ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', loadData);
+</script>
+
+</body>
+</html>
