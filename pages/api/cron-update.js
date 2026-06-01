@@ -1,10 +1,10 @@
 /**
  * /api/cron-update — Mise à jour automatique des données
  *
- * CORRECTIONS:
- * - Suppression de l'import invalide FALLBACK_SNAPSHOT depuis ebola-data
- * - trend écrit avec suspected_ecdc ET suspected_msf
- * - Fallback sur snapshot complet si lastFull null
+ * CORRECTIONS v4.4.1:
+ * - INSERT inclut sources_comparison et source_discrepancies depuis lastFull
+ * - trend écrit avec suspected_ecdc ET suspected_msf (jamais l'ancien 'suspected')
+ * - recovered_estimated propagé depuis lastFull
  */
 
 import { supabaseAdmin } from '../../lib/supabase';
@@ -61,10 +61,15 @@ export default async function handler(req, res) {
   }
 
   // 4. Construire le trend mis à jour
-  // Parser le trend existant (peut être une string JSON selon type colonne Supabase)
+  // Parser le trend existant (peut être string JSON selon type colonne Supabase)
   let existingTrend = lastFull?.trend || null;
   if (typeof existingTrend === 'string') {
     try { existingTrend = JSON.parse(existingTrend); } catch(e) { existingTrend = null; }
+  }
+  // Normaliser l'ancien champ 'suspected' → 'suspected_ecdc'
+  if (existingTrend && existingTrend.suspected && !existingTrend.suspected_ecdc) {
+    existingTrend.suspected_ecdc = existingTrend.suspected;
+    delete existingTrend.suspected;
   }
   if (!existingTrend) {
     existingTrend = { dates:[], confirmed:[], suspected_ecdc:[], suspected_msf:[], deaths_conf:[], deaths_all:[] };
@@ -75,23 +80,26 @@ export default async function handler(req, res) {
 
   if (!existingTrend.dates.includes(today)) {
     updatedTrend = {
-      ...existingTrend,
+      source:      existingTrend.source     || 'WHO/ECDC/MSF',
+      source_url:  existingTrend.source_url || '',
+      note:        existingTrend.note       || '',
       dates:          [...(existingTrend.dates          || []), today],
       confirmed:      [...(existingTrend.confirmed      || []), newData.confirmed_cases],
-      suspected_ecdc: [...(existingTrend.suspected_ecdc || existingTrend.suspected || []), newData.suspected_cases || lastFull?.suspected_cases || 0],
+      suspected_ecdc: [...(existingTrend.suspected_ecdc || []), newData.suspected_cases || lastFull?.suspected_cases || 0],
       suspected_msf:  [...(existingTrend.suspected_msf  || []), null],
       deaths_conf:    [...(existingTrend.deaths_conf    || []), newData.confirmed_deaths || lastFull?.confirmed_deaths || 0],
       deaths_all:     [...(existingTrend.deaths_all     || []), lastFull?.total_deaths_all || 0],
     };
   }
 
-  // 5. Construire le nouveau snapshot
+  // 5. Construire le nouveau snapshot (tous les champs)
   const newSnapshot = {
     confirmed_cases:       newData.confirmed_cases,
     suspected_cases:       newData.suspected_cases  || lastFull?.suspected_cases,
     confirmed_deaths:      newData.confirmed_deaths || lastFull?.confirmed_deaths,
     cfr_confirmed:         newData.cfr_confirmed    || lastFull?.cfr_confirmed,
     total_deaths_all:      lastFull?.total_deaths_all,
+    recovered_estimated:   lastFull?.recovered_estimated,
     suspected_note:        lastFull?.suspected_note,
     uganda_confirmed:      lastFull?.uganda_confirmed,
     uganda_deaths:         lastFull?.uganda_deaths,

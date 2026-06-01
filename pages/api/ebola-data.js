@@ -1,9 +1,10 @@
 /**
  * /api/ebola-data — EBOLA-MONITOR v4.4
  *
- * CORRECTION CRITIQUE: mergeWithFallback parse les champs JSON
- * qui arrivent comme strings depuis Supabase (colonnes TEXT vs JSONB).
- * C'est la cause du bug : tables/graphiques vides malgré KPI ok.
+ * CORRECTIONS v4.4.1:
+ * - mergeWithFallback: normalizedTrend accepte ancien champ 'suspected' ET nouveaux 'suspected_ecdc'/'suspected_msf'
+ * - Colonnes sources_comparison, source_discrepancies, recovered_estimated maintenant présentes dans Supabase
+ * - parseField gère string JSON, objet, et null/undefined proprement
  */
 
 import { supabase } from '../../lib/supabase';
@@ -33,14 +34,14 @@ const FALLBACK_SNAPSHOT = {
   ],
 
   source_discrepancies: {
-    title: 'Pourquoi les chiffres diffèrent entre sources ?',
+    title: 'Pourquoi les chiffres diffèrent entre sources ?',
     reasons: [
       { label:'Définition de cas suspect',  detail:'WHO/ECDC: fièvre + symptôme hémorragique. MSF: fièvre + contact + symptômes — plus restrictif.' },
       { label:'Délai de rapportage',        detail:'Sitreps à dates différentes. UNFPA 26 mai vs ECDC 28 mai = 2 jours d\'écart.' },
       { label:'Consolidation laboratoire', detail:'Certains suspects deviennent confirmés entre deux rapports.' },
       { label:'Accès terrain limité',       detail:'Conflit armé actif Nord-Kivu/Sud-Kivu. Zones rapportant avec retard.' },
     ],
-    consensus: 'Chiffres retenus : 125 confirmés, 1077 suspects (ECDC 28 mai), 17 décès confirmés, CFR 13.6 %.',
+    consensus: 'Chiffres retenus : 125 confirmés, 1077 suspects (ECDC 28 mai), 17 décès confirmés, CFR 13.6 %.',
   },
 
   provinces: [
@@ -78,8 +79,10 @@ const FALLBACK_SNAPSHOT = {
 };
 
 /**
- * Parse un champ qui peut être soit un objet/tableau JS,
- * soit une string JSON (cas Supabase colonnes TEXT).
+ * Parse un champ qui peut être:
+ *  - null / undefined → retourne null
+ *  - string JSON → parse et retourne l'objet
+ *  - objet/tableau JS → retourne tel quel
  */
 function parseField(val) {
   if (val === null || val === undefined) return null;
@@ -91,30 +94,40 @@ function parseField(val) {
 
 /**
  * Fusionne le snapshot Supabase avec le fallback.
- * CORRECTION CLÉ: parse tous les champs complexes qui peuvent arriver
- * comme strings JSON depuis Supabase (colonnes TEXT au lieu de JSONB).
+ * Gère:
+ *  - colonnes TEXT stockées comme string JSON
+ *  - ancien champ trend.suspected (singulier) → mappe vers suspected_ecdc
+ *  - colonnes manquantes (undefined) → fallback automatique
  */
 function mergeWithFallback(raw) {
-  const provinces           = parseField(raw.provinces);
-  const trend               = parseField(raw.trend);
-  const contact_tracing     = parseField(raw.contact_tracing);
-  const sources_comparison  = parseField(raw.sources_comparison);
+  const provinces            = parseField(raw.provinces);
+  const trend                = parseField(raw.trend);
+  const contact_tracing      = parseField(raw.contact_tracing);
+  const sources_comparison   = parseField(raw.sources_comparison);
   const source_discrepancies = parseField(raw.source_discrepancies);
 
-  // Normaliser le trend (compatibilité ancien champ 'suspected' singulier)
+  // Normaliser le trend:
+  // - accepte suspected_ecdc OU l'ancien champ 'suspected' (rétrocompatibilité)
+  // - garantit suspected_msf même si absent
   let normalizedTrend = null;
   if (trend && Array.isArray(trend.dates) && trend.dates.length > 0) {
+    const ecdc = trend.suspected_ecdc || trend.suspected || [];
+    const msf  = trend.suspected_msf  || [];
     normalizedTrend = {
-      ...trend,
-      suspected_ecdc: trend.suspected_ecdc || trend.suspected || [],
-      suspected_msf:  trend.suspected_msf  || [],
+      source:      trend.source     || FALLBACK_SNAPSHOT.trend.source,
+      source_url:  trend.source_url || FALLBACK_SNAPSHOT.trend.source_url,
+      note:        trend.note       || FALLBACK_SNAPSHOT.trend.note,
+      dates:          trend.dates,
+      confirmed:      trend.confirmed      || [],
+      suspected_ecdc: ecdc,
+      suspected_msf:  msf,
       deaths_conf:    trend.deaths_conf    || [],
       deaths_all:     trend.deaths_all     || [],
     };
   }
 
   return {
-    // Champs scalaires du snapshot Supabase (KPI — écrasent le fallback)
+    // Scalaires KPI
     confirmed_cases:       raw.confirmed_cases       ?? FALLBACK_SNAPSHOT.confirmed_cases,
     suspected_cases:       raw.suspected_cases       ?? FALLBACK_SNAPSHOT.suspected_cases,
     confirmed_deaths:      raw.confirmed_deaths      ?? FALLBACK_SNAPSHOT.confirmed_deaths,
@@ -128,12 +141,13 @@ function mergeWithFallback(raw) {
     data_as_of:            raw.data_as_of            || raw.created_at || FALLBACK_SNAPSHOT.data_as_of,
     source:                raw.source                || FALLBACK_SNAPSHOT.source,
     created_at:            raw.created_at,
+
     // Champs complexes: parsed + fallback si invalides
-    provinces:             (provinces  && Array.isArray(provinces)  && provinces.length)  ? provinces  : FALLBACK_SNAPSHOT.provinces,
-    trend:                 normalizedTrend                                                 ? normalizedTrend : FALLBACK_SNAPSHOT.trend,
-    contact_tracing:       (contact_tracing && contact_tracing.total_contacts_identified)  ? contact_tracing : FALLBACK_SNAPSHOT.contact_tracing,
-    sources_comparison:    (sources_comparison  && Array.isArray(sources_comparison)  && sources_comparison.length)  ? sources_comparison  : FALLBACK_SNAPSHOT.sources_comparison,
-    source_discrepancies:  (source_discrepancies && source_discrepancies.title)             ? source_discrepancies : FALLBACK_SNAPSHOT.source_discrepancies,
+    provinces:             (provinces  && Array.isArray(provinces)  && provinces.length > 0)  ? provinces  : FALLBACK_SNAPSHOT.provinces,
+    trend:                 normalizedTrend                                                      ? normalizedTrend : FALLBACK_SNAPSHOT.trend,
+    contact_tracing:       (contact_tracing && contact_tracing.total_contacts_identified)       ? contact_tracing : FALLBACK_SNAPSHOT.contact_tracing,
+    sources_comparison:    (sources_comparison  && Array.isArray(sources_comparison)  && sources_comparison.length > 0)  ? sources_comparison  : FALLBACK_SNAPSHOT.sources_comparison,
+    source_discrepancies:  (source_discrepancies && source_discrepancies.title)                  ? source_discrepancies : FALLBACK_SNAPSHOT.source_discrepancies,
   };
 }
 
@@ -166,7 +180,7 @@ export default async function handler(req, res) {
 
   const allData = [
     ...HISTORICAL_DATA,
-    { year:2026, country:'DRC',    cases: snapshot.confirmed_cases,  deaths: snapshot.confirmed_deaths, cfr: snapshot.cfr_confirmed, species:'Bundibugyo', status:'Ongoing' },
+    { year:2026, country:'DRC',    cases: snapshot.confirmed_cases,  deaths: snapshot.confirmed_deaths, cfr: snapshot.cfr_confirmed,   species:'Bundibugyo', status:'Ongoing' },
     { year:2026, country:'Uganda', cases: snapshot.uganda_confirmed, deaths: snapshot.uganda_deaths,    cfr: snapshot.uganda_confirmed ? parseFloat(((snapshot.uganda_deaths / snapshot.uganda_confirmed)*100).toFixed(1)) : 0, species:'Bundibugyo', status:'Ongoing' },
   ];
 
