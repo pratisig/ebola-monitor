@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>EBOLA-MONITOR v4.3 — RDC 2026</title>
+<title>EBOLA-MONITOR v4.4 — RDC 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600&display=swap" rel="stylesheet">
@@ -196,7 +196,7 @@ toast.show{opacity:1;transform:translateY(0);}
 <div class="topbar fi">
   <div class="topbar-brand">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 1 0 20M12 2a7 7 0 0 0 0 20M2 12h20"/><path d="M12 6c1.5 2 2 4 2 6s-.5 4-2 6M12 6c-1.5 2-2 4-2 6s.5 4 2 6"/></svg>
-    <span class="dot"></span> EBOLA-MONITOR v4.3
+    <span class="dot"></span> EBOLA-MONITOR v4.4
   </div>
   <div class="topbar-right">
     <span class="pheic-badge">PHEIC DECLARED 17 MAY 2026</span>
@@ -341,7 +341,7 @@ toast.show{opacity:1;transform:translateY(0);}
             <stop offset="0" stop-color="#52b788"/><stop offset="50%" stop-color="#f4a261"/><stop offset="100%" stop-color="#e63946"/>
           </linearGradient></defs>
           <path d="M10,75 A70,70 0 0,1 150,75" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="12" stroke-linecap="round"/>
-          <path d="M10,75 A70,70 0 0,1 150,75" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" opacity=".6"/>
+          <path d="M10,75 A70,75 0 0,1 150,75" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" opacity=".6"/>
           <line id="gaugeNeedle" x1="80" y1="75" x2="80" y2="20" stroke="#e63946" stroke-width="2.5" stroke-linecap="round" transform="rotate(36,80,75)"/>
           <circle cx="80" cy="75" r="5" fill="#e63946"/>
           <text x="10" y="70" fill="#3e4a56" font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">1.0</text>
@@ -486,50 +486,16 @@ toast.show{opacity:1;transform:translateY(0);}
     <a href="https://www.cdc.gov/ebola/situation-summary/index.html" target="_blank">CDC (29 mai)</a> &bull;
     <a href="https://reliefweb.int/report/democratic-republic-congo/unfpa-flash-update-bundibugyo-ebola-virus-disease-bvd-outbreak-20-26-may" target="_blank">UNFPA (27 mai)</a>
   </div>
-  <span class="footer-tag">EBOLA-MONITOR v4.3 &mdash; Carte D3 GeoJSON r&eacute;el &mdash; WHO/ECDC/MSF/CDC/UNFPA &mdash; Usage op&eacute;rationnel uniquement</span>
+  <span class="footer-tag">EBOLA-MONITOR v4.4 &mdash; Carte D3 GeoJSON r&eacute;el &mdash; WHO/ECDC/MSF/CDC/UNFPA &mdash; Usage op&eacute;rationnel uniquement</span>
 </footer>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// EBOLA-MONITOR v4.3
-// Carte: D3 + GeoJSON provinces DRC (coordonnées géographiques réelles)
+// EBOLA-MONITOR v4.4
+// Carte: D3 + GeoJSON provinces DRC (cd.json via /drc-provinces.geojson)
 // Toutes autres données dynamiques depuis /api/ebola-data
 // ═══════════════════════════════════════════════════════════
-
-// ── GeoJSON DRC provinces (26 provinces, coordonnées réelles simplifiées) ──
-// Coordonnées longitude/latitude réelles, polygones simplifiés
-const DRC_GEOJSON = {
-  type:"FeatureCollection",
-  features:[
-    {type:"Feature",properties:{name:"Kinshasa"},geometry:{type:"Polygon",coordinates:[[[15.2,-4.7],[15.5,-4.2],[15.0,-4.0],[14.8,-4.4],[15.2,-4.7]]]}},
-    {type:"Feature",properties:{name:"Kongo Central"},geometry:{type:"Polygon",coordinates:[[[12.2,-4.3],[15.0,-4.0],[15.2,-4.7],[14.5,-5.9],[13.1,-5.8],[12.2,-4.9],[12.2,-4.3]]]}},
-    {type:"Feature",properties:{name:"Kwango"},geometry:{type:"Polygon",coordinates:[[[16.2,-4.5],[18.0,-4.5],[18.5,-6.5],[17.0,-7.5],[15.8,-7.0],[15.0,-5.9],[16.2,-4.5]]]}},
-    {type:"Feature",properties:{name:"Kwilu"},geometry:{type:"Polygon",coordinates:[[[16.2,-4.5],[18.0,-4.5],[18.5,-4.2],[18.0,-2.8],[16.5,-3.0],[15.8,-3.8],[16.2,-4.5]]]}},
-    {type:"Feature",properties:{name:"Mai-Ndombe"},geometry:{type:"Polygon",coordinates:[[[16.5,-3.0],[18.0,-2.8],[19.5,-2.5],[19.5,-0.5],[18.2,-0.8],[17.0,-1.5],[16.0,-2.0],[16.5,-3.0]]]}},
-    {type:"Feature",properties:{name:"Équateur"},geometry:{type:"Polygon",coordinates:[[[18.2,-0.8],[19.5,-0.5],[21.5,-0.2],[22.0,1.0],[20.5,2.0],[18.5,1.5],[17.5,0.5],[18.2,-0.8]]]}},
-    {type:"Feature",properties:{name:"Sud-Ubangi"},geometry:{type:"Polygon",coordinates:[[[17.5,0.5],[18.5,1.5],[20.5,2.0],[20.0,3.5],[18.5,3.2],[17.0,2.5],[16.5,1.5],[17.5,0.5]]]}},
-    {type:"Feature",properties:{name:"Nord-Ubangi"},geometry:{type:"Polygon",coordinates:[[[18.5,3.2],[20.0,3.5],[22.5,3.8],[22.5,5.0],[20.5,4.8],[18.5,4.5],[17.8,3.8],[18.5,3.2]]]}},
-    {type:"Feature",properties:{name:"Mongala"},geometry:{type:"Polygon",coordinates:[[[20.5,2.0],[22.0,1.0],[24.0,1.5],[24.0,3.5],[22.5,3.8],[20.0,3.5],[20.5,2.0]]]}},
-    {type:"Feature",properties:{name:"Bas-Uele"},geometry:{type:"Polygon",coordinates:[[[22.5,3.8],[24.0,3.5],[26.5,3.8],[27.0,4.5],[24.5,5.0],[22.5,5.0],[22.5,3.8]]]}},
-    {type:"Feature",properties:{name:"Haut-Uele"},geometry:{type:"Polygon",coordinates:[[[26.5,3.8],[29.5,3.5],[30.0,4.0],[29.5,5.0],[27.5,5.5],[27.0,4.5],[26.5,3.8]]]}},
-    {type:"Feature",properties:{name:"Ituri"},geometry:{type:"Polygon",coordinates:[[[27.5,1.0],[29.8,0.5],[30.0,2.5],[29.5,3.5],[26.5,3.8],[27.0,2.0],[27.5,1.0]]]}},
-    {type:"Feature",properties:{name:"Tshopo"},geometry:{type:"Polygon",coordinates:[[[22.0,1.0],[24.0,1.5],[26.0,1.8],[27.5,1.0],[27.0,2.0],[26.5,3.8],[24.0,3.5],[22.0,1.0]]]}},
-    {type:"Feature",properties:{name:"Nord-Kivu"},geometry:{type:"Polygon",coordinates:[[[27.5,1.0],[29.8,0.5],[30.5,-0.5],[29.5,-1.5],[28.5,-1.5],[27.5,-0.5],[27.0,0.5],[27.5,1.0]]]}},
-    {type:"Feature",properties:{name:"Maniema"},geometry:{type:"Polygon",coordinates:[[[25.5,-1.0],[27.5,-0.5],[27.5,1.0],[27.0,2.0],[26.0,1.8],[25.0,0.5],[25.0,-1.5],[25.5,-1.0]]]}},
-    {type:"Feature",properties:{name:"Sud-Kivu"},geometry:{type:"Polygon",coordinates:[[[26.5,-3.0],[28.5,-1.5],[29.5,-1.5],[29.5,-3.5],[28.5,-4.5],[27.5,-4.5],[26.5,-3.5],[26.5,-3.0]]]}},
-    {type:"Feature",properties:{name:"Tanganyika"},geometry:{type:"Polygon",coordinates:[[[25.5,-3.5],[26.5,-3.0],[26.5,-3.5],[27.5,-4.5],[28.5,-4.5],[28.0,-6.0],[26.5,-6.5],[25.0,-5.5],[25.5,-3.5]]]}},
-    {type:"Feature",properties:{name:"Lualaba"},geometry:{type:"Polygon",coordinates:[[[22.5,-6.0],[25.0,-5.5],[26.5,-6.5],[26.0,-8.5],[24.5,-9.0],[22.5,-8.0],[22.5,-6.0]]]}},
-    {type:"Feature",properties:{name:"Haut-Lomami"},geometry:{type:"Polygon",coordinates:[[[23.5,-7.0],[25.0,-5.5],[22.5,-6.0],[22.5,-8.0],[23.5,-9.5],[24.5,-9.0],[23.5,-7.0]]]}},
-    {type:"Feature",properties:{name:"Haut-Katanga"},geometry:{type:"Polygon",coordinates:[[[24.5,-9.0],[26.0,-8.5],[28.0,-9.5],[29.0,-11.0],[27.5,-12.5],[26.0,-13.0],[24.0,-12.5],[23.0,-11.5],[23.5,-9.5],[24.5,-9.0]]]}},
-    {type:"Feature",properties:{name:"Lomami"},geometry:{type:"Polygon",coordinates:[[[23.5,-4.0],[25.5,-3.5],[25.0,-5.5],[23.5,-7.0],[22.0,-6.0],[21.5,-4.5],[23.5,-4.0]]]}},
-    {type:"Feature",properties:{name:"Sankuru"},geometry:{type:"Polygon",coordinates:[[[22.0,-1.5],[25.5,-1.0],[25.0,0.5],[22.5,0.0],[21.5,-0.5],[22.0,-1.5]]]}},
-    {type:"Feature",properties:{name:"Kasaï-Oriental"},geometry:{type:"Polygon",coordinates:[[[22.0,-1.5],[25.5,-1.0],[25.5,-3.5],[23.5,-4.0],[21.5,-4.5],[21.5,-3.0],[22.0,-1.5]]]}},
-    {type:"Feature",properties:{name:"Kasaï"},geometry:{type:"Polygon",coordinates:[[[19.5,-2.5],[21.5,-2.0],[21.5,-3.0],[21.5,-4.5],[20.0,-5.0],[19.0,-4.0],[19.5,-2.5]]]}},
-    {type:"Feature",properties:{name:"Kasaï-Central"},geometry:{type:"Polygon",coordinates:[[[19.0,-4.0],[20.0,-5.0],[21.5,-4.5],[22.5,-6.0],[21.0,-7.0],[19.5,-6.5],[18.5,-5.5],[19.0,-4.0]]]}},
-    {type:"Feature",properties:{name:"Tshuapa"},geometry:{type:"Polygon",coordinates:[[[19.5,-0.5],[21.5,-0.2],[22.0,1.0],[20.5,2.0],[19.5,1.5],[18.5,0.5],[18.2,-0.8],[19.5,-0.5]]]}},
-  ]
-};
 
 let ALL=[], PROVINCE_DATA=[], TREND_DATES=[], TREND_CONF=[], TREND_SUSP_ECDC=[], TREND_SUSP_MSF=[], EPI_DAILY=[];
 let DRC_HISTORY=[], CONTACT_TRACING={}, RISK_FACTORS=[], SOURCES_COMPARISON=[], SOURCE_DISCREPANCIES={};
@@ -660,7 +626,6 @@ function renderProvinceTable(data){
   }).join('');
 }
 
-// ── CARTE D3 — vraies coordonnées géographiques ───────────
 function getProvDataByName(){
   const m={};
   PROVINCE_DATA.forEach(p=>{
@@ -674,116 +639,6 @@ function getProvDataByName(){
 }
 
 function setMapMode(v,b){mapMode=v;b.closest('.tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');drawDrcMap();}
-
-function drawDrcMap(){
-  const el=document.getElementById('mapDrc');
-  if(!el||typeof d3==='undefined')return;
-
-  const W=el.clientWidth||500, H=400;
-  el.setAttribute('viewBox',`0 0 ${W} ${H}`);
-
-  d3.select('#mapDrc').selectAll('*').remove();
-
-  const svg=d3.select('#mapDrc');
-  svg.append('rect').attr('width',W).attr('height',H).attr('fill','#0e1218');
-
-  // Projection Mercator centrée sur la RDC
-  const proj=d3.geoMercator()
-    .center([24.0,-4.0])
-    .scale(Math.min(W,H)*2.1)
-    .translate([W/2, H/2]);
-
-  const path=d3.geoPath().projection(proj);
-  const provData=getProvDataByName();
-  const vals=Object.values(provData).map(d=>mapMode==='cfr'?d.cfr:mapMode==='deaths'?d.deaths:d.cases);
-  const maxVal=Math.max(...vals,1);
-
-  const tt=document.getElementById('mtt');
-
-  // Provinces DRC
-  svg.selectAll('path.prov')
-    .data(DRC_GEOJSON.features)
-    .enter().append('path')
-    .attr('class','prov')
-    .attr('d',path)
-    .attr('fill',f=>{
-      const d=provData[f.properties.name];
-      if(!d)return '#1b222b';
-      const val=mapMode==='cfr'?d.cfr:mapMode==='deaths'?d.deaths:d.cases;
-      const t=Math.min(1,val/maxVal);
-      if(d.status==='Active'){
-        const r=Math.round(155+t*100), g=Math.round(20*(1-t));
-        return `rgba(${r},${g},${g},.9)`;
-      }
-      return `rgba(244,162,97,${0.12+t*0.55})`;
-    })
-    .attr('stroke',f=>{
-      const d=provData[f.properties.name];
-      if(!d)return 'rgba(255,255,255,.08)';
-      return d.status==='Active'?'#e63946':'#f4a261';
-    })
-    .attr('stroke-width',f=>{
-      const d=provData[f.properties.name];
-      return d?(d.status==='Active'?1.8:1):0.5;
-    })
-    .style('cursor',f=>provData[f.properties.name]?'pointer':'default')
-    .on('mousemove',function(event,f){
-      const d=provData[f.properties.name];
-      if(!d)return;
-      tt.style.display='block';
-      tt.style.left=(event.pageX+14)+'px';
-      tt.style.top=(event.pageY-20)+'px';
-      tt.innerHTML=`<strong>${f.properties.name}</strong>
-        <div class="mtt-row"><span>Cas conf.</span><span>${d.cases}</span></div>
-        <div class="mtt-row"><span>Décès</span><span>${d.deaths}</span></div>
-        <div class="mtt-row"><span>CFR</span><span>${d.cfr}%</span></div>
-        <div class="mtt-row"><span>Status</span><span>${d.status}</span></div>`;
-    })
-    .on('mouseleave',()=>{tt.style.display='none';});
-
-  // Labels pour provinces avec données
-  svg.selectAll('text.plabel')
-    .data(DRC_GEOJSON.features.filter(f=>provData[f.properties.name]))
-    .enter().append('text')
-    .attr('class','plabel')
-    .attr('transform',f=>{
-      const c=path.centroid(f);
-      return `translate(${c[0]},${c[1]})`;
-    })
-    .attr('text-anchor','middle')
-    .attr('dominant-baseline','middle')
-    .attr('font-family','IBM Plex Mono,monospace')
-    .attr('font-size','8')
-    .attr('pointer-events','none')
-    .attr('fill',f=>{
-      const d=provData[f.properties.name];
-      return d&&d.status==='Active'?'#ffffff':'#f4a261';
-    })
-    .each(function(f){
-      const d=provData[f.properties.name];
-      const val=mapMode==='cfr'?d.cfr+'%':mapMode==='deaths'?d.deaths:d.cases;
-      const g=d3.select(this);
-      g.append('tspan').attr('x',0).attr('dy','-5').text(f.properties.name.split('-')[0].substring(0,6));
-      g.append('tspan').attr('x',0).attr('dy','11')
-        .attr('fill',d.status==='Active'?'#ff8087':'#f4a261')
-        .attr('font-size','9').attr('font-weight','600')
-        .text(val);
-    });
-
-  // Titre
-  svg.append('text')
-    .attr('x',8).attr('y',14)
-    .attr('font-family','IBM Plex Mono,monospace')
-    .attr('font-size','9').attr('fill','#3e4a56')
-    .text('RDC — PROVINCES EBOLA 2026 — '+mapMode.toUpperCase());
-
-  // Légende
-  document.getElementById('mapLeg').innerHTML=[
-    {col:'rgba(200,20,20,.9)', label:'Zone active (cas confirmés)'},
-    {col:'rgba(244,162,97,.55)',label:'Zone surveillance'},
-    {col:'#1b222b',            label:'Sans cas signalé'},
-  ].map(l=>`<div class="leg-i"><div class="leg-sw" style="background:${l.col}"></div>${l.label}</div>`).join('');
-}
 
 function renderContactTracing(){
   const zones=[
@@ -930,7 +785,6 @@ function exportCurrentCSV(){dlCSV([['Province','Zone','Cases','Deaths','CFR%','S
 function exportTrendCSV(){dlCSV([['Date','Confirmed','Suspected_ECDC','Suspected_MSF','Daily_New'],...TREND_DATES.map((d,i)=>[d,TREND_CONF[i],TREND_SUSP_ECDC[i]||'',TREND_SUSP_MSF[i]||'',EPI_DAILY[i]])],'ebola-2026-trend.csv');}
 function exportChartPNG(chart,fn){if(!chart)return;const a=document.createElement('a');a.href=chart.toBase64Image('image/png',1);a.download=fn+'.png';a.click();showToast('PNG: '+fn+'.png');}
 
-// Redraw map on resize
 let resizeTimer;
 window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(drawDrcMap,200);});
 
@@ -939,5 +793,6 @@ document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
 
 document.addEventListener('DOMContentLoaded', loadData);
 </script>
+<script src="/map-patch-v44.js"></script>
 </body>
 </html>
