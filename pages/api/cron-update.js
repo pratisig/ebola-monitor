@@ -2,18 +2,17 @@
  * /api/cron-update — Mise à jour automatique des données
  *
  * CORRECTIONS:
- * - trend écrit avec suspected_ecdc ET suspected_msf (cohérence avec dashboard)
+ * - Suppression de l'import invalide FALLBACK_SNAPSHOT depuis ebola-data
+ * - trend écrit avec suspected_ecdc ET suspected_msf
  * - Fallback sur snapshot complet si lastFull null
- * - Gestion correcte du champ deaths_conf et deaths_all
  */
 
 import { supabaseAdmin } from '../../lib/supabase';
 import { fetchWHOData, fetchECDCData } from '../../lib/who-fetcher';
-import { FALLBACK_SNAPSHOT as FB } from './ebola-data';
 
 export default async function handler(req, res) {
-  const authHeader  = req.headers['authorization'];
-  const cronSecret  = process.env.CRON_SECRET;
+  const authHeader   = req.headers['authorization'];
+  const cronSecret   = process.env.CRON_SECRET;
   const isVercelCron = req.headers['x-vercel-cron'] === '1';
   const isBearerAuth = cronSecret && authHeader === `Bearer ${cronSecret}`;
 
@@ -62,11 +61,14 @@ export default async function handler(req, res) {
   }
 
   // 4. Construire le trend mis à jour
-  // CORRECTION: on écrit suspected_ecdc et suspected_msf séparément
-  const existingTrend = lastFull?.trend || {
-    dates: [], confirmed: [], suspected_ecdc: [], suspected_msf: [],
-    deaths_conf: [], deaths_all: [],
-  };
+  // Parser le trend existant (peut être une string JSON selon type colonne Supabase)
+  let existingTrend = lastFull?.trend || null;
+  if (typeof existingTrend === 'string') {
+    try { existingTrend = JSON.parse(existingTrend); } catch(e) { existingTrend = null; }
+  }
+  if (!existingTrend) {
+    existingTrend = { dates:[], confirmed:[], suspected_ecdc:[], suspected_msf:[], deaths_conf:[], deaths_all:[] };
+  }
 
   const today = new Date().toLocaleDateString('fr-FR', { day:'2-digit', month:'short' });
   let updatedTrend = existingTrend;
@@ -76,7 +78,6 @@ export default async function handler(req, res) {
       ...existingTrend,
       dates:          [...(existingTrend.dates          || []), today],
       confirmed:      [...(existingTrend.confirmed      || []), newData.confirmed_cases],
-      // suspected_ecdc = valeur parsée si source ECDC, sinon last known
       suspected_ecdc: [...(existingTrend.suspected_ecdc || existingTrend.suspected || []), newData.suspected_cases || lastFull?.suspected_cases || 0],
       suspected_msf:  [...(existingTrend.suspected_msf  || []), null],
       deaths_conf:    [...(existingTrend.deaths_conf    || []), newData.confirmed_deaths || lastFull?.confirmed_deaths || 0],
@@ -86,12 +87,10 @@ export default async function handler(req, res) {
 
   // 5. Construire le nouveau snapshot
   const newSnapshot = {
-    // Données mises à jour automatiquement
-    confirmed_cases:  newData.confirmed_cases,
-    suspected_cases:  newData.suspected_cases  || lastFull?.suspected_cases,
-    confirmed_deaths: newData.confirmed_deaths || lastFull?.confirmed_deaths,
-    cfr_confirmed:    newData.cfr_confirmed    || lastFull?.cfr_confirmed,
-    // Données héritées
+    confirmed_cases:       newData.confirmed_cases,
+    suspected_cases:       newData.suspected_cases  || lastFull?.suspected_cases,
+    confirmed_deaths:      newData.confirmed_deaths || lastFull?.confirmed_deaths,
+    cfr_confirmed:         newData.cfr_confirmed    || lastFull?.cfr_confirmed,
     total_deaths_all:      lastFull?.total_deaths_all,
     suspected_note:        lastFull?.suspected_note,
     uganda_confirmed:      lastFull?.uganda_confirmed,
@@ -103,11 +102,10 @@ export default async function handler(req, res) {
     sources_comparison:    lastFull?.sources_comparison,
     source_discrepancies:  lastFull?.source_discrepancies,
     trend:                 updatedTrend,
-    // Métadonnées
-    source:           `${newData.source} (auto-parse) — ${new Date().toLocaleDateString('fr-FR')}`,
-    source_url:       newData.source_url,
-    data_as_of:       new Date().toISOString(),
-    parse_confidence: 'auto',
+    source:                `${newData.source} (auto-parse) — ${new Date().toLocaleDateString('fr-FR')}`,
+    source_url:            newData.source_url,
+    data_as_of:            new Date().toISOString(),
+    parse_confidence:      'auto',
   };
 
   const { error: insertError } = await supabaseAdmin
