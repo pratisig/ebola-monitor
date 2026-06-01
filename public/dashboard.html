@@ -154,7 +154,6 @@ a{color:var(--blue);}
 .risk-meter{height:6px;background:var(--bg4);border-radius:99px;overflow:hidden;margin-bottom:5px;}
 .risk-bar{height:100%;border-radius:99px;transition:width .6s;}
 .risk-level{font-family:var(--mono);font-size:10px;}
-/* MAP */
 #mapDrc{width:100%;height:380px;display:block;background:var(--bg3);border-radius:var(--r);}
 #mapDrc path{transition:opacity .15s;}
 #mapDrc path:hover{opacity:.75;}
@@ -281,7 +280,7 @@ toast.show{opacity:1;transform:translateY(0);}
     </div>
     <div class="panel" style="padding:14px">
       <div class="panel-head">
-        <span class="panel-title">RDC &mdash; carte provinces affect&eacute;es</span>
+        <span class="panel-title">RDC &mdash; 26 provinces</span>
         <div class="tabs">
           <button class="tab on" onclick="setMapMode('cases',this)">Cases</button>
           <button class="tab" onclick="setMapMode('deaths',this)">Deaths</button>
@@ -492,9 +491,10 @@ toast.show{opacity:1;transform:translateY(0);}
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// EBOLA-MONITOR v4.4
-// Carte: D3 + GeoJSON provinces DRC (cd.json via /drc-provinces.geojson)
-// Toutes autres données dynamiques depuis /api/ebola-data
+// EBOLA-MONITOR v4.4.3 — FIXES:
+//   1. window.PROVINCE_DATA toujours synchronisé avec le let local
+//   2. drawDrcMap() appelée après que map-patch soit prêt (défensif)
+//   3. Init robuste : ne dépend plus de DOMContentLoaded
 // ═══════════════════════════════════════════════════════════
 
 let ALL=[], PROVINCE_DATA=[], TREND_DATES=[], TREND_CONF=[], TREND_SUSP_ECDC=[], TREND_SUSP_MSF=[], EPI_DAILY=[];
@@ -504,6 +504,13 @@ let mapMode='cases', compM='cases', spM='cases', ctyM='cases', trendType='both';
 let provFilter='all', statusFilter='all';
 let trendChart, compChart, spChart, ctyChart, epiChart, cfrChart;
 
+// ── FIX 1: expose PROVINCE_DATA sur window pour map-patch-v44.js ──
+// map-patch lit window.PROVINCE_DATA; on le synchronise à chaque écriture
+function setProvinceData(arr) {
+  PROVINCE_DATA = arr;
+  window.PROVINCE_DATA = arr;
+}
+
 const CHART_CFG={
   responsive:true,maintainAspectRatio:false,
   plugins:{legend:{display:false}},
@@ -512,6 +519,16 @@ const CHART_CFG={
     y:{ticks:{color:'#3e4a56',font:{family:"'IBM Plex Mono'",size:9}},grid:{color:'rgba(255,255,255,.04)'}},
   },
 };
+
+// ── FIX 2: drawDrcMap défensif — attend que map-patch soit chargé ──
+function safeDraw() {
+  if (typeof window.drawDrcMap === 'function') {
+    window.mapMode = mapMode;
+    window.drawDrcMap();
+  } else {
+    setTimeout(safeDraw, 100);
+  }
+}
 
 // ── LOAD DATA ────────────────────────────────────────────
 async function loadData() {
@@ -532,7 +549,8 @@ async function loadData() {
 function applyData(d) {
   const o=d.outbreak_2026, t=o.totals;
   ALL=d.historical||[];
-  PROVINCE_DATA=o.provinces||[];
+  // FIX 1: utiliser setProvinceData pour synchroniser window.PROVINCE_DATA
+  setProvinceData(o.provinces||[]);
   DRC_HISTORY=d.drc_history_comparison||[];
   CONTACT_TRACING=o.contact_tracing||{};
   RISK_FACTORS=o.risk_factors||[];
@@ -565,7 +583,8 @@ function applyData(d) {
   renderContactTracing();
   renderRiskGrid();
   doFilter();
-  drawDrcMap();
+  // FIX 2: dessin carte après synchronisation window.PROVINCE_DATA
+  safeDraw();
 }
 
 function checkStaleness(iso) {
@@ -612,7 +631,12 @@ function renderDiscrepancies() {
 function setProvFilter(v,b){provFilter=v;document.querySelectorAll('#provFilters .fbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');renderCurrentDashboard();}
 function setStatusFilter(v,b){statusFilter=v;document.querySelectorAll('#statusFilters .fbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');renderCurrentDashboard();}
 function getFilteredProvinces(){return PROVINCE_DATA.filter(d=>{if(provFilter!=='all'&&d.province!==provFilter&&d.country!==provFilter)return false;if(statusFilter!=='all'&&d.status!==statusFilter)return false;return true;});}
-function renderCurrentDashboard(){renderProvinceTable(getFilteredProvinces());drawDrcMap();}
+function renderCurrentDashboard(){
+  renderProvinceTable(getFilteredProvinces());
+  // FIX 2: synchroniser et redessiner la carte
+  window.PROVINCE_DATA = PROVINCE_DATA;
+  safeDraw();
+}
 function renderProvinceTable(data){
   const mx=Math.max(...data.map(d=>d.cases),1);
   document.getElementById('provTableBody').innerHTML=data.map(d=>{
@@ -626,19 +650,16 @@ function renderProvinceTable(data){
   }).join('');
 }
 
-function getProvDataByName(){
-  const m={};
-  PROVINCE_DATA.forEach(p=>{
-    if(!m[p.province])m[p.province]={cases:0,deaths:0,cfr:0,status:''};
-    m[p.province].cases+=p.cases;
-    m[p.province].deaths+=p.deaths;
-    m[p.province].cfr=p.cfr||0;
-    m[p.province].status=p.status;
-  });
-  return m;
-}
+// NOTE: getProvDataByName est définie dans map-patch-v44.js (version avec alias + exclusion Uganda)
+// Ne pas la redéfinir ici pour éviter le conflit
 
-function setMapMode(v,b){mapMode=v;b.closest('.tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');drawDrcMap();}
+function setMapMode(v,b){
+  mapMode=v;
+  window.mapMode=v;
+  b.closest('.tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  safeDraw();
+}
 
 function renderContactTracing(){
   const zones=[
@@ -786,13 +807,19 @@ function exportTrendCSV(){dlCSV([['Date','Confirmed','Suspected_ECDC','Suspected
 function exportChartPNG(chart,fn){if(!chart)return;const a=document.createElement('a');a.href=chart.toBase64Image('image/png',1);a.download=fn+'.png';a.click();showToast('PNG: '+fn+'.png');}
 
 let resizeTimer;
-window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(drawDrcMap,200);});
+window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(safeDraw,200);});
 
 const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');}),{threshold:.1});
 document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
 
-document.addEventListener('DOMContentLoaded', loadData);
+// ── FIX 3: init robuste — fonctionne si DOM déjà prêt (iframe) ou pas encore ──
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadData);
+} else {
+  loadData();
+}
 </script>
+<!-- map-patch chargé APRÈS le script principal pour que window.PROVINCE_DATA soit défini -->
 <script src="/map-patch-v44.js"></script>
 </body>
 </html>
