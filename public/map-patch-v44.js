@@ -1,1 +1,1 @@
-// v4.4 map patch placeholder
+console.log('v4.4 loaded');
