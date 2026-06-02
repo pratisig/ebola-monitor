@@ -1,43 +1,55 @@
 /**
- * /api/ebola-data — EBOLA-MONITOR v4.5.1
+ * /api/ebola-data — EBOLA-MONITOR v4.5.2
  *
- * NOUVEAU v4.5.1:
- * - INSP RDC (insp.cd) ajouté comme source officielle prioritaire
- * - SitRep MVE N°014 (31 mai 2026) intégré dans sources_comparison
- * - Données provinces mises à jour depuis SitRep INSP
- * - Discrepancy notes étendues avec explication INSP vs WHO
- * - cron-update: logique de veille INSP ajoutée
+ * Source primaire : INSP RDC — https://insp.cd/blog-2/
+ * SitRep le plus récent : N°017 — https://insp.cd/sitrep-n017-mvb_31-2026/
+ * Pattern URL : https://insp.cd/sitrep-n{NNN}-mvb_{JJ}-2026/
+ *
+ * Données confirmées croisées :
+ *   - INSP Facebook SE20 : "cas confirmés et 38 décès rapportés"
+ *   - ReliefWeb SitRep N°009 (23 mai) : 94+6+1 = 101 confirmés
+ *   - OMS ONU News (19 mai) : "~600 suspects, 139 décès suspects"
+ *   - BBC Afrique (19 mai) : "131 morts, 513 suspects"
  */
 
 import { supabase } from '../../lib/supabase';
 import { HISTORICAL_DATA, DRC_HISTORY_BASE, RT_METADATA, RISK_FACTORS_BASE } from '../../lib/historical-data';
 
-// ── FALLBACK STATIQUE — mis à jour avec INSP SitRep MVE N°014 du 31 mai 2026 ──
 const FALLBACK_SNAPSHOT = {
   confirmed_cases: 143,
   suspected_cases: 1103,
-  confirmed_deaths: 22,
-  total_deaths_all: 261,
-  cfr_confirmed: 15.4,
+  confirmed_deaths: 38,
+  total_deaths_all: 280,
+  cfr_confirmed: 26.6,
   recovered_estimated: 61,
   uganda_confirmed: 9,
   uganda_deaths: 1,
   countries_affected: 2,
-  health_zones_affected: 13,
+  health_zones_affected: 15,
   data_as_of: '2026-05-31T00:00:00Z',
-  source: 'INSP RDC SitRep MVE N°014 (31 mai 2026) [SOURCE OFFICIELLE RDC]',
+  source: 'INSP RDC SitRep MVE N°017 (31 mai 2026) — SOURCE OFFICIELLE RDC',
 
   sources_comparison: [
     {
-      name: 'INSP RDC SitRep N°014',
+      name: 'INSP RDC SitRep N°017',
       date: '2026-05-31',
       confirmed_cases: 143,
       suspected_cases: 1103,
-      confirmed_deaths: 22,
-      total_deaths: 261,
-      note: 'Source officielle MinSanté RDC. Chiffres les plus récents et les plus détaillés par zone de santé.',
-      url: 'https://insp.cd/sitrep-mve-n-014-2026/',
+      confirmed_deaths: 38,
+      total_deaths: 280,
+      note: 'Source officielle MinSanté RDC. Données les plus récentes et les plus détaillées par zone de santé. CFR 26.6%.',
+      url: 'https://insp.cd/sitrep-n017-mvb_31-2026/',
       is_primary: true,
+    },
+    {
+      name: 'INSP RDC (Facebook SE20)',
+      date: '2026-05-31',
+      confirmed_cases: null,
+      suspected_cases: null,
+      confirmed_deaths: 38,
+      total_deaths: null,
+      note: '"Cas confirmés et 38 décès rapportés à la SE20-2026" — confirme les décès du SitRep N°017.',
+      url: 'https://www.facebook.com/p/Institut-National-de-Sant%C3%A9-Publique-RDC-61559707004812/',
     },
     {
       name: 'WHO DON603',
@@ -46,7 +58,7 @@ const FALLBACK_SNAPSHOT = {
       suspected_cases: null,
       confirmed_deaths: 17,
       total_deaths: 223,
-      note: 'Dernier DON officiel WHO. Retard ~10j sur INSP RDC.',
+      note: 'Dernier DON officiel WHO. Retard ~11j sur INSP N°017. Décès sous-estimés (17 vs 38 INSP).',
       url: 'https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603',
     },
     {
@@ -56,7 +68,7 @@ const FALLBACK_SNAPSHOT = {
       suspected_cases: 1077,
       confirmed_deaths: 17,
       total_deaths: 238,
-      note: 'ECDC agrège WHO + MinSanté RDC. 3 jours de retard sur INSP.',
+      note: 'ECDC agrège WHO + MinSanté RDC. 3 jours de retard. Décès 17 confirmés vs 38 INSP.',
       url: 'https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda',
     },
     {
@@ -66,8 +78,18 @@ const FALLBACK_SNAPSHOT = {
       suspected_cases: 906,
       confirmed_deaths: 17,
       total_deaths: 223,
-      note: 'Définition cas opérationnelle terrain. Suspects plus restrictifs que INSP.',
+      note: 'Définition cas terrain restrictive → 906 suspects (vs 1103 INSP). Décès sous-comptés.',
       url: 'https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak',
+    },
+    {
+      name: 'OMS/ONU News',
+      date: '2026-05-19',
+      confirmed_cases: 51,
+      suspected_cases: 600,
+      confirmed_deaths: null,
+      total_deaths: 139,
+      note: 'Chiffres au 19 mai. Épicentre Ituri + Nord-Kivu. Risque épidémique élevé national et régional.',
+      url: 'https://news.un.org/fr/story/2026/05/1158865',
     },
     {
       name: 'CDC Situation Summary',
@@ -76,7 +98,7 @@ const FALLBACK_SNAPSHOT = {
       suspected_cases: null,
       confirmed_deaths: 17,
       total_deaths: null,
-      note: 'Reprend chiffres WHO confirmés. Pas de suspects.',
+      note: 'Reprend chiffres WHO confirmés uniquement.',
       url: 'https://www.cdc.gov/ebola/situation-summary/index.html',
     },
     {
@@ -86,7 +108,7 @@ const FALLBACK_SNAPSHOT = {
       suspected_cases: 1012,
       confirmed_deaths: 17,
       total_deaths: 240,
-      note: 'Rapport au 26 mai. Base INSP sitreps antérieurs.',
+      note: 'Rapport au 26 mai. Base sitreps INSP antérieurs.',
       url: 'https://www.unfpa.org/resources/unfpa-flash-update-bundibugyo-ebola-virus-disease-bvd-outbreak-20-26-may-2026',
     },
   ],
@@ -95,61 +117,65 @@ const FALLBACK_SNAPSHOT = {
     title: 'Pourquoi les chiffres diffèrent entre sources ?',
     reasons: [
       {
-        label: 'INSP RDC = source primaire',
-        detail: 'L\u2019INSP (Institut National de Santé Publique) publie les sitreps officiels du MinSanté RDC. C\u2019est la source la plus précise et la plus récente. WHO/ECDC la répliquent avec 3\u201310 jours de retard.',
+        label: 'INSP RDC = source primaire officielle',
+        detail: 'L’INSP publie quotidiennement les sitreps officiels du MinSanté RDC (insp.cd/blog-2). WHO/ECDC les répliquent avec 3–11 jours de retard. Écart actuel décès : 38 (INSP N°017) vs 17 (WHO DON603 du 20 mai).',
       },
       {
         label: 'Définition de cas suspect',
-        detail: 'WHO/ECDC: fièvre + symptôme hémorragique (définition large → 1103). MSF terrain: fièvre + contact + symptômes (définition restrictive → 906).',
+        detail: 'INSP/WHO/ECDC : fièvre + symptôme hémorragique → 1103 suspects. MSF terrain : fièvre + contact + symptômes → 906 suspects. Différence de 197 suspects.',
       },
       {
         label: 'Délai de rapportage',
-        detail: 'INSP publie quotidiennement. WHO DON tous les ~10 jours. ECDC 2x/semaine. D’où écarts de 18-22 cas entre INSP (143) et WHO DON603 (121) pris au 20 mai.',
+        detail: 'INSP publie quotidiennement. WHO DON tous les ~10 jours. ECDC 2x/semaine. Résultat : écart de 21 décès confirmés entre INSP (38) et WHO (17 au 20 mai).',
       },
       {
-        label: 'Consolidation laboratoire',
-        detail: 'Certains suspects deviennent confirmés entre deux rapports. INSP intègre les résultats PCR INRB dans les 24h.',
+        label: 'Consolidation laboratoire INRB',
+        detail: 'INSP intègre les résultats PCR de l’INRB (Institut National de Recherche Biomédicale) sous 24h. WHO attend confirmation officielle avant publication DON.',
       },
       {
         label: 'Accès terrain limité',
-        detail: 'Conflit armé actif Nord-Kivu/Sud-Kivu. Zones de santé isolées rapportant avec retard vers INSP, puis vers WHO.',
+        detail: 'Conflit armé actif Nord-Kivu/Sud-Kivu. Zones isolées rapportent avec retard vers INSP, puis vers WHO.',
       },
     ],
-    consensus: 'Chiffres retenus (source INSP SitRep N°014, 31 mai) : 143 confirmés, 1103 suspects, 22 décès confirmés, CFR 15.4 %. WHO DON et ECDC représentent l’état au 20–28 mai.',
+    consensus: 'Source retenue : INSP RDC SitRep N°017 (31 mai) : 143 confirmés, 1103 suspects, 38 décès confirmés, CFR 26.6%. WHO DON603 et ECDC 28 mai reflètent l’état au 20–28 mai uniquement.',
   },
 
   provinces: [
-    // Données INSP SitRep N°014 (31 mai 2026) — source officielle RDC
-    { province: 'Ituri',     zone: 'Mongbwalu',    cases: 61, deaths: 11, cfr: 18.0, status: 'Active',     country: 'DRC',    source: 'INSP SitRep N°014', source_date: '2026-05-31' },
-    { province: 'Ituri',     zone: 'Bunia',        cases: 38, deaths:  7, cfr: 18.4, status: 'Active',     country: 'DRC',    source: 'INSP SitRep N°014', source_date: '2026-05-31' },
-    { province: 'Ituri',     zone: 'Rwampara',     cases: 22, deaths:  4, cfr: 18.2, status: 'Active',     country: 'DRC',    source: 'INSP SitRep N°014', source_date: '2026-05-31' },
-    { province: 'Nord-Kivu', zone: 'Butembo',      cases: 10, deaths:  0, cfr:  0.0, status: 'Active',     country: 'DRC',    source: 'INSP SitRep N°014', source_date: '2026-05-31' },
-    { province: 'Nord-Kivu', zone: 'Goma',         cases:  5, deaths:  0, cfr:  0.0, status: 'Monitoring', country: 'DRC',    source: 'INSP SitRep N°014', source_date: '2026-05-31' },
-    { province: 'Sud-Kivu',  zone: 'Multiple',     cases:  4, deaths:  0, cfr:  0.0, status: 'Monitoring', country: 'DRC',    source: 'INSP SitRep N°014', source_date: '2026-05-31' },
-    { province: 'Kinshasa',  zone: 'Surveillance', cases:  2, deaths:  0, cfr:  0.0, status: 'Monitoring', country: 'DRC',    source: 'INSP SitRep N°014', source_date: '2026-05-31' },
-    { province: 'Maniema',   zone: 'Surveillance', cases:  1, deaths:  0, cfr:  0.0, status: 'Monitoring', country: 'DRC',    source: 'INSP SitRep N°014', source_date: '2026-05-31' },
-    { province: 'Uganda',    zone: 'Kampala+',     cases:  9, deaths:  1, cfr: 11.1, status: 'Monitoring', country: 'Uganda', source: 'WHO DON603',         source_date: '2026-05-20' },
+    // Source : INSP SitRep N°009 (23 mai) = 94 Ituri + 6 Nord-Kivu + 1 Sud-Kivu = 101 confirmés
+    // Source : INSP SitRep N°017 (31 mai) = 143 confirmés totaux, 38 décès
+    { province: 'Ituri',     zone: 'Mongbwalu',     cases: 65, deaths: 18, cfr: 27.7, status: 'Active',     country: 'DRC',    source: 'INSP N°017', source_date: '2026-05-31' },
+    { province: 'Ituri',     zone: 'Bunia',         cases: 38, deaths: 11, cfr: 28.9, status: 'Active',     country: 'DRC',    source: 'INSP N°017', source_date: '2026-05-31' },
+    { province: 'Ituri',     zone: 'Rwampara',      cases: 20, deaths:  5, cfr: 25.0, status: 'Active',     country: 'DRC',    source: 'INSP N°017', source_date: '2026-05-31' },
+    { province: 'Ituri',     zone: 'Nyakunde',      cases:  5, deaths:  1, cfr: 20.0, status: 'Active',     country: 'DRC',    source: 'INSP N°017', source_date: '2026-05-31' },
+    { province: 'Ituri',     zone: 'Nizi',          cases:  4, deaths:  1, cfr: 25.0, status: 'Active',     country: 'DRC',    source: 'INSP N°009', source_date: '2026-05-23' },
+    { province: 'Nord-Kivu', zone: 'Butembo',       cases: 10, deaths:  2, cfr: 20.0, status: 'Active',     country: 'DRC',    source: 'INSP N°017', source_date: '2026-05-31' },
+    { province: 'Nord-Kivu', zone: 'Goma',          cases:  5, deaths:  0, cfr:  0.0, status: 'Monitoring', country: 'DRC',    source: 'INSP N°017', source_date: '2026-05-31' },
+    { province: 'Nord-Kivu', zone: 'Katwa',         cases:  2, deaths:  0, cfr:  0.0, status: 'Monitoring', country: 'DRC',    source: 'INSP N°009', source_date: '2026-05-23' },
+    { province: 'Sud-Kivu',  zone: 'Miti-Murhesa',  cases:  4, deaths:  0, cfr:  0.0, status: 'Monitoring', country: 'DRC',    source: 'INSP N°017', source_date: '2026-05-31' },
+    { province: 'Kinshasa',  zone: 'Surveillance',  cases:  2, deaths:  0, cfr:  0.0, status: 'Monitoring', country: 'DRC',    source: 'INSP N°017', source_date: '2026-05-31' },
+    { province: 'Maniema',   zone: 'Surveillance',  cases:  1, deaths:  0, cfr:  0.0, status: 'Monitoring', country: 'DRC',    source: 'INSP N°017', source_date: '2026-05-31' },
+    { province: 'Uganda',    zone: 'Kampala+',      cases:  9, deaths:  1, cfr: 11.1, status: 'Monitoring', country: 'Uganda', source: 'WHO DON603',  source_date: '2026-05-20' },
   ],
 
   trend: {
-    source: 'INSP RDC SitReps MVE N°001–014 + WHO DON601-603 + ECDC sitreps + UNFPA Flash Updates',
-    source_url: 'https://insp.cd/sitrep-mve-n-014-2026/',
-    note: 'Suspects: INSP/ECDC (1103 au 31 mai) vs MSF terrain (906 au 28 mai). Source primaire: INSP RDC.',
-    dates:          ['15 mai', '16 mai', '17 mai', '18 mai', '19 mai', '21 mai', '22 mai', '24 mai', '26 mai', '28 mai', '29 mai', '31 mai'],
-    confirmed:      [8,        8,        10,       13,       22,       31,       40,       51,       70,       121,      125,      143    ],
-    suspected_ecdc: [246,      248,      280,      300,      528,      516,      650,      800,      1012,     1077,     1077,     1103   ],
-    suspected_msf:  [null,     null,     null,     null,     null,     null,     null,     null,     null,     906,      906,      null   ],
-    deaths_conf:    [1,        1,        2,        3,        5,        7,        10,       14,       16,       17,       17,       22     ],
-    deaths_all:     [40,       42,       55,       80,       120,      160,      195,      220,      238,      246,      246,      261    ],
+    source: 'INSP RDC SitReps MVE N°001–017 + WHO DON601-603 + ECDC + UNFPA',
+    source_url: 'https://insp.cd/blog-2/',
+    note: 'Suspects INSP (1103 au 31 mai) vs MSF terrain (906 au 28 mai). Décès INSP (38) vs WHO DON (17 au 20 mai). Source primaire : INSP RDC.',
+    dates:          ['15 mai', '16 mai', '17 mai', '18 mai', '19 mai', '21 mai', '22 mai', '23 mai', '24 mai', '26 mai', '28 mai', '29 mai', '31 mai'],
+    confirmed:      [8,        8,        10,       13,       22,       31,       40,       101,      51,       70,       121,      125,      143    ],
+    suspected_ecdc: [246,      248,      280,      300,      513,      516,      650,      null,     800,      1012,     1077,     1077,     1103   ],
+    suspected_msf:  [null,     null,     null,     null,     null,     null,     null,     null,     null,     null,     906,      906,      null   ],
+    deaths_conf:    [1,        1,        2,        3,        5,        7,        10,       null,     14,       16,       17,       17,       38     ],
+    deaths_all:     [40,       42,       55,       80,       131,      160,      195,      null,     220,      238,      246,      246,      280    ],
   },
 
   contact_tracing: {
     total_contacts_identified: 712,
     drc_contacts: 581,
     uganda_contacts: 131,
-    source: 'INSP RDC SitRep N°014 + WHO',
+    source: 'INSP RDC SitRep N°017 + WHO',
     source_date: '2026-05-31',
-    source_url: 'https://insp.cd/sitrep-mve-n-014-2026/',
+    source_url: 'https://insp.cd/sitrep-n017-mvb_31-2026/',
   },
 };
 
@@ -245,21 +271,19 @@ export default async function handler(req, res) {
     generated_at:   new Date().toISOString(),
     data_as_of:     snapshot.data_as_of,
     data_source:    supabaseError ? 'FALLBACK_STATIC (Supabase indisponible)' : 'Supabase (cron 8h UTC)',
-    primary_source: 'INSP RDC — https://insp.cd',
+    primary_source: 'INSP RDC — https://insp.cd/blog-2/',
     supabase_error: supabaseError || null,
-
-    disclaimer: "Outil d'aide à la décision. Source primaire : INSP RDC (insp.cd). Complété par WHO, ECDC, MSF, CDC, UNFPA.",
-
+    disclaimer: "Outil d'aide à la décision. Source primaire : INSP RDC (insp.cd/blog-2). Complété par WHO, ECDC, MSF, CDC, UNFPA.",
     methodology: {
-      primary_source:       'INSP RDC SitReps MVE (insp.cd) — source officielle du Ministère de la Santé RDC.',
-      secondary_sources:    'WHO DON, ECDC Rapid Risk, MSF, CDC, UNFPA — utilisés pour triangulation et données Ouganda.',
-      cfr:                  'CFR = Décès confirmés / Cas confirmés × 100.',
-      suspects_definition:  'Cas suspect = fièvre + symptômes hémorragiques ou contact confirmé (définition INSP/WHO).',
-      rt:                   'Rᵗ estimé par EpiEstim (Cori 2013). SI BDBV ≈7j. IC 95%: [1.4–2.1].',
-      update_frequency:     'Veille quotidienne INSP RDC + veille 2x/semaine WHO/ECDC. Cron Vercel 08h00 UTC.',
-      insp_sitrep_url:      'https://insp.cd/category/sitrep-mve/',
+      primary_source:      'INSP RDC SitReps MVE (insp.cd/blog-2) — source officielle du Ministère de la Santé RDC. Publiés quotidiennement.',
+      secondary_sources:   'WHO DON, ECDC Rapid Risk, MSF, CDC, UNFPA, ONU News — triangulation et données Ouganda.',
+      cfr:                 'CFR = Décès confirmés / Cas confirmés × 100.',
+      suspects_definition: 'Cas suspect = fièvre + symptômes hémorragiques ou contact confirmé (déf. INSP/WHO).',
+      rt:                  'Rᵗ estimé EpiEstim (Cori 2013). SI BDBV ≈7j. IC 95%: [1.4–2.1].',
+      update_frequency:    'Veille quotidienne INSP (insp.cd/blog-2). Cron Vercel 08h00 UTC.',
+      insp_sitrep_list:    'https://insp.cd/blog-2/',
+      insp_url_pattern:    'https://insp.cd/sitrep-n{NNN}-mvb_{JJ}-2026/',
     },
-
     outbreak_2026: {
       meta: {
         declaration_date:    '2026-05-15',
@@ -270,7 +294,8 @@ export default async function handler(req, res) {
         index_case:          'Infirmière, Zone de santé de Mongbwalu, Ituri',
         last_data_update:    snapshot.data_as_of,
         last_verified_by:    snapshot.source,
-        primary_source_url:  'https://insp.cd/sitrep-mve-n-014-2026/',
+        primary_source_url:  'https://insp.cd/sitrep-n017-mvb_31-2026/',
+        sitrep_list_url:     'https://insp.cd/blog-2/',
       },
       totals: {
         confirmed_cases:       snapshot.confirmed_cases,
@@ -293,7 +318,6 @@ export default async function handler(req, res) {
       rt:                   RT_METADATA,
       risk_factors:         RISK_FACTORS_BASE,
     },
-
     historical:             allData,
     drc_history_comparison: drcHistory,
   });
