@@ -96,7 +96,7 @@ a{color:var(--blue);}
 .province-list tr:last-child td{border-bottom:none;}
 .province-list tr:hover td{background:rgba(255,255,255,.02);}
 .bar-cell{display:flex;align-items:center;gap:8px;}
-.mini-bar{height:5px;border-radius:3px;background:var(--red);min-width:2px;transition:width .4s;}
+.mini-bar{height:5px;border-radius:3px;background:var(--red);min-width:2px;transition:width .4px;}
 .status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;}
 .active-dot{background:var(--red);animation:blink 1.5s infinite;}
 .monitoring-dot{background:var(--amber);}
@@ -282,4 +282,112 @@ toast.show{opacity:1;transform:translateY(0);}
       <div class="panel-head">
         <span class="panel-title">RDC &mdash; 26 provinces</span>
         <div class="tabs">
-          <button class="tab on" onclick="setMapMode('cases',this)">
+          <button class="tab on" onclick="setMapMode('cases',this)">Cases</button>
+          <button class="tab" onclick="setMapMode('deaths',this)">Deaths</button>
+          <button class="tab" onclick="setMapMode('cfr',this)">CFR</button>
+        </div>
+      </div>
+      <svg id="mapDrc"></svg>
+      <div class="map-leg" id="mapLeg"></div>
+    </div>
+  </div>
+</div>
+
+<div class="section fi">
+  <div class="section-head"><span class="section-title">2026 DRC &mdash; courbes &eacute;pid&eacute;miologiques</span></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Cas cumulatifs &mdash; confirmed vs suspected</span>
+        <div class="export-group">
+          <button class="export-btn" onclick="exportChartPNG(trendChart,'trend-2026')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG</button>
+          <button class="export-btn" onclick="exportTrendCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> CSV</button>
+        </div>
+      </div>
+      <div class="trend-controls">
+        <div class="tabs" id="trendTypeTabs">
+          <button class="tab on" onclick="setTrendType('both',this)">Both</button>
+          <button class="tab" onclick="setTrendType('confirmed',this)">Confirmed</button>
+          <button class="tab" onclick="setTrendType('deaths',this)">D&eacute;c&egrave;s</button>
+          <button class="tab" onclick="setTrendType('recovered',this)">Gu&eacute;ris</button>
+        </div>
+      </div>
+      <div class="chart-box" style="height:220px"><canvas id="trendChart"></canvas></div>
+      <div style="display:flex;gap:14px;margin-top:6px;font-size:11px;color:var(--text2);font-family:var(--mono)">
+        <span><span style="display:inline-block;width:10px;height:2px;background:#e63946;vertical-align:middle"></span> Confirmed</span>
+        <span><span style="display:inline-block;width:10px;height:2px;background:#f4a261;vertical-align:middle"></span> D&eacute;c&egrave;s</span>
+        <span><span style="display:inline-block;width:10px;height:2px;background:#52b788;vertical-align:middle"></span> Gu&eacute;ris</span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Nouveaux cas journaliers &mdash; Epi curve</span>
+        <button class="export-btn" onclick="exportChartPNG(epiChart,'epi-curve-2026')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG</button>
+      </div>
+      <div class="chart-box" style="height:240px"><canvas id="epiChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="section fi">
+  <div class="section-head"><span class="section-title">Indicateurs op&eacute;rationnels</span></div>
+  <div class="grid3">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Reproduction number R&#x209c;</span></div>
+      <div class="r-gauge-wrap">
+        <svg class="r-gauge-arc" viewBox="0 0 160 80">
+          <defs><linearGradient id="gaugeGrad" x1="0" y1="0" x2="100%" y2="0">
+            <stop offset="0" stop-color="#52b788"/><stop offset="50%" stop-color="#f4a261"/><stop offset="100%" stop-color="#e63946"/>
+          </linearGradient></defs>
+          <path d="M10,75 A70,70 0 0,1 150,75" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="12" stroke-linecap="round"/>
+          <path d="M10,75 A70,75 0 0,1 150,75" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" opacity=".6"/>
+          <line id="gaugeNeedle" x1="80" y1="75" x2="80" y2="20" stroke="#f4a261" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="80" cy="75" r="5" fill="#e63946"/>
+          <text x="10" y="70" fill="#3e4a56" font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">1.0</text>
+          <text x="80" y="10" fill="#3e4a56" font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">2.0</text>
+          <text x="150" y="70" fill="#3e4a56" font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">3.0</text>
+        </svg>
+        <div class="r-gauge-val" id="rtVal" style="color:var(--amber)">1.7</div>
+        <div class="r-gauge-label">R&#x209c; &mdash; <span id="rtDate">01 juin 2026</span></div>
+        <div class="r-gauge-interp" style="margin-top:6px" id="rtInterp">Chaque cas infecte 1.7 autres. IC 95% [1.4&ndash;2.1].</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-align:center;margin-top:4px">EpiEstim (Cori 2013) &mdash; SI BDBV &asymp;7j</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Contact tracing coverage</span></div>
+      <div class="ct-wrap" id="ctWrap"></div>
+      <div style="margin-top:10px;font-size:11px;color:var(--text3)" id="ctTotal"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Risk assessment</span></div>
+      <div class="risk-grid" id="riskGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="section fi">
+  <div class="section-head"><span class="section-title">2026 vs &eacute;pid&eacute;mies DRC pass&eacute;es</span></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Comparaison &eacute;pid&eacute;mies DRC</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <div class="tabs"><button class="tab on" onclick="setCompM('cases',this)">Cases</button><button class="tab" onclick="setCompM('deaths',this)">Deaths</button></div>
+          <button class="export-btn" onclick="exportChartPNG(compChart,'drc-comparison')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG</button>
+        </div>
+      </div>
+      <div class="chart-box" style="height:240px"><canvas id="compChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">CFR &mdash; &eacute;pid&eacute;mies DRC</span>
+        <button class="export-btn" onclick="exportChartPNG(cfrChart,'cfr-comparison')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PNG</button>
+      </div>
+      <div class="chart-box" style="height:240px"><canvas id="cfrChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="section fi">
+  <div class="section-head"><span class="section-title">Historique global &mdash; toutes &eacute;pid&eacute;mies 1976&ndash;2026</span></div>
+  <div class="grid
