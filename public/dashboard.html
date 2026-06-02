@@ -335,21 +335,26 @@ toast.show{opacity:1;transform:translateY(0);}
     <div class="panel">
       <div class="panel-head"><span class="panel-title">Reproduction number R&#x209c;</span></div>
       <div class="r-gauge-wrap">
+        <!-- ═══ GAUGE SVG — aiguille SANS transform statique ═══ -->
         <svg class="r-gauge-arc" viewBox="0 0 160 80">
           <defs><linearGradient id="gaugeGrad" x1="0" y1="0" x2="100%" y2="0">
             <stop offset="0" stop-color="#52b788"/><stop offset="50%" stop-color="#f4a261"/><stop offset="100%" stop-color="#e63946"/>
           </linearGradient></defs>
+          <!-- Arc de fond -->
           <path d="M10,75 A70,70 0 0,1 150,75" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="12" stroke-linecap="round"/>
+          <!-- Arc coloré -->
           <path d="M10,75 A70,75 0 0,1 150,75" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" opacity=".6"/>
-          <line id="gaugeNeedle" x1="80" y1="75" x2="80" y2="20" stroke="#e63946" stroke-width="2.5" stroke-linecap="round" transform="rotate(36,80,75)"/>
+          <!-- Aiguille : PAS de transform ici — positionée par updateRtGauge() -->
+          <line id="gaugeNeedle" x1="80" y1="75" x2="80" y2="20" stroke="#e63946" stroke-width="2.5" stroke-linecap="round"/>
           <circle cx="80" cy="75" r="5" fill="#e63946"/>
+          <!-- Labels échelle -->
           <text x="10" y="70" fill="#3e4a56" font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">1.0</text>
           <text x="80" y="10" fill="#3e4a56" font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">2.0</text>
           <text x="150" y="70" fill="#3e4a56" font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">3.0</text>
         </svg>
-        <div class="r-gauge-val" id="rtVal" style="color:var(--amber)">1.7</div>
-        <div class="r-gauge-label">R&#x209c; &mdash; <span id="rtDate">01 juin 2026</span></div>
-        <div class="r-gauge-interp" style="margin-top:6px" id="rtInterp">Chaque cas infecte 1.7 autres. IC 95% [1.4&ndash;2.1].</div>
+        <div class="r-gauge-val" id="rtVal" style="color:var(--amber)">—</div>
+        <div class="r-gauge-label">R&#x209c; &mdash; <span id="rtDate">—</span></div>
+        <div class="r-gauge-interp" style="margin-top:6px" id="rtInterp">Chargement&hellip;</div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-align:center;margin-top:4px">EpiEstim (Cori 2013) &mdash; SI BDBV &asymp;7j</div>
       </div>
     </div>
@@ -491,12 +496,12 @@ toast.show{opacity:1;transform:translateY(0);}
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// EBOLA-MONITOR v4.5.6
-// FIXES:
-//   1. KPI suspects : t.suspected_cases_active (INSP actifs du jour)
-//   2. KPI "Décès totaux" → "Guéris" en vert (t.confirmed_recovered)
-//   3. Alert text mis à jour (INSP comme source primaire)
-//   4. Trend chart : confirmed / décès / guéris (au lieu de ECDC/MSF)
+// EBOLA-MONITOR v4.5.7
+// FIX: Gauge Rt — aiguille positionnée dynamiquement
+//   Plage : 1.0 (gauche, -90°) → 3.0 (droite, +90°)
+//   Formule : angle = ((Rt - 1.0) / 2.0) * 180 - 90
+//   Rt=1.0 → -90° | Rt=2.0 → 0° | Rt=3.0 → +90°
+//   Rt=1.7 → -27° ✅ (légèrement à gauche du centre)
 // ═══════════════════════════════════════════════════════════
 
 let ALL=[], PROVINCE_DATA=[], TREND_DATES=[], TREND_CONF=[], TREND_DEATHS=[], TREND_RECOVERED=[], EPI_DAILY=[];
@@ -529,6 +534,34 @@ function safeDraw() {
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+// updateRtGauge — positionne l'aiguille SVG selon la valeur Rt
+//   pivot : (80, 75)  — centre du demi-cercle
+//   plage  : 1.0 → 3.0  ≡  -90° → +90°  (180° total)
+//   angle  = ((rt - 1) / 2) * 180 - 90
+// ═══════════════════════════════════════════════════════════
+function updateRtGauge(rtValue) {
+  const rt = parseFloat(rtValue);
+  if (isNaN(rt)) return;
+
+  // Clamp entre 1.0 et 3.0
+  const rtClamped = Math.min(Math.max(rt, 1.0), 3.0);
+  const angle = ((rtClamped - 1.0) / 2.0) * 180 - 90; // degrés
+
+  const needle = document.getElementById('gaugeNeedle');
+  if (needle) {
+    needle.setAttribute('transform', `rotate(${angle},80,75)`);
+  }
+
+  // Couleur de la valeur selon le niveau
+  const valEl = document.getElementById('rtVal');
+  if (valEl) {
+    const color = rt >= 2.0 ? 'var(--red)' : rt >= 1.5 ? 'var(--amber)' : 'var(--green)';
+    valEl.style.color = color;
+    needle.style.stroke = color;
+  }
+}
+
 async function loadData() {
   try {
     const res = await fetch('/api/ebola-data');
@@ -541,6 +574,8 @@ async function loadData() {
     console.warn('[EBOLA-MONITOR] API error:', err.message);
     document.getElementById('dataSourceBadge').textContent='⚠ API indisponible';
     checkStaleness('2026-06-01T00:00:00Z');
+    // Afficher quand même la gauge avec la valeur par défaut
+    updateRtGauge(1.7);
   }
 }
 
@@ -556,7 +591,6 @@ function applyData(d) {
   if (o.trend) {
     TREND_DATES    = o.trend.dates     || [];
     TREND_CONF     = o.trend.confirmed || [];
-    // Décès et guéris depuis le trend INSP
     TREND_DEATHS   = o.trend.deaths_conf   || [];
     TREND_RECOVERED= o.trend.recovered     || [];
     EPI_DAILY      = TREND_CONF.map((v,i)=>i===0?v:Math.max(0,v-TREND_CONF[i-1]));
@@ -565,21 +599,30 @@ function applyData(d) {
   document.getElementById('heroDate').textContent=ds;
   document.getElementById('alertDate').textContent=ds.toUpperCase();
 
-  // ── Suspects : utiliser suspected_cases_active (INSP actifs du jour) ──
   const suspectsVal = t.suspected_cases_active ?? t.suspected_cases ?? '—';
   const recoveredVal = t.confirmed_recovered ?? t.recovered_estimated ?? '—';
 
   document.getElementById('alertText').innerHTML=
     `<strong>${t.confirmed_cases} cas confirmés</strong> (cumul), <strong>${suspectsVal} suspects en investigation</strong> (actifs INSP), <strong>${recoveredVal} guéris</strong> en RDC.
-    Ouganda : <strong>${t.uganda_confirmed} confirmés</strong>, ${t.uganda_deaths} décès. Bundibugyo virus &mdash; <b>aucun vaccin approuvé</b>.<br>
-    <small style="color:var(--text3)">Source primaire : <a href="https://insp.cd/blog-2/" target="_blank" style="color:var(--amber)">INSP RDC SitRep N°017 (01/06/2026)</a> &mdash; suspects = actifs du jour (pas cumulatifs). <a href="#discrepancyBox" style="color:var(--amber)">Voir différences sources ↓</a></small>`;
+    Ouganda : <strong>${t.uganda_confirmed} confirmés</strong>, ${t.uganda_deaths} décès. Bundibugyo virus &mdash; <b>aucun vaccin approuvé</b>.<br>
+    <small style="color:var(--text3)">Source primaire : <a href="https://insp.cd/blog-2/" target="_blank" style="color:var(--amber)">INSP RDC SitRep N°017 (01/06/2026)</a> &mdash; suspects = actifs du jour (pas cumulatifs). <a href="#discrepancyBox" style="color:var(--amber)">Voir différences sources ↓</a></small>`;
 
   document.getElementById('dataSourceBadge').textContent=d.data_source?'● '+d.data_source:'';
+
+  // ── Gauge Rt : mise à jour dynamique ──
   if (o.rt) {
-    document.getElementById('rtVal').textContent=o.rt.value;
-    document.getElementById('rtDate').textContent=o.rt.date||'01 juin 2026';
-    document.getElementById('rtInterp').textContent=`Chaque cas infecte ${o.rt.value} autres. IC 95% : [${o.rt.ci_low||1.4}–${o.rt.ci_high||2.1}].`;
+    const rtVal = o.rt.value;
+    document.getElementById('rtVal').textContent = rtVal;
+    document.getElementById('rtDate').textContent = o.rt.date || '01 juin 2026';
+    document.getElementById('rtInterp').textContent =
+      `Chaque cas infecte ${rtVal} autres. IC 95% : [${o.rt.ci_low||1.4}–${o.rt.ci_high||2.1}].`;
+    // ✅ Positionner l'aiguille selon la vraie valeur Rt
+    updateRtGauge(rtVal);
+  } else {
+    // Fallback si pas de données Rt
+    updateRtGauge(1.7);
   }
+
   checkStaleness(d.data_as_of);
   renderKPIs(t);
   renderSourcesTable();
@@ -601,15 +644,8 @@ function checkStaleness(iso) {
   } else { b.style.display='none'; }
 }
 
-// ═══════════════════════════════════════════════════════════
-// renderKPIs — v4.5.6
-//   KPI 3 : suspects_cases_active  (INSP actifs, PAS cumulatif)
-//   KPI 4 : confirmed_recovered    en VERT (remplace "Décès totaux" null)
-// ═══════════════════════════════════════════════════════════
 function renderKPIs(t) {
-  // Suspects : preferred field suspected_cases_active, fallback suspected_cases
   const suspects = t.suspected_cases_active ?? t.suspected_cases ?? '—';
-  // Guéris
   const recovered = t.confirmed_recovered ?? t.recovered_estimated ?? '—';
 
   const kpis = [
@@ -625,7 +661,7 @@ function renderKPIs(t) {
       ka:'#c1121f',
       label:'Décès confirmés',
       val: t.confirmed_deaths,
-      sub: 'CFR ' + (t.cfr_confirmed ?? '—') + '%',
+      sub: 'CFR ' + (t.cfr_confirmed ?? '—') + '%',
       delta:'delta-up',
       dt: 'CFR confirmé'
     },
@@ -635,9 +671,8 @@ function renderKPIs(t) {
       val: suspects,
       sub: 'en cours investigation',
       delta:'delta-neu',
-      dt: 'INSP — snapshot du jour'
+      dt: 'INSP — snapshot du jour'
     },
-    // ✅ FIX : Guéris en vert, remplace "Décès totaux" null
     {
       ka:'var(--green)',
       label:'Guéris confirmés',
@@ -660,7 +695,7 @@ function renderKPIs(t) {
       val: t.health_zones_affected,
       sub: (t.countries_affected||2)+' pays',
       delta:'delta-neu',
-      dt: 'Ituri 15 • NK 7 • SK 1'
+      dt: 'Ituri 15 • NK 7 • SK 1'
     },
   ];
 
@@ -747,9 +782,9 @@ function renderContactTracing(){
   }).join('');
   const total = ct.suspects_en_investigation || ct.total_contacts_identified || '—';
   document.getElementById('ctTotal').innerHTML=
-    `<span style="color:var(--amber)">Taux global : ${globalRate}%</span> (cible : 95%) &mdash; 
+    `<span style="color:var(--amber)">Taux global : ${globalRate}%</span> (cible : 95%) &mdash; 
      ${total} suspects suivis &mdash; 
-     Source : <a href="https://insp.cd/blog-2/" style="color:var(--text3)" target="_blank">INSP N°017</a>`;
+     Source : <a href="https://insp.cd/blog-2/" style="color:var(--text3)" target="_blank">INSP N°017</a>`;
 }
 
 function renderRiskGrid(){
@@ -802,97 +837,4 @@ function updateCompChart(){
   if(compChart)compChart.destroy();
   compChart=new Chart(document.getElementById('compChart'),{
     type:'bar',
-    data:{labels:DRC_HISTORY.map(d=>d.label),datasets:[{data:DRC_HISTORY.map(d=>d[key]),backgroundColor:DRC_HISTORY.map((_,i)=>i===n-1?'rgba(230,57,70,.9)':'rgba(72,149,239,.6)'),borderRadius:3}]},
-    options:{...CHART_CFG},
-  });
-}
-function setCompM(v,b){compM=v;b.closest('.tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');updateCompChart();}
-
-function updateCfrChart(){
-  if(!DRC_HISTORY.length)return;
-  if(cfrChart)cfrChart.destroy();
-  cfrChart=new Chart(document.getElementById('cfrChart'),{
-    type:'bar',
-    data:{labels:DRC_HISTORY.map(d=>d.label),datasets:[{data:DRC_HISTORY.map(d=>d.cfr),backgroundColor:DRC_HISTORY.map(d=>d.cfr>50?'rgba(230,57,70,.7)':d.cfr>30?'rgba(244,162,97,.7)':'rgba(82,183,136,.7)'),borderRadius:3}]},
-    options:{...CHART_CFG,scales:{...CHART_CFG.scales,y:{...CHART_CFG.scales.y,ticks:{...CHART_CFG.scales.y.ticks,callback:v=>v+'%'}}}},
-  });
-}
-
-function updateSpChart(){
-  if(!ALL.length)return;
-  const sp={};
-  ALL.forEach(d=>{if(!sp[d.species])sp[d.species]={cases:0,deaths:0,n:0};sp[d.species].cases+=d.cases;sp[d.species].deaths+=d.deaths;sp[d.species].n++;});
-  const SPCOL={Zaire:'#4895ef',Sudan:'#f4a261',Bundibugyo:'#52b788','Taï Forest':'#c77dff'};
-  const labels=Object.keys(sp),vals=labels.map(k=>sp[k][spM==='n'?'n':spM]);
-  if(spChart)spChart.destroy();
-  spChart=new Chart(document.getElementById('spChart'),{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:labels.map(k=>SPCOL[k]||'#7a8694'),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-  document.getElementById('spLeg').innerHTML=labels.map((k,i)=>`<div class="sp-legend-row"><div class="sp-swatch" style="background:${SPCOL[k]||'#7a8694'}"></div>${k}: <strong>${vals[i].toLocaleString()}</strong></div>`).join('');
-}
-function setSpM(v,b){spM=v;b.closest('.tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');updateSpChart();}
-
-function updateCtyChart(){
-  if(!ALL.length)return;
-  const cty={};
-  ALL.forEach(d=>{if(!cty[d.country])cty[d.country]={cases:0,deaths:0,n:0};cty[d.country].cases+=d.cases;cty[d.country].deaths+=d.deaths;cty[d.country].n++;});
-  const key=ctyM==='n'?'n':ctyM;
-  const sorted=Object.entries(cty).sort((a,b)=>b[1][key]-a[1][key]).slice(0,10);
-  if(ctyChart)ctyChart.destroy();
-  ctyChart=new Chart(document.getElementById('ctyChart'),{type:'bar',data:{labels:sorted.map(([k])=>k),datasets:[{data:sorted.map(([,v])=>v[key]),backgroundColor:'rgba(72,149,239,.6)',borderRadius:3}]},options:{...CHART_CFG,indexAxis:'y'}});
-}
-function setCtyM(v,b){ctyM=v;b.closest('.tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');updateCtyChart();}
-
-function getFiltered(){
-  return ALL.filter(d=>{
-    if(spFilt!=='all'&&d.species!==spFilt)return false;
-    if(search&&!d.country.toLowerCase().includes(search.toLowerCase()))return false;
-    if(yFilt==='1976-1999')return d.year<=1999;
-    if(yFilt==='2000-2013')return d.year>=2000&&d.year<=2013;
-    if(yFilt==='2014-2016')return d.year>=2014&&d.year<=2016;
-    if(yFilt==='2017-2026')return d.year>=2017;
-    return true;
-  });
-}
-function setY(v,b){yFilt=v;document.querySelectorAll('#yFilters .fbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');page=1;doFilter();}
-function setSp(v,b){spFilt=v;document.querySelectorAll('#spFilters .fbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');page=1;doFilter();}
-function doFilter(){search=document.getElementById('searchInp').value;const sv=document.getElementById('sortSel').value;[sortF,sortD]=sv.split('-');rows=parseInt(document.getElementById('rowsSel').value);renderTable(getFiltered());updateSpChart();updateCtyChart();}
-function sBy(f){if(sortF===f)sortD=sortD==='asc'?'desc':'asc';else{sortF=f;sortD='desc';}document.querySelectorAll('.data-tbl th span').forEach(s=>s.textContent='');const sp=document.getElementById('a-'+f);if(sp)sp.textContent=sortD==='asc'?' ▲':' ▼';document.querySelectorAll('.data-tbl th').forEach(th=>th.classList.toggle('sorted',th.getAttribute('onclick')==="sBy('"+f+"')")); page=1;renderTable(getFiltered());}
-const SP_CLS={Zaire:'sp-z',Sudan:'sp-s',Bundibugyo:'sp-b','Taï Forest':'sp-t'};
-function renderTable(data){
-  const sorted=[...data].sort((a,b)=>{const av=sortF==='country'?a[sortF]:a[sortF]??-1,bv=sortF==='country'?b[sortF]:b[sortF]??-1;return sortD==='asc'?(av>bv?1:-1):(av<bv?1:-1);});
-  const total=sorted.length,pages=Math.max(1,Math.ceil(total/rows));
-  if(page>pages)page=1;
-  const sl=rows>=99?sorted:sorted.slice((page-1)*rows,page*rows);
-  document.getElementById('tblInfo').textContent=total+' outbreaks';
-  document.getElementById('tblBody').innerHTML=sl.map(d=>{const cfrCls=d.cfr>70?'b-hi':d.cfr>40?'b-mid':'b-lo';return`<tr><td class="mn">${d.year}</td><td>${d.country}</td><td class="mn">${d.cases.toLocaleString()}</td><td class="mn">${d.deaths.toLocaleString()}</td><td class="mn"><span class="badge ${cfrCls}">${d.cfr}%</span></td><td><span class="badge ${SP_CLS[d.species]||'b-na'}">${d.species}</span></td><td><span class="${d.status==='Ongoing'?'tag-on':'tag-ov'}">${d.status}</span></td></tr>`;}).join('');
-  const pager=document.getElementById('pager');
-  if(rows>=99||pages<=1){pager.innerHTML='';return;}
-  let html=`<button onclick="goPg(${page>1?page-1:1}">◄</button>`;
-  for(let i=1;i<=pages;i++){if(i===1||i===pages||Math.abs(i-page)<=1)html+=`<button class="${i===page?'on':''}" onclick="goPg(${i})">${i}</button>`;else if(Math.abs(i-page)===2)html+=`<span class="pager-ellipsis">…</span>`;}
-  html+=`<button onclick="goPg(${page<pages?page+1:pages})">►</button>`;
-  pager.innerHTML=html;
-}
-function goPg(p){page=p;renderTable(getFiltered());}
-
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-function dlCSV(rows,fn){const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}`).join(',')).join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download=fn;a.click();showToast('CSV: '+fn);}
-function exportFilteredCSV(){const data=getFiltered().sort((a,b)=>b.year-a.year);dlCSV([['Year','Country','Cases','Deaths','CFR%','Species','Status'],...data.map(d=>[d.year,d.country,d.cases,d.deaths,d.cfr,d.species,d.status])],'ebola-historical-filtered.csv');}
-function exportCurrentCSV(){dlCSV([['Province','Zone','Cases','Deaths','CFR%','Status','Country','Source'],...getFilteredProvinces().map(d=>[d.province,d.zone,d.cases,d.deaths,d.cfr,d.status,d.country,d.source||''])],'ebola-2026-current.csv');}
-function exportTrendCSV(){dlCSV([['Date','Confirmed','Deaths','Recovered','Daily_New'],...TREND_DATES.map((d,i)=>[d,TREND_CONF[i],TREND_DEATHS[i]||'',TREND_RECOVERED[i]||'',EPI_DAILY[i]])],'ebola-2026-trend.csv');}
-function exportChartPNG(chart,fn){if(!chart)return;const a=document.createElement('a');a.href=chart.toBase64Image('image/png',1);a.download=fn+'.png';a.click();showToast('PNG: '+fn+'.png');}
-
-let resizeTimer;
-window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(safeDraw,200);});
-
-const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');}),{threshold:.1});
-document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadData);
-} else {
-  loadData();
-}
-</script>
-<!-- map-patch chargé APRÈS le script principal pour que window.PROVINCE_DATA soit défini -->
-<script src="/map-patch-v44.js"></script>
-</body>
-</html>
+    data:{labels:DRC_HISTORY.map(d=>d.label),datasets:[{data:DRC_HISTORY.map(d=>d[k
