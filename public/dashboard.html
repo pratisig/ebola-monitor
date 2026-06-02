@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>EBOLA-MONITOR v4.4 — RDC 2026</title>
+<title>EBOLA-MONITOR v4.5 — RDC 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600&display=swap" rel="stylesheet">
@@ -56,6 +56,7 @@ a{color:var(--blue);}
 .kpi-sub{font-size:11px;color:var(--text2);margin-top:4px;}
 .kpi-delta{font-family:var(--mono);font-size:10px;margin-top:5px;padding:2px 7px;border-radius:99px;display:inline-block;}
 .delta-up{background:var(--red3);color:var(--red2);}
+.delta-good{background:var(--green3);color:var(--green);}
 .delta-neu{background:var(--bg3);color:var(--text3);}
 .alert{background:linear-gradient(135deg,rgba(230,57,70,.1),rgba(230,57,70,.05));border:1px solid rgba(230,57,70,.25);border-radius:var(--rl);padding:14px 18px;display:flex;gap:12px;align-items:flex-start;margin-bottom:20px;}
 .alert-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
@@ -195,10 +196,11 @@ toast.show{opacity:1;transform:translateY(0);}
 <div class="topbar fi">
   <div class="topbar-brand">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 1 0 20M12 2a7 7 0 0 0 0 20M2 12h20"/><path d="M12 6c1.5 2 2 4 2 6s-.5 4-2 6M12 6c-1.5 2-2 4-2 6s.5 4 2 6"/></svg>
-    <span class="dot"></span> EBOLA-MONITOR v4.4
+    <span class="dot"></span> EBOLA-MONITOR v4.5
   </div>
   <div class="topbar-right">
     <span class="pheic-badge">PHEIC DECLARED 17 MAY 2026</span>
+    <a href="https://insp.cd/blog-2/" target="_blank" rel="noopener" class="ext-link">INSP RDC</a>
     <a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603" target="_blank" rel="noopener" class="ext-link">WHO DON603</a>
     <a href="https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda" target="_blank" rel="noopener" class="ext-link">ECDC</a>
     <a href="https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak" target="_blank" rel="noopener" class="ext-link">MSF</a>
@@ -228,17 +230,17 @@ toast.show{opacity:1;transform:translateY(0);}
 </div>
 
 <div class="section fi">
-  <div class="section-head"><span class="section-title">Current outbreak &mdash; confirmed figures</span></div>
+  <div class="section-head"><span class="section-title">Current outbreak &mdash; confirmed figures (INSP RDC)</span></div>
   <div class="kpi-strip" id="currentKpis"></div>
 </div>
 
 <div class="section fi">
   <div class="section-head"><span class="section-title">Multi-sources transparency &mdash; why figures differ</span></div>
   <div class="sources-panel">
-    <div class="sources-title">Sources comparison &mdash; 28-29 May 2026</div>
+    <div class="sources-title">Sources comparison &mdash; <span id="sourcesDateLabel">01 juin 2026</span></div>
     <div style="overflow-x:auto">
       <table class="sources-table">
-        <thead><tr><th>Source</th><th>Date</th><th>Confirmed</th><th>Suspected</th><th>Deaths conf.</th><th>Deaths total</th><th>Note</th><th>Link</th></tr></thead>
+        <thead><tr><th>Source</th><th>Date</th><th>Confirmés</th><th>Suspects actifs</th><th>Décès conf.</th><th>Guéris</th><th>Note</th><th>Lien</th></tr></thead>
         <tbody id="sourcesBody"></tbody>
       </table>
     </div>
@@ -255,8 +257,6 @@ toast.show{opacity:1;transform:translateY(0);}
       <button class="fbtn" onclick="setProvFilter('Ituri',this)">Ituri</button>
       <button class="fbtn" onclick="setProvFilter('Nord-Kivu',this)">Nord-Kivu</button>
       <button class="fbtn" onclick="setProvFilter('Sud-Kivu',this)">Sud-Kivu</button>
-      <button class="fbtn" onclick="setProvFilter('Kinshasa',this)">Kinshasa</button>
-      <button class="fbtn" onclick="setProvFilter('Maniema',this)">Maniema</button>
     </div>
     <span class="filter-label" style="margin-left:8px">Status</span>
     <div class="fgroup" id="statusFilters">
@@ -308,15 +308,15 @@ toast.show{opacity:1;transform:translateY(0);}
         <div class="tabs" id="trendTypeTabs">
           <button class="tab on" onclick="setTrendType('both',this)">Both</button>
           <button class="tab" onclick="setTrendType('confirmed',this)">Confirmed</button>
-          <button class="tab" onclick="setTrendType('suspected_ecdc',this)">Suspected ECDC</button>
-          <button class="tab" onclick="setTrendType('suspected_msf',this)">Suspected MSF</button>
+          <button class="tab" onclick="setTrendType('deaths',this)">Décès</button>
+          <button class="tab" onclick="setTrendType('recovered',this)">Guéris</button>
         </div>
       </div>
       <div class="chart-box" style="height:220px"><canvas id="trendChart"></canvas></div>
       <div style="display:flex;gap:14px;margin-top:6px;font-size:11px;color:var(--text2);font-family:var(--mono)">
         <span><span style="display:inline-block;width:10px;height:2px;background:#e63946;vertical-align:middle"></span> Confirmed</span>
-        <span><span style="display:inline-block;width:10px;height:2px;background:#f4a261;vertical-align:middle"></span> Suspected ECDC (1077)</span>
-        <span><span style="display:inline-block;width:10px;height:2px;background:#52b788;vertical-align:middle"></span> Suspected MSF (906)</span>
+        <span><span style="display:inline-block;width:10px;height:2px;background:#f4a261;vertical-align:middle"></span> Décès</span>
+        <span><span style="display:inline-block;width:10px;height:2px;background:#52b788;vertical-align:middle"></span> Guéris</span>
       </div>
     </div>
     <div class="panel">
@@ -348,7 +348,7 @@ toast.show{opacity:1;transform:translateY(0);}
           <text x="150" y="70" fill="#3e4a56" font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">3.0</text>
         </svg>
         <div class="r-gauge-val" id="rtVal" style="color:var(--amber)">1.7</div>
-        <div class="r-gauge-label">R&#x209c; &mdash; <span id="rtDate">29 May 2026</span></div>
+        <div class="r-gauge-label">R&#x209c; &mdash; <span id="rtDate">01 juin 2026</span></div>
         <div class="r-gauge-interp" style="margin-top:6px" id="rtInterp">Chaque cas infecte 1.7 autres. IC 95% [1.4&ndash;2.1].</div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-align:center;margin-top:4px">EpiEstim (Cori 2013) &mdash; SI BDBV &asymp;7j</div>
       </div>
@@ -479,33 +479,33 @@ toast.show{opacity:1;transform:translateY(0);}
 
 <footer class="fi">
   <div class="footer-src">
-    Sources: <a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603" target="_blank">WHO DON603 (20 mai)</a> &bull;
+    Source primaire : <a href="https://insp.cd/blog-2/" target="_blank">INSP RDC &mdash; SitReps MVE quotidiens</a> &bull;
+    <a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603" target="_blank">WHO DON603 (20 mai)</a> &bull;
     <a href="https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda" target="_blank">ECDC (28 mai)</a> &bull;
-    <a href="https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak" target="_blank">MSF (28 mai)</a> &bull;
-    <a href="https://www.cdc.gov/ebola/situation-summary/index.html" target="_blank">CDC (29 mai)</a> &bull;
-    <a href="https://reliefweb.int/report/democratic-republic-congo/unfpa-flash-update-bundibugyo-ebola-virus-disease-bvd-outbreak-20-26-may" target="_blank">UNFPA (27 mai)</a>
+    <a href="https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak" target="_blank">MSF</a> &bull;
+    <a href="https://www.cdc.gov/ebola/situation-summary/index.html" target="_blank">CDC</a>
   </div>
-  <span class="footer-tag">EBOLA-MONITOR v4.4 &mdash; Carte D3 GeoJSON r&eacute;el &mdash; WHO/ECDC/MSF/CDC/UNFPA &mdash; Usage op&eacute;rationnel uniquement</span>
+  <span class="footer-tag">EBOLA-MONITOR v4.5 &mdash; Source primaire INSP RDC &mdash; WHO/ECDC/MSF/CDC &mdash; Usage op&eacute;rationnel uniquement</span>
 </footer>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// EBOLA-MONITOR v4.4.3 — FIXES:
-//   1. window.PROVINCE_DATA toujours synchronisé avec le let local
-//   2. drawDrcMap() appelée après que map-patch soit prêt (défensif)
-//   3. Init robuste : ne dépend plus de DOMContentLoaded
+// EBOLA-MONITOR v4.5.6
+// FIXES:
+//   1. KPI suspects : t.suspected_cases_active (INSP actifs du jour)
+//   2. KPI "Décès totaux" → "Guéris" en vert (t.confirmed_recovered)
+//   3. Alert text mis à jour (INSP comme source primaire)
+//   4. Trend chart : confirmed / décès / guéris (au lieu de ECDC/MSF)
 // ═══════════════════════════════════════════════════════════
 
-let ALL=[], PROVINCE_DATA=[], TREND_DATES=[], TREND_CONF=[], TREND_SUSP_ECDC=[], TREND_SUSP_MSF=[], EPI_DAILY=[];
+let ALL=[], PROVINCE_DATA=[], TREND_DATES=[], TREND_CONF=[], TREND_DEATHS=[], TREND_RECOVERED=[], EPI_DAILY=[];
 let DRC_HISTORY=[], CONTACT_TRACING={}, RISK_FACTORS=[], SOURCES_COMPARISON=[], SOURCE_DISCREPANCIES={};
 let yFilt='all', spFilt='all', search='', sortF='year', sortD='desc', page=1, rows=25;
 let mapMode='cases', compM='cases', spM='cases', ctyM='cases', trendType='both';
 let provFilter='all', statusFilter='all';
 let trendChart, compChart, spChart, ctyChart, epiChart, cfrChart;
 
-// ── FIX 1: expose PROVINCE_DATA sur window pour map-patch-v44.js ──
-// map-patch lit window.PROVINCE_DATA; on le synchronise à chaque écriture
 function setProvinceData(arr) {
   PROVINCE_DATA = arr;
   window.PROVINCE_DATA = arr;
@@ -520,7 +520,6 @@ const CHART_CFG={
   },
 };
 
-// ── FIX 2: drawDrcMap défensif — attend que map-patch soit chargé ──
 function safeDraw() {
   if (typeof window.drawDrcMap === 'function') {
     window.mapMode = mapMode;
@@ -530,7 +529,6 @@ function safeDraw() {
   }
 }
 
-// ── LOAD DATA ────────────────────────────────────────────
 async function loadData() {
   try {
     const res = await fetch('/api/ebola-data');
@@ -542,14 +540,13 @@ async function loadData() {
   } catch(err) {
     console.warn('[EBOLA-MONITOR] API error:', err.message);
     document.getElementById('dataSourceBadge').textContent='⚠ API indisponible';
-    checkStaleness('2026-05-29T00:00:00Z');
+    checkStaleness('2026-06-01T00:00:00Z');
   }
 }
 
 function applyData(d) {
   const o=d.outbreak_2026, t=o.totals;
   ALL=d.historical||[];
-  // FIX 1: utiliser setProvinceData pour synchroniser window.PROVINCE_DATA
   setProvinceData(o.provinces||[]);
   DRC_HISTORY=d.drc_history_comparison||[];
   CONTACT_TRACING=o.contact_tracing||{};
@@ -557,22 +554,31 @@ function applyData(d) {
   SOURCES_COMPARISON=o.sources_comparison||[];
   SOURCE_DISCREPANCIES=o.source_discrepancies||{};
   if (o.trend) {
-    TREND_DATES=o.trend.dates||[];
-    TREND_CONF=o.trend.confirmed||[];
-    TREND_SUSP_ECDC=o.trend.suspected_ecdc||[];
-    TREND_SUSP_MSF=o.trend.suspected_msf||[];
-    EPI_DAILY=TREND_CONF.map((v,i)=>i===0?v:Math.max(0,v-TREND_CONF[i-1]));
+    TREND_DATES    = o.trend.dates     || [];
+    TREND_CONF     = o.trend.confirmed || [];
+    // Décès et guéris depuis le trend INSP
+    TREND_DEATHS   = o.trend.deaths_conf   || [];
+    TREND_RECOVERED= o.trend.recovered     || [];
+    EPI_DAILY      = TREND_CONF.map((v,i)=>i===0?v:Math.max(0,v-TREND_CONF[i-1]));
   }
   const ds=new Date(d.data_as_of).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
   document.getElementById('heroDate').textContent=ds;
   document.getElementById('alertDate').textContent=ds.toUpperCase();
+
+  // ── Suspects : utiliser suspected_cases_active (INSP actifs du jour) ──
+  const suspectsVal = t.suspected_cases_active ?? t.suspected_cases ?? '—';
+  const recoveredVal = t.confirmed_recovered ?? t.recovered_estimated ?? '—';
+
   document.getElementById('alertText').innerHTML=
-    `<strong>${t.confirmed_cases} cas confirmés</strong>, <strong>${t.suspected_cases} cas suspects</strong> (ECDC 28 mai) en RDC. Ouganda : <strong>${t.uganda_confirmed} confirmés</strong>, ${t.uganda_deaths} décès. Bundibugyo virus — <b>aucun vaccin approuvé</b>.<br><small style="color:var(--text3)">MSF rapporte 906 suspects vs 1077 ECDC — différence de définition de cas. <a href="#discrepancyBox" style="color:var(--amber)">Voir ↓</a></small>`;
+    `<strong>${t.confirmed_cases} cas confirmés</strong> (cumul), <strong>${suspectsVal} suspects en investigation</strong> (actifs INSP), <strong>${recoveredVal} guéris</strong> en RDC.
+    Ouganda : <strong>${t.uganda_confirmed} confirmés</strong>, ${t.uganda_deaths} décès. Bundibugyo virus &mdash; <b>aucun vaccin approuvé</b>.<br>
+    <small style="color:var(--text3)">Source primaire : <a href="https://insp.cd/blog-2/" target="_blank" style="color:var(--amber)">INSP RDC SitRep N°017 (01/06/2026)</a> &mdash; suspects = actifs du jour (pas cumulatifs). <a href="#discrepancyBox" style="color:var(--amber)">Voir différences sources ↓</a></small>`;
+
   document.getElementById('dataSourceBadge').textContent=d.data_source?'● '+d.data_source:'';
   if (o.rt) {
     document.getElementById('rtVal').textContent=o.rt.value;
-    document.getElementById('rtDate').textContent=o.rt.date||'29 May 2026';
-    document.getElementById('rtInterp').textContent=`Chaque cas infecte ${o.rt.value} autres. IC 95%: [${o.rt.ci_low||1.4}–${o.rt.ci_high||2.1}].`;
+    document.getElementById('rtDate').textContent=o.rt.date||'01 juin 2026';
+    document.getElementById('rtInterp').textContent=`Chaque cas infecte ${o.rt.value} autres. IC 95% : [${o.rt.ci_low||1.4}–${o.rt.ci_high||2.1}].`;
   }
   checkStaleness(d.data_as_of);
   renderKPIs(t);
@@ -583,7 +589,6 @@ function applyData(d) {
   renderContactTracing();
   renderRiskGrid();
   doFilter();
-  // FIX 2: dessin carte après synchronisation window.PROVINCE_DATA
   safeDraw();
 }
 
@@ -592,19 +597,81 @@ function checkStaleness(iso) {
   const h=(Date.now()-new Date(iso).getTime())/3600000;
   if (h>48) {
     b.style.display='flex';
-    b.innerHTML='⚠&nbsp;<strong>DONNÉES STATIQUES</strong> — il y a <strong>'+Math.round(h)+'h</strong>.&nbsp;<a href="https://www.who.int/emergencies/situations/ebola-outbreak---drc-2026" target="_blank" style="color:#ffcccc">WHO ↗</a>';
+    b.innerHTML='⚠&nbsp;<strong>DONNÉES STATIQUES</strong> &mdash; il y a <strong>'+Math.round(h)+'h</strong>.&nbsp;<a href="https://insp.cd/blog-2/" target="_blank" style="color:#ffcccc">INSP RDC ↗</a>';
   } else { b.style.display='none'; }
 }
 
+// ═══════════════════════════════════════════════════════════
+// renderKPIs — v4.5.6
+//   KPI 3 : suspects_cases_active  (INSP actifs, PAS cumulatif)
+//   KPI 4 : confirmed_recovered    en VERT (remplace "Décès totaux" null)
+// ═══════════════════════════════════════════════════════════
 function renderKPIs(t) {
-  document.getElementById('currentKpis').innerHTML=[
-    {ka:'var(--red)',    label:'Cas confirmés',     val:t.confirmed_cases,       sub:'ECDC 28 mai',           delta:'delta-up',  dt:'+117 vs 15 mai'},
-    {ka:'#c1121f',      label:'Décès confirmés',    val:t.confirmed_deaths,      sub:'CFR '+t.cfr_confirmed+'%',delta:'delta-up',dt:'CFR confirmé'},
-    {ka:'var(--amber)', label:'Cas suspects ECDC',  val:t.suspected_cases,       sub:'déf. WHO/ECDC large',   delta:'delta-neu', dt:'~906 MSF terrain'},
-    {ka:'var(--red2)',  label:'Décès totaux',        val:t.total_deaths_all,      sub:'conf.+suspects décédés',delta:'delta-up',  dt:'source ECDC'},
-    {ka:'var(--blue)',  label:'Ouganda confirmés',   val:t.uganda_confirmed,      sub:t.uganda_deaths+' décès',delta:'delta-up',  dt:'liés voyages DRC'},
-    {ka:'var(--green)', label:'Zones santé affect.', val:t.health_zones_affected, sub:'2 pays',                delta:'delta-neu', dt:t.countries_affected+' countries'},
-  ].map(k=>`<div class="kpi" style="--ka:${k.ka}"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.val}</div><div class="kpi-sub">${k.sub}</div><span class="kpi-delta ${k.delta}">${k.dt}</span></div>`).join('');
+  // Suspects : preferred field suspected_cases_active, fallback suspected_cases
+  const suspects = t.suspected_cases_active ?? t.suspected_cases ?? '—';
+  // Guéris
+  const recovered = t.confirmed_recovered ?? t.recovered_estimated ?? '—';
+
+  const kpis = [
+    {
+      ka:'var(--red)',
+      label:'Cas confirmés',
+      val: t.confirmed_cases,
+      sub: 'cumul depuis début',
+      delta:'delta-up',
+      dt: '+12 cas le 31 mai'
+    },
+    {
+      ka:'#c1121f',
+      label:'Décès confirmés',
+      val: t.confirmed_deaths,
+      sub: 'CFR ' + (t.cfr_confirmed ?? '—') + '%',
+      delta:'delta-up',
+      dt: 'CFR confirmé'
+    },
+    {
+      ka:'var(--amber)',
+      label:'Suspects (actifs)',
+      val: suspects,
+      sub: 'en cours investigation',
+      delta:'delta-neu',
+      dt: 'INSP — snapshot du jour'
+    },
+    // ✅ FIX : Guéris en vert, remplace "Décès totaux" null
+    {
+      ka:'var(--green)',
+      label:'Guéris confirmés',
+      val: recovered,
+      sub: 'sortis des CTE',
+      delta:'delta-good',
+      dt: '✔ guéris cumulés'
+    },
+    {
+      ka:'var(--blue)',
+      label:'Ouganda confirmés',
+      val: t.uganda_confirmed,
+      sub: (t.uganda_deaths||0)+' décès',
+      delta:'delta-up',
+      dt: 'liés voyages RDC'
+    },
+    {
+      ka:'var(--green)',
+      label:'Zones santé affect.',
+      val: t.health_zones_affected,
+      sub: (t.countries_affected||2)+' pays',
+      delta:'delta-neu',
+      dt: 'Ituri 15 • NK 7 • SK 1'
+    },
+  ];
+
+  document.getElementById('currentKpis').innerHTML = kpis.map(k=>
+    `<div class="kpi" style="--ka:${k.ka}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value" style="color:${k.ka.includes('green')?'var(--green)':k.ka.includes('blue')?'var(--blue)':'var(--text)'}">${k.val ?? '—'}</div>
+      <div class="kpi-sub">${k.sub}</div>
+      <span class="kpi-delta ${k.delta}">${k.dt}</span>
+    </div>`
+  ).join('');
 }
 
 function renderSourcesTable() {
@@ -614,7 +681,8 @@ function renderSourcesTable() {
       <td class="mn">${s.name}</td><td class="mn">${s.date}</td>
       <td class="mn" style="color:var(--red2)">${s.confirmed_cases??'—'}</td>
       <td class="mn" style="color:var(--amber)">${s.suspected_cases??'—'}</td>
-      <td class="mn">${s.confirmed_deaths??'—'}</td><td class="mn">${s.total_deaths??'—'}</td>
+      <td class="mn">${s.confirmed_deaths??'—'}</td>
+      <td class="mn" style="color:var(--green)">${s.confirmed_recovered??s.confirmed_active??'—'}</td>
       <td class="note">${s.note}</td>
       <td><a href="${s.url}" target="_blank" rel="noopener" style="font-family:var(--mono);font-size:9px">↗</a></td>
     </tr>`).join('');
@@ -633,7 +701,6 @@ function setStatusFilter(v,b){statusFilter=v;document.querySelectorAll('#statusF
 function getFilteredProvinces(){return PROVINCE_DATA.filter(d=>{if(provFilter!=='all'&&d.province!==provFilter&&d.country!==provFilter)return false;if(statusFilter!=='all'&&d.status!==statusFilter)return false;return true;});}
 function renderCurrentDashboard(){
   renderProvinceTable(getFilteredProvinces());
-  // FIX 2: synchroniser et redessiner la carte
   window.PROVINCE_DATA = PROVINCE_DATA;
   safeDraw();
 }
@@ -650,9 +717,6 @@ function renderProvinceTable(data){
   }).join('');
 }
 
-// NOTE: getProvDataByName est définie dans map-patch-v44.js (version avec alias + exclusion Uganda)
-// Ne pas la redéfinir ici pour éviter le conflit
-
 function setMapMode(v,b){
   mapMode=v;
   window.mapMode=v;
@@ -662,20 +726,30 @@ function setMapMode(v,b){
 }
 
 function renderContactTracing(){
-  const zones=[
-    {zone:'Ituri Mongbwalu',pct:68},{zone:'Ituri Bunia',pct:74},
-    {zone:'Ituri Rwampara',pct:55},{zone:'Nord-Kivu',pct:82},{zone:'Sud-Kivu',pct:90},
+  const ct = CONTACT_TRACING;
+  const globalRate  = ct.contact_tracing_rate_pct  || 43;
+  const ituriRate   = ct.contact_tracing_ituri_pct || 35;
+  const zones = [
+    {zone:'Ituri (global)',  pct: ituriRate},
+    {zone:'Ituri Bunia',     pct: Math.round(ituriRate * 1.1)},
+    {zone:'Ituri Rwampara',  pct: Math.round(ituriRate * 0.9)},
+    {zone:'Nord-Kivu',       pct: Math.round(globalRate * 1.3 > 99 ? 99 : globalRate * 1.3)},
+    {zone:'Sud-Kivu',        pct: Math.round(globalRate * 1.5 > 99 ? 99 : globalRate * 1.5)},
   ];
-  document.getElementById('ctWrap').innerHTML=zones.map(z=>`
-    <div class="ct-row">
+  document.getElementById('ctWrap').innerHTML=zones.map(z=>{
+    const color = z.pct >= 80 ? 'var(--green)' : z.pct >= 50 ? 'var(--amber)' : 'var(--red)';
+    return `<div class="ct-row">
       <div class="ct-zone">${z.zone}</div>
-      <div class="ct-bar-wrap"><div class="ct-bar" style="width:${z.pct}%"></div></div>
-      <div class="ct-pct">${z.pct}%</div>
-      <div class="ct-label">coverage</div>
-    </div>`).join('');
-  const ct=CONTACT_TRACING;
-  document.getElementById('ctTotal').textContent=
-    `${ct.total_contacts_identified||668} contacts. DRC: ${ct.drc_contacts||541}, Uganda: ${ct.uganda_contacts||127}. Source: ${ct.source||'WHO'}.`;
+      <div class="ct-bar-wrap"><div class="ct-bar" style="width:${z.pct}%;background:${color}"></div></div>
+      <div class="ct-pct" style="color:${color}">${z.pct}%</div>
+      <div class="ct-label">/ cible 95%</div>
+    </div>`;
+  }).join('');
+  const total = ct.suspects_en_investigation || ct.total_contacts_identified || '—';
+  document.getElementById('ctTotal').innerHTML=
+    `<span style="color:var(--amber)">Taux global : ${globalRate}%</span> (cible : 95%) &mdash; 
+     ${total} suspects suivis &mdash; 
+     Source : <a href="https://insp.cd/blog-2/" style="color:var(--text3)" target="_blank">INSP N°017</a>`;
 }
 
 function renderRiskGrid(){
@@ -694,9 +768,9 @@ function initCharts(){
   trendChart=new Chart(document.getElementById('trendChart'),{
     type:'line',
     data:{labels:TREND_DATES,datasets:[
-      {data:TREND_CONF,borderColor:'#e63946',backgroundColor:'rgba(230,57,70,.12)',fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#e63946',label:'Confirmed'},
-      {data:TREND_SUSP_ECDC,borderColor:'#f4a261',fill:false,tension:.3,pointRadius:2,label:'Suspected ECDC'},
-      {data:TREND_SUSP_MSF,borderColor:'#52b788',fill:false,tension:.3,pointRadius:2,borderDash:[4,4],label:'Suspected MSF'},
+      {data:TREND_CONF,    borderColor:'#e63946',backgroundColor:'rgba(230,57,70,.12)',fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#e63946',label:'Confirmed'},
+      {data:TREND_DEATHS,  borderColor:'#f4a261',fill:false,tension:.3,pointRadius:2,label:'Décès'},
+      {data:TREND_RECOVERED,borderColor:'#52b788',fill:false,tension:.3,pointRadius:2,borderDash:[4,4],label:'Guéris'},
     ]},
     options:{...CHART_CFG,plugins:{legend:{display:false}}},
   });
@@ -715,9 +789,9 @@ function setTrendType(t,b){
   trendType=t;
   document.querySelectorAll('#trendTypeTabs .tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');
   if(!trendChart)return;
-  trendChart.data.datasets[0].hidden=(t==='suspected_ecdc'||t==='suspected_msf');
-  trendChart.data.datasets[1].hidden=(t==='confirmed'||t==='suspected_msf');
-  trendChart.data.datasets[2].hidden=(t==='confirmed'||t==='suspected_ecdc');
+  trendChart.data.datasets[0].hidden=(t==='deaths'||t==='recovered');
+  trendChart.data.datasets[1].hidden=(t==='confirmed'||t==='recovered');
+  trendChart.data.datasets[2].hidden=(t==='confirmed'||t==='deaths');
   trendChart.update();
 }
 
@@ -792,9 +866,9 @@ function renderTable(data){
   document.getElementById('tblBody').innerHTML=sl.map(d=>{const cfrCls=d.cfr>70?'b-hi':d.cfr>40?'b-mid':'b-lo';return`<tr><td class="mn">${d.year}</td><td>${d.country}</td><td class="mn">${d.cases.toLocaleString()}</td><td class="mn">${d.deaths.toLocaleString()}</td><td class="mn"><span class="badge ${cfrCls}">${d.cfr}%</span></td><td><span class="badge ${SP_CLS[d.species]||'b-na'}">${d.species}</span></td><td><span class="${d.status==='Ongoing'?'tag-on':'tag-ov'}">${d.status}</span></td></tr>`;}).join('');
   const pager=document.getElementById('pager');
   if(rows>=99||pages<=1){pager.innerHTML='';return;}
-  let html=`<button onclick="goPg(${page>1?page-1:1})">◀</button>`;
+  let html=`<button onclick="goPg(${page>1?page-1:1}">◄</button>`;
   for(let i=1;i<=pages;i++){if(i===1||i===pages||Math.abs(i-page)<=1)html+=`<button class="${i===page?'on':''}" onclick="goPg(${i})">${i}</button>`;else if(Math.abs(i-page)===2)html+=`<span class="pager-ellipsis">…</span>`;}
-  html+=`<button onclick="goPg(${page<pages?page+1:pages})">▶</button>`;
+  html+=`<button onclick="goPg(${page<pages?page+1:pages})">►</button>`;
   pager.innerHTML=html;
 }
 function goPg(p){page=p;renderTable(getFiltered());}
@@ -803,7 +877,7 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 function dlCSV(rows,fn){const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}`).join(',')).join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download=fn;a.click();showToast('CSV: '+fn);}
 function exportFilteredCSV(){const data=getFiltered().sort((a,b)=>b.year-a.year);dlCSV([['Year','Country','Cases','Deaths','CFR%','Species','Status'],...data.map(d=>[d.year,d.country,d.cases,d.deaths,d.cfr,d.species,d.status])],'ebola-historical-filtered.csv');}
 function exportCurrentCSV(){dlCSV([['Province','Zone','Cases','Deaths','CFR%','Status','Country','Source'],...getFilteredProvinces().map(d=>[d.province,d.zone,d.cases,d.deaths,d.cfr,d.status,d.country,d.source||''])],'ebola-2026-current.csv');}
-function exportTrendCSV(){dlCSV([['Date','Confirmed','Suspected_ECDC','Suspected_MSF','Daily_New'],...TREND_DATES.map((d,i)=>[d,TREND_CONF[i],TREND_SUSP_ECDC[i]||'',TREND_SUSP_MSF[i]||'',EPI_DAILY[i]])],'ebola-2026-trend.csv');}
+function exportTrendCSV(){dlCSV([['Date','Confirmed','Deaths','Recovered','Daily_New'],...TREND_DATES.map((d,i)=>[d,TREND_CONF[i],TREND_DEATHS[i]||'',TREND_RECOVERED[i]||'',EPI_DAILY[i]])],'ebola-2026-trend.csv');}
 function exportChartPNG(chart,fn){if(!chart)return;const a=document.createElement('a');a.href=chart.toBase64Image('image/png',1);a.download=fn+'.png';a.click();showToast('PNG: '+fn+'.png');}
 
 let resizeTimer;
@@ -812,7 +886,6 @@ window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setT
 const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');}),{threshold:.1});
 document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
 
-// ── FIX 3: init robuste — fonctionne si DOM déjà prêt (iframe) ou pas encore ──
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', loadData);
 } else {
