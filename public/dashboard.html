@@ -237,7 +237,7 @@ toast.show{opacity:1;transform:translateY(0);}
 <div class="section fi">
   <div class="section-head"><span class="section-title">Multi-sources transparency &mdash; why figures differ</span></div>
   <div class="sources-panel">
-    <div class="sources-title">Sources comparison &mdash; <span id="sourcesDateLabel">01 juin 2026</span></div>
+    <div class="sources-title">Sources comparison &mdash; <span id="sourcesDateLabel">02 juin 2026</span></div>
     <div style="overflow-x:auto">
       <table class="sources-table">
         <thead><tr><th>Source</th><th>Date</th><th>Confirm&eacute;s</th><th>Suspects actifs</th><th>D&eacute;c&egrave;s conf.</th><th>Gu&eacute;ris</th><th>Note</th><th>Lien</th></tr></thead>
@@ -348,7 +348,7 @@ toast.show{opacity:1;transform:translateY(0);}
           <text x="150" y="70" fill="#3e4a56" font-family="IBM Plex Mono,monospace" font-size="9" text-anchor="middle">3.0</text>
         </svg>
         <div class="r-gauge-val" id="rtVal" style="color:var(--amber)">1.7</div>
-        <div class="r-gauge-label">R&#x209c; &mdash; <span id="rtDate">01 juin 2026</span></div>
+        <div class="r-gauge-label">R&#x209c; &mdash; <span id="rtDate">02 juin 2026</span></div>
         <div class="r-gauge-interp" style="margin-top:6px" id="rtInterp">Chaque cas infecte 1.7 autres. IC 95% [1.4&ndash;2.1].</div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-align:center;margin-top:4px">EpiEstim (Cori 2013) &mdash; SI BDBV &asymp;7j</div>
       </div>
@@ -390,4 +390,510 @@ toast.show{opacity:1;transform:translateY(0);}
 
 <div class="section fi">
   <div class="section-head"><span class="section-title">Historique global &mdash; toutes &eacute;pid&eacute;mies 1976&ndash;2026</span></div>
-  <div class="grid
+  <div class="tbl-controls">
+    <div class="tabs" id="histSpeciesTabs">
+      <button class="tab on" onclick="setHistSpecies('all',this)">All</button>
+      <button class="tab" onclick="setHistSpecies('Zaire',this)">Za&iuml;re</button>
+      <button class="tab" onclick="setHistSpecies('Sudan',this)">Sudan</button>
+      <button class="tab" onclick="setHistSpecies('Bundibugyo',this)">Bundibugyo</button>
+    </div>
+    <select class="sel" id="histCountrySel" onchange="renderHistTable()"><option value="all">All countries</option></select>
+    <div class="search-wrap">
+      <svg class="s-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-inp" id="histSearch" placeholder="Search..." oninput="renderHistTable()">
+    </div>
+    <div class="export-group" style="margin-left:auto">
+      <button class="export-btn" onclick="exportHistCSV()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> CSV
+      </button>
+    </div>
+    <span class="tbl-info" id="histInfo"></span>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="data-tbl" id="histTbl">
+      <thead><tr>
+        <th onclick="sortHist('year')">Year</th>
+        <th onclick="sortHist('country')">Country</th>
+        <th onclick="sortHist('species')">Species</th>
+        <th onclick="sortHist('cases')">Cases</th>
+        <th onclick="sortHist('deaths')">Deaths</th>
+        <th onclick="sortHist('cfr')">CFR</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody id="histBody"></tbody>
+    </table>
+  </div>
+  <div class="pager" id="histPager"></div>
+</div>
+
+<footer class="fi">
+  <div class="footer-src">
+    Sources primaires : <a href="https://insp.cd/blog-2/" target="_blank">INSP RDC SitReps MVE</a> &bull;
+    <a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603" target="_blank">WHO DON603</a> &bull;
+    <a href="https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda" target="_blank">ECDC</a> &bull;
+    <a href="https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak" target="_blank">MSF</a> &bull;
+    <a href="https://reliefweb.int" target="_blank">ReliefWeb</a>
+    <span class="footer-tag">EBOLA-MONITOR v4.5.10 &mdash; open-source &mdash; not for clinical use</span>
+  </div>
+</footer>
+</div>
+
+<script>
+'use strict';
+const API = '/api/ebola-data';
+let G = {};
+let trendChart, epiChart, compChart, cfrChart;
+let mapMode = 'cases', provFilter = 'all', statusFilter = 'all';
+let histData = [], histSort = {col:'year', asc:false}, histPage = 1, histPerPage = 15;
+let histSpeciesFilter = 'all', histCountryFilter = 'all', histSearchQ = '';
+let trendType = 'both', compMode = 'cases';
+
+function fmt(n,d=0){if(n==null||n===undefined)return '—';return Number(n).toLocaleString('fr-FR',{maximumFractionDigits:d});}
+function fmtDate(s){if(!s)return '—';const d=new Date(s);if(isNaN(d))return s;return d.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});}
+function showToast(msg='Export ready'){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+async function loadData(){
+  try{
+    const r=await fetch(API);
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const json=await r.json();
+    G=json;
+    render();
+  }catch(e){
+    console.error('API error:',e);
+    document.getElementById('alertText').textContent='Erreur chargement API. Vérifiez /api/ebola-data.';
+  }
+}
+
+function render(){
+  const ob=G.outbreak_2026||{};
+  const tot=ob.totals||{};
+  const trend=ob.trend||{};
+  const ct=ob.contact_tracing||{};
+  const rf=ob.risk_factors||[];
+  const rt=ob.rt||{};
+  const hist=G.historical||[];
+  const drcHist=G.drc_history_comparison||[];
+  const sc=ob.sources_comparison||[];
+  const sd=ob.source_discrepancies||{};
+  const provs=ob.provinces||[];
+
+  // staleness
+  if(G.data_as_of){
+    const age=(Date.now()-new Date(G.data_as_of))/864e5;
+    const banner=document.getElementById('stalenessBanner');
+    if(age>2){banner.style.display='flex';banner.textContent='⚠ Données datant de '+Math.floor(age)+' jours. Mise à jour en cours.';}
+  }
+
+  // hero
+  const heroDate=document.getElementById('heroDate');
+  if(heroDate)heroDate.textContent=fmtDate(G.data_as_of);
+  const alertDate=document.getElementById('alertDate');
+  if(alertDate)alertDate.textContent=fmtDate(G.data_as_of);
+  const alertText=document.getElementById('alertText');
+  if(alertText)alertText.textContent=tot.confirmed_cases+' cas confirmés · '+tot.confirmed_deaths+' décès · CFR '+tot.cfr_confirmed+'% · '+tot.health_zones_affected+' zones de santé · Rt≈'+( rt.rt_point||'1.7')+' · Suivi contacts '+(ct.contact_tracing_rate_pct||'—')+'% (cible 95%)';
+  const dsBadge=document.getElementById('dataSourceBadge');
+  if(dsBadge)dsBadge.textContent=G.data_source==='FALLBACK_STATIC'?'⚡ mode fallback statique':'';
+  const srcDateLabel=document.getElementById('sourcesDateLabel');
+  if(srcDateLabel)srcDateLabel.textContent=fmtDate(G.data_as_of);
+
+  // KPIs
+  const kpis=[
+    {label:'Cas confirmés',value:fmt(tot.confirmed_cases),sub:'Cumul depuis 15 mai 2026',delta:'+19 le 02/06',cls:'delta-up',ka:'var(--red)'},
+    {label:'Décès confirmés',value:fmt(tot.confirmed_deaths),sub:'CFR '+tot.cfr_confirmed+'%',delta:'↑ CFR vs 2007-08 (25%)',cls:'delta-neu',ka:'var(--red)'},
+    {label:'Cas actifs',value:fmt(tot.confirmed_active),sub:'Hospitalisés / isolement',delta:null,cls:'',ka:'var(--amber)'},
+    {label:'Suspects actifs',value:fmt(tot.suspected_cases_active),sub:'En investigation (INSP)',delta:'Actifs jour J — pas cumulatif',cls:'delta-neu',ka:'var(--amber)'},
+    {label:'Guéris',value:fmt(tot.confirmed_recovered),sub:'Confirmés guéris',delta:null,cls:'delta-good',ka:'var(--green)'},
+    {label:'Zones de santé',value:fmt(tot.health_zones_affected),sub:'sur 104 (3 provinces)',delta:'Ituri:16 · NK:7 · SK:1',cls:'delta-neu',ka:'var(--blue)'},
+    {label:'Uganda',value:fmt(tot.uganda_confirmed),sub:fmt(tot.uganda_deaths)+' décès',delta:'WHO 03/06/2026',cls:'delta-neu',ka:'var(--amber)'},
+    {label:'Suivi contacts',value:(ct.contact_tracing_rate_pct||'—')+'%',sub:'Cible: 95%',delta:'≪ seuil contrôle',cls:'delta-up',ka:'var(--red)'},
+  ];
+  const kpiEl=document.getElementById('currentKpis');
+  if(kpiEl)kpiEl.innerHTML=kpis.map(k=>`<div class="kpi" style="--ka:${k.ka}"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div><div class="kpi-sub">${k.sub}</div>${k.delta?`<div class="kpi-delta ${k.cls}">${k.delta}</div>`:''}</div>`).join('');
+
+  // sources comparison
+  const sb=document.getElementById('sourcesBody');
+  if(sb&&sc.length){
+    sb.innerHTML=sc.map(s=>`<tr>
+      <td class="mn">${s.is_primary?'<strong>'+s.name+'</strong>':s.name}</td>
+      <td class="mn">${s.date||'—'}</td>
+      <td class="mn">${fmt(s.confirmed_cases)}</td>
+      <td class="mn">${s.suspected_cases!=null?fmt(s.suspected_cases):'—'}</td>
+      <td class="mn">${fmt(s.confirmed_deaths)}</td>
+      <td class="mn">${s.confirmed_recovered!=null?fmt(s.confirmed_recovered):'—'}</td>
+      <td class="note">${s.note||''}</td>
+      <td>${s.url?`<a href="${s.url}" target="_blank" style="font-size:10px;font-family:var(--mono)">↗</a>`:''}</td>
+    </tr>`).join('');
+  }
+  const db=document.getElementById('discrepancyBox');
+  if(db&&sd.title){
+    db.innerHTML=`<div class="discrepancy-title">${sd.title}</div>`+
+      (sd.reasons||[]).map(r=>`<div class="discrepancy-item"><span class="discrepancy-label">${r.label}</span><span class="discrepancy-detail">${r.detail}</span></div>`).join('')+
+      (sd.consensus?`<div class="consensus">✓ ${sd.consensus}</div>`:'');
+  }
+
+  // province table
+  renderProvTable(provs);
+
+  // map
+  initMap(provs);
+
+  // charts
+  buildTrendChart(trend);
+  buildEpiChart(trend);
+
+  // operational
+  updateRtGauge(rt);
+  buildContactTracing(ct);
+  buildRiskGrid(rf);
+
+  // historical
+  histData=G.historical||[];
+  buildHistCountryFilter();
+  renderHistTable();
+
+  // comparison charts
+  buildCompChart(drcHist);
+  buildCfrChart(drcHist);
+
+  // fade-in
+  document.querySelectorAll('.fi').forEach((el,i)=>setTimeout(()=>el.classList.add('vis'),i*60));
+}
+
+function renderProvTable(provs){
+  const fProv=provFilter==='all'?provs:provs.filter(p=>p.province===provFilter&&p.country==='DRC');
+  const fStat=statusFilter==='all'?fProv:fProv.filter(p=>(p.cases>0&&statusFilter==='Active')||(p.cases===0&&statusFilter==='Monitoring'));
+  const tbody=document.getElementById('provTableBody');
+  if(!tbody)return;
+  const maxC=Math.max(...fStat.map(p=>p.cases||0),1);
+  tbody.innerHTML=fStat.map(p=>{
+    const cfr=p.cfr!=null?p.cfr.toFixed(1)+'%':'—';
+    const st=p.cases>0?'<span class="status-dot active-dot"></span>Active':'<span class="status-dot monitoring-dot"></span>Monitoring';
+    const bw=Math.round((p.cases/maxC)*80);
+    const zoneList=p.zones&&p.zones.length?p.zones.join(', '):'';
+    return `<tr>
+      <td><strong>${p.province}</strong>${p.country==='Uganda'?' <span style="font-size:9px;color:var(--text3)">(Uganda)</span>':''}<br><span style="font-size:10px;color:var(--text3)">${zoneList}</span></td>
+      <td class="mn"><div class="bar-cell"><div class="mini-bar" style="width:${bw}px"></div>${fmt(p.cases)}</div></td>
+      <td class="mn">${fmt(p.deaths)}</td>
+      <td class="mn">${cfr}</td>
+      <td>${st}</td>
+      <td><span class="src-tag" title="${p.source_date||''}">${(p.source||'').replace('INSP N°','N°')}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function setProvFilter(v,btn){
+  provFilter=v;
+  document.querySelectorAll('#provFilters .fbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderProvTable(G.outbreak_2026?.provinces||[]);
+}
+function setStatusFilter(v,btn){
+  statusFilter=v;
+  document.querySelectorAll('#statusFilters .fbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderProvTable(G.outbreak_2026?.provinces||[]);
+}
+
+function initMap(provs){
+  const svg=d3.select('#mapDrc');
+  const w=svg.node().clientWidth||600, h=380;
+  svg.attr('viewBox',`0 0 ${w} ${h}`);
+  const proj=d3.geoMercator().center([24,-3]).scale(w*1.1).translate([w/2,h/2]);
+  const path=d3.geoPath().projection(proj);
+  const mtt=document.getElementById('mtt');
+
+  const caseMap={};
+  provs.forEach(p=>{
+    if(p.country==='DRC')caseMap[p.province]={cases:p.cases||0,deaths:p.deaths||0,cfr:p.cfr||0};
+  });
+
+  const colorScale=d3.scaleSequential().domain([0,Math.max(...Object.values(caseMap).map(v=>v.cases),1)]).interpolator(d3.interpolate('#1b222b','#e63946'));
+
+  fetch('/drc-provinces.geojson')
+    .then(r=>r.json())
+    .then(geo=>{
+      svg.selectAll('path').remove();
+      svg.selectAll('path')
+        .data(geo.features)
+        .join('path')
+        .attr('d',path)
+        .attr('fill',d=>{
+          const nm=d.properties.NAME_1||d.properties.name||'';
+          const match=Object.keys(caseMap).find(k=>nm.toLowerCase().includes(k.toLowerCase())||k.toLowerCase().includes(nm.toLowerCase()));
+          if(!match)return '#1b222b';
+          const v=mapMode==='cases'?caseMap[match].cases:mapMode==='deaths'?caseMap[match].deaths:caseMap[match].cfr;
+          return v>0?colorScale(caseMap[match].cases):'#1b222b';
+        })
+        .attr('stroke','rgba(255,255,255,.08)').attr('stroke-width','0.5')
+        .on('mousemove',(e,d)=>{
+          const nm=d.properties.NAME_1||d.properties.name||'';
+          const match=Object.keys(caseMap).find(k=>nm.toLowerCase().includes(k.toLowerCase())||k.toLowerCase().includes(nm.toLowerCase()));
+          const info=match?caseMap[match]:{cases:0,deaths:0,cfr:0};
+          mtt.style.display='block';
+          mtt.style.left=(e.pageX+14)+'px';
+          mtt.style.top=(e.pageY-10)+'px';
+          mtt.innerHTML=`<strong>${nm}</strong><div class="mtt-row"><span>Cas conf.</span><span>${fmt(info.cases)}</span></div><div class="mtt-row"><span>Décès</span><span>${fmt(info.deaths)}</span></div><div class="mtt-row"><span>CFR</span><span>${info.cfr?info.cfr.toFixed(1)+'%':'—'}</span></div>`;
+        })
+        .on('mouseleave',()=>mtt.style.display='none');
+      updateMapLegend(colorScale,mapMode,caseMap);
+    }).catch(()=>{});
+}
+
+function setMapMode(mode,btn){
+  mapMode=mode;
+  document.querySelectorAll('#mapDrc').forEach(()=>{});
+  document.querySelectorAll('.panel .tabs .tab').forEach(b=>{
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes('setMapMode'))b.classList.remove('on');
+  });
+  btn.classList.add('on');
+  initMap(G.outbreak_2026?.provinces||[]);
+}
+
+function updateMapLegend(scale,mode,caseMap){
+  const leg=document.getElementById('mapLeg');
+  if(!leg)return;
+  const vals=[0,50,150,300];
+  leg.innerHTML=vals.map(v=>`<div class="leg-i"><span class="leg-sw" style="background:${scale(v)}"></span>${v}+ cas</div>`).join('')+
+    '<div class="leg-i" style="margin-left:8px"><span class="leg-sw" style="background:#1b222b;border:1px solid rgba(255,255,255,.1)"></span>Non touché</div>';
+}
+
+const CHART_DEFAULTS={
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{backgroundColor:'#141a21',borderColor:'rgba(255,255,255,.13)',borderWidth:1,titleFont:{family:'IBM Plex Mono',size:11},bodyFont:{family:'IBM Plex Mono',size:10},padding:10}},
+  scales:{
+    x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#3e4a56',font:{family:'IBM Plex Mono',size:9}}},
+    y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#3e4a56',font:{family:'IBM Plex Mono',size:9}}}
+  }
+};
+
+function buildTrendChart(trend){
+  const ctx=document.getElementById('trendChart')?.getContext('2d');
+  if(!ctx)return;
+  if(trendChart)trendChart.destroy();
+  const labels=trend.dates||[];
+  const conf=trend.confirmed||[];
+  const deaths=trend.deaths_conf||[];
+  const recov=trend.recovered||[];
+  let datasets=[];
+  if(trendType==='both'||trendType==='confirmed')datasets.push({label:'Confirmés',data:conf,borderColor:'#e63946',backgroundColor:'rgba(230,57,70,.08)',tension:.4,fill:true,pointRadius:3,pointBackgroundColor:'#e63946'});
+  if(trendType==='both'||trendType==='deaths')datasets.push({label:'Décès',data:deaths,borderColor:'#f4a261',backgroundColor:'rgba(244,162,97,.08)',tension:.4,fill:false,pointRadius:3,pointBackgroundColor:'#f4a261'});
+  if(trendType==='recovered')datasets.push({label:'Guéris',data:recov,borderColor:'#52b788',backgroundColor:'rgba(82,183,136,.08)',tension:.4,fill:true,pointRadius:3,pointBackgroundColor:'#52b788'});
+  trendChart=new Chart(ctx,{type:'line',data:{labels,datasets},options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:datasets.length>1,labels:{color:'#7a8694',font:{family:'IBM Plex Mono',size:9}}}}}});
+}
+
+function setTrendType(t,btn){
+  trendType=t;
+  document.querySelectorAll('#trendTypeTabs .tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  buildTrendChart(G.outbreak_2026?.trend||{});
+}
+
+function buildEpiChart(trend){
+  const ctx=document.getElementById('epiChart')?.getContext('2d');
+  if(!ctx)return;
+  if(epiChart)epiChart.destroy();
+  const labels=trend.dates||[];
+  const newCases=trend.new_cases_24h||[];
+  epiChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Nouveaux cas',data:newCases,backgroundColor:'rgba(230,57,70,.7)',borderColor:'#e63946',borderWidth:1,borderRadius:3}]},options:{...CHART_DEFAULTS}});
+}
+
+function updateRtGauge(rt){
+  const val=parseFloat(rt.rt_point||1.7);
+  const el=document.getElementById('rtVal');
+  const needle=document.getElementById('gaugeNeedle');
+  const interp=document.getElementById('rtInterp');
+  const rtDate=document.getElementById('rtDate');
+  if(el){
+    el.textContent=val.toFixed(1);
+    el.style.color=val>=2?'#e63946':val>=1.5?'#f4a261':'#52b788';
+  }
+  if(needle){
+    const pct=Math.min(Math.max((val-1)/2,0),1);
+    const angle=-90+pct*180;
+    const rad=angle*Math.PI/180;
+    const cx=80,cy=75,len=50;
+    const x2=cx+len*Math.cos(rad);
+    const y2=cy+len*Math.sin(rad);
+    needle.setAttribute('x2',x2.toFixed(1));
+    needle.setAttribute('y2',y2.toFixed(1));
+  }
+  if(interp&&rt.rt_ci95)interp.textContent=`Chaque cas infecte ${val.toFixed(1)} autres. IC 95% [${rt.rt_ci95}].`;
+  if(rtDate&&rt.rt_date)rtDate.textContent=fmtDate(rt.rt_date);
+}
+
+function buildContactTracing(ct){
+  const wrap=document.getElementById('ctWrap');
+  const total=document.getElementById('ctTotal');
+  if(!wrap)return;
+  const rows=[
+    {zone:'National',pct:ct.contact_tracing_rate_pct||0,target:ct.contact_tracing_target_pct||95},
+    {zone:'Ituri',pct:ct.contact_tracing_ituri_pct||0,target:95},
+  ];
+  wrap.innerHTML=rows.map(r=>{
+    const w=Math.min(r.pct,100);
+    const col=r.pct>=90?'var(--green)':r.pct>=60?'var(--amber)':'var(--red)';
+    return `<div class="ct-row">
+      <span class="ct-zone">${r.zone}</span>
+      <div class="ct-bar-wrap"><div class="ct-bar" style="width:${w}%;background:${col}"></div></div>
+      <span class="ct-pct">${r.pct}%</span>
+      <span class="ct-label">cible ${r.target}%</span>
+    </div>`;
+  }).join('');
+  if(total)total.textContent=`Contacts suivis: ${ct.contact_tracing_rate_pct||'—'}% · Patients isolés: ${fmt(ct.patients_en_isolement_total)} · Alertes investiguées: ${ct.alertes_investiguees_pct||'—'}%`;
+}
+
+function buildRiskGrid(rf){
+  const grid=document.getElementById('riskGrid');
+  if(!grid)return;
+  const items=rf.length?rf:[
+    {label:'Spread géographique',level:85,color:'var(--red)',text:'Très élevé'},
+    {label:'Suivi contacts',level:55,color:'var(--amber)',text:'Insuffisant'},
+    {label:'Capacité réponse',level:60,color:'var(--amber)',text:'Modérée'},
+    {label:'Risque régional',level:70,color:'var(--amber)',text:'Élevé'},
+  ];
+  grid.innerHTML=items.map(i=>`<div class="risk-card">
+    <div class="risk-card-title">${i.label||i.factor}</div>
+    <div class="risk-meter"><div class="risk-bar" style="width:${i.level||i.score||50}%;background:${i.color||'var(--amber)'}"></div></div>
+    <div class="risk-level" style="color:${i.color||'var(--amber)'}">${i.text||i.level+'%'}</div>
+  </div>`).join('');
+}
+
+function buildCompChart(drcHist){
+  const ctx=document.getElementById('compChart')?.getContext('2d');
+  if(!ctx)return;
+  if(compChart)compChart.destroy();
+  const data=drcHist.slice(-12);
+  const labels=data.map(d=>d.label||d.year);
+  const vals=data.map(d=>compMode==='cases'?d.cases:d.deaths);
+  const colors=data.map(d=>(d.label||'').includes('2026')||d.year===2026?'#e63946':'rgba(230,57,70,.35)');
+  compChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:compMode==='cases'?'Cas':'Décès',data:vals,backgroundColor:colors,borderRadius:3}]},options:{...CHART_DEFAULTS}});
+}
+
+function setCompM(mode,btn){
+  compMode=mode;
+  document.querySelectorAll('.panel .tabs .tab').forEach(b=>{
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes('setCompM'))b.classList.remove('on');
+  });
+  btn.classList.add('on');
+  buildCompChart(G.drc_history_comparison||[]);
+}
+
+function buildCfrChart(drcHist){
+  const ctx=document.getElementById('cfrChart')?.getContext('2d');
+  if(!ctx)return;
+  if(cfrChart)cfrChart.destroy();
+  const data=drcHist.slice(-12);
+  const labels=data.map(d=>d.label||d.year);
+  const vals=data.map(d=>d.cfr);
+  const colors=data.map(d=>(d.label||'').includes('2026')||d.year===2026?'#f4a261':'rgba(244,162,97,.35)');
+  cfrChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'CFR %',data:vals,backgroundColor:colors,borderRadius:3}]},options:{...CHART_DEFAULTS,scales:{...CHART_DEFAULTS.scales,y:{...CHART_DEFAULTS.scales.y,ticks:{...CHART_DEFAULTS.scales.y.ticks,callback:v=>v+'%'}}}}});
+}
+
+function buildHistCountryFilter(){
+  const sel=document.getElementById('histCountrySel');
+  if(!sel)return;
+  const countries=[...new Set(histData.map(d=>d.country))].sort();
+  sel.innerHTML='<option value="all">All countries</option>'+countries.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+
+function renderHistTable(){
+  const search=(document.getElementById('histSearch')?.value||'').toLowerCase();
+  histSearchQ=search;
+  histCountryFilter=document.getElementById('histCountrySel')?.value||'all';
+  let data=[...histData];
+  if(histSpeciesFilter!=='all')data=data.filter(d=>d.species===histSpeciesFilter);
+  if(histCountryFilter!=='all')data=data.filter(d=>d.country===histCountryFilter);
+  if(search)data=data.filter(d=>(d.country+d.species+d.year+d.status).toLowerCase().includes(search));
+  data.sort((a,b)=>{
+    const av=a[histSort.col],bv=b[histSort.col];
+    if(av==null)return 1;if(bv==null)return -1;
+    return histSort.asc?(av>bv?1:-1):(av<bv?1:-1);
+  });
+  const total=data.length;
+  const pages=Math.ceil(total/histPerPage)||1;
+  histPage=Math.min(histPage,pages);
+  const slice=data.slice((histPage-1)*histPerPage,histPage*histPerPage);
+  const info=document.getElementById('histInfo');
+  if(info)info.textContent=total+' épidémies';
+  const tbody=document.getElementById('histBody');
+  if(tbody)tbody.innerHTML=slice.map(d=>{
+    const cfr=d.cfr!=null?d.cfr.toFixed(1)+'%':'—';
+    const sp=d.species==='Zaire'?'sp-z':d.species==='Sudan'?'sp-s':d.species==='Bundibugyo'?'sp-b':'sp-t';
+    const st=d.status==='Ongoing'?'<span class="tag-on">En cours</span>':'<span class="tag-ov">Terminé</span>';
+    const is2026=(d.year===2026);
+    return `<tr style="${is2026?'background:rgba(230,57,70,.05)':''}"><td class="mn">${d.year}</td><td>${d.country}</td><td><span class="badge ${sp}">${d.species||'—'}</span></td><td class="mn">${fmt(d.cases)}</td><td class="mn">${fmt(d.deaths)}</td><td class="mn">${cfr}</td><td>${st}</td></tr>`;
+  }).join('');
+  renderHistPager(pages);
+  document.querySelectorAll('#histTbl th').forEach(th=>th.classList.remove('sorted'));
+}
+
+function renderHistPager(pages){
+  const pager=document.getElementById('histPager');
+  if(!pager)return;
+  let html='';
+  for(let i=1;i<=pages;i++){
+    if(i===1||i===pages||Math.abs(i-histPage)<=1){html+=`<button class="${i===histPage?'on':''}" onclick="histPage=${i};renderHistTable()">${i}</button>`;}
+    else if(Math.abs(i-histPage)===2){html+='<span class="pager-ellipsis">&hellip;</span>';}
+  }
+  pager.innerHTML=html;
+}
+
+function sortHist(col){
+  if(histSort.col===col)histSort.asc=!histSort.asc;
+  else{histSort.col=col;histSort.asc=false;}
+  histPage=1;
+  renderHistTable();
+}
+
+function setHistSpecies(v,btn){
+  histSpeciesFilter=v;
+  document.querySelectorAll('#histSpeciesTabs .tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  histPage=1;
+  renderHistTable();
+}
+
+function exportChartPNG(chart,name){
+  if(!chart)return;
+  const a=document.createElement('a');
+  a.href=chart.toBase64Image();
+  a.download=name+'.png';
+  a.click();
+  showToast('PNG exporté');
+}
+
+function exportTrendCSV(){
+  const t=G.outbreak_2026?.trend||{};
+  if(!t.dates)return;
+  const rows=[['Date','Confirmés','Décès','Guéris','Nouveaux cas'].join(',')];
+  t.dates.forEach((d,i)=>rows.push([d,t.confirmed[i]??'',t.deaths_conf[i]??'',t.recovered[i]??'',t.new_cases_24h[i]??''].join(',')));
+  downloadCSV(rows.join('\n'),'trend-2026');
+}
+
+function exportCurrentCSV(){
+  const provs=G.outbreak_2026?.provinces||[];
+  const rows=[['Province','Pays','Cas confirmés','Décès','CFR%','Zones touchées','Source','Date'].join(',')];
+  provs.forEach(p=>rows.push([p.province,p.country,p.cases,p.deaths,p.cfr,p.zones_touchees,`"${p.source}"`,p.source_date].join(',')));
+  downloadCSV(rows.join('\n'),'provinces-2026');
+}
+
+function exportHistCSV(){
+  const rows=[['Année','Pays','Espèce','Cas','Décès','CFR%','Statut'].join(',')];
+  (G.historical||[]).forEach(d=>rows.push([d.year,d.country,d.species,d.cases,d.deaths,d.cfr,d.status].join(',')));
+  downloadCSV(rows.join('\n'),'historique-ebola-1976-2026');
+}
+
+function downloadCSV(csv,name){
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=name+'.csv';
+  a.click();
+  showToast('CSV exporté');
+}
+
+loadData();
+</script>
+</body>
+</html>
