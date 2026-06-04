@@ -1,11 +1,11 @@
 /**
- * /api/cron-update — EBOLA-MONITOR v4.5.2
+ * /api/cron-update — EBOLA-MONITOR v4.5.3
  *
  * Veille multi-sources avec INSP RDC comme source primaire.
  *
  * Liste officielle SitReps : https://insp.cd/blog-2/
  * Pattern URL SitRep       : https://insp.cd/sitrep-n{NNN}-mvb_{JJ}-2026/
- * Exemple N°017            : https://insp.cd/sitrep-n017-mvb_31-2026/
+ * Exemple N°019            : https://insp.cd/sitrep-n019-mvb_02-2026/
  *
  * Ordre de priorité sources :
  *   1. INSP RDC     — insp.cd/blog-2/           (quotidien)
@@ -76,10 +76,11 @@ export default async function handler(req, res) {
 
   const log = [];
   const now = new Date().toISOString();
-  log.push(`[${now}] cron-update v4.5.2 started`);
+  log.push(`[${now}] cron-update v4.5.3 started`);
 
   // Lire le dernier sitrep connu depuis Supabase
-  let lastSitrepNumber = 17; // N°017 est le dernier intégré
+  // Valeur par défaut = 19 (N°019 du 02/06/2026 — dernier intégré manuellement)
+  let lastSitrepNumber = 19;
   let lastDataAsOf     = null;
   try {
     const { data } = await supabase
@@ -95,7 +96,7 @@ export default async function handler(req, res) {
     }
     log.push(`Last known sitrep: N°${lastSitrepNumber}, data_as_of: ${lastDataAsOf}`);
   } catch (e) {
-    log.push(`Supabase read error: ${e.message}`);
+    log.push(`Supabase vide ou erreur — baseline N°019: ${e.message}`);
   }
 
   // Tenter INSP
@@ -108,9 +109,8 @@ export default async function handler(req, res) {
     if (inspLatest.number > lastSitrepNumber) {
       newSitrep = inspLatest;
       log.push(`⚠️ NEW SitRep detected: N°${inspLatest.number} (was N°${lastSitrepNumber})`);
-      log.push(`ACTION: Update FALLBACK_SNAPSHOT in ebola-data.js with data from ${inspLatest.url}`);
     } else {
-      log.push(`INSP: no new sitrep (still N°${inspLatest.number})`);
+      log.push(`INSP: pas de nouveau sitrep (toujours N°${inspLatest.number})`);
     }
   } else {
     log.push('INSP insp.cd/blog-2/ inaccessible — trying ReliefWeb fallback...');
@@ -137,7 +137,7 @@ export default async function handler(req, res) {
       description:   'Institut National de Santé Publique — MinSanté RDC',
       sitrep_list:   'https://insp.cd/blog-2/',
       url_pattern:   'https://insp.cd/sitrep-n{NNN}-mvb_{JJ}-2026/',
-      latest_known:  `https://insp.cd/sitrep-n017-mvb_31-2026/`,
+      latest_known:  'https://insp.cd/sitrep-n019-mvb_02-2026/',
       frequency:     'Quotidien',
       last_checked:  now,
     },
