@@ -1,8 +1,12 @@
 {
   "crons": [
     {
-      "path": "/api/cron-update",
+      "path": "/api/cron-insp",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron-insp",
+      "schedule": "0 14 * * *"
     }
   ]
 }
