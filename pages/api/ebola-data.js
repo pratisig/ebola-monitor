@@ -1,122 +1,126 @@
 /**
- * /api/ebola-data — EBOLA-MONITOR v4.5.5
+ * /api/ebola-data — EBOLA-MONITOR v4.5.6
  *
  * SOURCE PRIMAIRE : INSP RDC PDF quotidiens — https://insp.cd/blog-2/
  *
- * VRAIS CHIFFRES SitRep N°017/MVB_31/2026 (PDF lu 01/06/2026) :
- *   Cumul cas confirmés            : 321
- *   Cumul décès confirmés          : 48
- *   CFR                            : 15.0%  (48/321)
- *   Cas suspects en investigation  : 104    (actifs du jour, pas cumulatif)
- *   Cas confirmés actifs isolement : 238
+ * VRAIS CHIFFRES SitRep N°018 (01/06/2026) :
+ *   Cumul cas confirmés            : 344
+ *   Cumul décès confirmés          : 60
+ *   CFR                            : 17.4%  (60/344)
+ *   Cas suspects en investigation  : 116    (actifs du jour)
  *   Guéris cumulés                 : 6
- *   Taux suivi contacts            : 43%    (cible: 95%)
- *   Zones de santé touchées        : 23     (Ituri:15, NK:7, SK:1)
- *   Provinces                      : 3      (Ituri, Nord-Kivu, Sud-Kivu)
- *   Ituri                          : 299 cas, 46 décès, CFR 15.4%
- *   Nord-Kivu                      : 19 cas, 1 décès, CFR 5.3%
- *   Sud-Kivu                       : 3 cas, 1 décès, CFR 33.3%
- *   Nouveaux cas 31 mai            : 12 (Rwampara:5, Bunia:4, Nyankunde:1, Logo:1, Nizi:1)
+ *   Ituri                          : 322 cas — 16 ZS
+ *   Nord-Kivu                      : 19 cas — 7 ZS
+ *   Sud-Kivu                       : 3 cas — 1 ZS
+ *   23 nouveaux cas vs veille
  *
- * AUTOMATISATION :
- *   Edge Function insp-scraper (Supabase) appelée par cron Vercel 08h00 UTC
- *   Niveau 1 : INSP WordPress REST API
- *   Niveau 2 : ReliefWeb API
- *   Fallback : données statiques ci-dessous (derniers chiffres vérifiés)
+ * VRAIS CHIFFRES SitRep N°019/MVB_02/2026 (02/06/2026) — DERNIÈRE VERSION :
+ *   Cumul cas confirmés            : 363   (+19 en 24h)
+ *   Cumul décès confirmés          : 62
+ *   CFR                            : 17.1%  (62/363)
+ *   Hospitalisés ou en isolement   : 206
+ *   Guéris cumulés                 : 6
+ *   Uganda confirmés               : 15 (dont 1 décès)
+ *
+ * Sources: MinSanté RDC, ECDC (updated 3 June 13:30), WHO, Reuters/AFP
  */
 
 import { supabase } from '../../lib/supabase';
 import { HISTORICAL_DATA, DRC_HISTORY_BASE, RT_METADATA, RISK_FACTORS_BASE } from '../../lib/historical-data';
 
 const FALLBACK_SNAPSHOT = {
-  confirmed_cases         : 321,
-  suspected_cases         : 104,
-  confirmed_deaths        : 48,
+  confirmed_cases         : 363,
+  suspected_cases         : 116,
+  confirmed_deaths        : 62,
   total_deaths_all        : null,
-  cfr_confirmed           : 15.0,
+  cfr_confirmed           : 17.1,
   recovered_estimated     : 6,
-  confirmed_active        : 238,
-  uganda_confirmed        : 9,
+  confirmed_active        : 206,
+  uganda_confirmed        : 15,
   uganda_deaths           : 1,
   countries_affected      : 2,
-  health_zones_affected   : 23,
-  data_as_of              : '2026-06-01T00:00:00Z',
-  source                  : 'INSP RDC SitRep MVE N°017/MVB_31/2026 — PDF 01 juin 2026 [SOURCE OFFICIELLE RDC]',
-  source_url              : 'https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N017_01_06_2026-Revised_JO_PA_IM-1.pdf',
+  health_zones_affected   : 24,
+  data_as_of              : '2026-06-02T00:00:00Z',
+  source                  : 'INSP RDC SitRep MVE N°019/MVB_02/2026 — 02 juin 2026 [SOURCE OFFICIELLE RDC]',
+  source_url              : 'https://insp.cd/blog-2/',
 
   contact_tracing: {
-    suspects_en_investigation  : 104,
-    confirmes_actifs_isolement : 238,
+    suspects_en_investigation  : 116,
+    confirmes_actifs_isolement : 206,
     gueris_cumul               : 6,
-    contact_tracing_rate_pct   : 43.0,
+    contact_tracing_rate_pct   : 45.0,
     contact_tracing_target_pct : 95.0,
-    contact_tracing_ituri_pct  : 35.0,
-    patients_en_isolement_total: 129,
-    echantillons_collectes_24h : 65,
-    echantillons_positifs_24h  : 12,
-    taux_positivite_pct        : 66.6,
-    echantillons_en_attente    : 47,
-    alertes_remontees_24h      : 192,
-    alertes_investiguees_pct   : 88.5,
-    voyageurs_POE_24h          : 14057,
-    voyageurs_screnes_pct      : 98.8,
-    source                     : 'INSP RDC N°017',
-    source_date                : '2026-06-01',
+    contact_tracing_ituri_pct  : 38.0,
+    patients_en_isolement_total: 206,
+    echantillons_collectes_24h : null,
+    echantillons_positifs_24h  : 19,
+    taux_positivite_pct        : null,
+    echantillons_en_attente    : null,
+    alertes_remontees_24h      : null,
+    alertes_investiguees_pct   : null,
+    voyageurs_POE_24h          : null,
+    voyageurs_screnes_pct      : null,
+    source                     : 'INSP RDC N°019 + WHO 03/06/2026',
+    source_date                : '2026-06-02',
   },
 
   trend: {
-    source      : 'INSP RDC SitReps MVE N°001–017 PDF officiels',
+    source      : 'INSP RDC SitReps MVE N°001–019 PDF officiels',
     source_url  : 'https://insp.cd/blog-2/',
-    note        : 'Confirmés=cumulés. Suspects=actifs jour J (INSP). 12 nouveaux cas 31 mai.',
-    dates            : ['15 mai','17 mai','19 mai','21 mai','23 mai','26 mai','28 mai','01 juin'],
-    confirmed        : [8,       10,      22,      31,      101,     121,     125,     321],
-    suspected_active : [null,    null,    null,    null,    null,    null,    null,    104],
-    deaths_conf      : [1,       2,       5,       7,       null,    17,      17,      48],
-    recovered        : [0,       0,       0,       0,       null,    0,       0,       6],
-    new_cases_24h    : [null,    null,    null,    null,    null,    null,    null,    12],
+    note        : 'Confirmés=cumulés. Suspects=actifs jour J (INSP). +19 nouveaux cas 02 juin.',
+    dates            : ['15 mai','17 mai','19 mai','21 mai','23 mai','26 mai','28 mai','01 juin','01 juin (N018)','02 juin (N019)'],
+    confirmed        : [8,       10,      22,      31,      101,     121,     125,     321,     344,             363],
+    suspected_active : [null,    null,    null,    null,    null,    null,    null,    104,     116,             116],
+    deaths_conf      : [1,       2,       5,       7,       null,    17,      17,      48,      60,              62],
+    recovered        : [0,       0,       0,       0,       null,    0,       0,       6,       6,               6],
+    new_cases_24h    : [null,    null,    null,    null,    null,    null,    null,    12,      23,              19],
   },
 
   provinces: [
-    { province:'Ituri',     cases:299, deaths:46, cfr:15.4, zones_touchees:15, zones_total:36, pct_zones:41.7, new_cases_24h:12, country:'DRC',    source:'INSP N°017', source_date:'2026-06-01',
-      zones:['Aru','Aungba','Bambu','Bunia','Damas','Gety','Kilo','Komanda','Lita','Logo','Mangala','Mongbwalu','Nizi','Nyankunde','Rwampara'] },
-    { province:'Nord-Kivu', cases:19,  deaths:1,  cfr:5.3,  zones_touchees:7,  zones_total:34, pct_zones:20.6, new_cases_24h:0,  country:'DRC',    source:'INSP N°017', source_date:'2026-06-01',
+    { province:'Ituri',     cases:335, deaths:58, cfr:17.3, zones_touchees:16, zones_total:36, pct_zones:44.4, new_cases_24h:17, country:'DRC',    source:'INSP N°019 / ECDC 03/06', source_date:'2026-06-02',
+      zones:['Aru','Aungba','Bambu','Bunia','Damas','Gety','Kilo','Komanda','Lita','Logo','Mangala','Mongbwalu','Nizi','Nyankunde','Rwampara','Fataki'] },
+    { province:'Nord-Kivu', cases:22,  deaths:3,  cfr:13.6, zones_touchees:7,  zones_total:34, pct_zones:20.6, new_cases_24h:2,  country:'DRC',    source:'INSP N°019 / ECDC 03/06', source_date:'2026-06-02',
       zones:['Beni','Butembo','Goma','Kalunguta','Katwa','Kyondo','Oicha'] },
-    { province:'Sud-Kivu',  cases:3,   deaths:1,  cfr:33.3, zones_touchees:1,  zones_total:34, pct_zones:2.9,  new_cases_24h:0,  country:'DRC',    source:'INSP N°017', source_date:'2026-06-01',
+    { province:'Sud-Kivu',  cases:6,   deaths:1,  cfr:16.7, zones_touchees:1,  zones_total:34, pct_zones:2.9,  new_cases_24h:0,  country:'DRC',    source:'INSP N°019 / ECDC 03/06', source_date:'2026-06-02',
       zones:['Miti-Murhesa'] },
-    { province:'Uganda',    cases:9,   deaths:1,  cfr:11.1, zones_touchees:null, zones_total:null, pct_zones:null, new_cases_24h:null, country:'Uganda', source:'WHO DON603', source_date:'2026-05-20',
-      zones:[] },
+    { province:'Uganda',    cases:15,  deaths:1,  cfr:6.7,  zones_touchees:null, zones_total:null, pct_zones:null, new_cases_24h:null, country:'Uganda', source:'WHO 03/06/2026', source_date:'2026-06-03',
+      zones:['Kampala','Wakiso'] },
   ],
 
   sources_comparison: [
     {
-      name:'INSP RDC SitRep N°017/MVB_31 (PDF officiel)',
-      date:'2026-06-01', confirmed_cases:321, suspected_cases:104, confirmed_deaths:48,
-      confirmed_active:238, confirmed_recovered:6, contact_tracing_rate_pct:43.0, health_zones:23, new_cases_24h:12,
-      note:'SOURCE OFFICIELLE. 321 cas cumulés, 238 actifs isolement, 104 suspects investigation, 6 guéris, 48 décès, CFR 15.0%. 23 ZS. 12 nouveaux cas 31 mai.',
-      url:'https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N017_01_06_2026-Revised_JO_PA_IM-1.pdf',
+      name:'INSP RDC SitRep N°019/MVB_02 (source officielle)',
+      date:'2026-06-02', confirmed_cases:363, suspected_cases:116, confirmed_deaths:62,
+      confirmed_active:206, confirmed_recovered:6, contact_tracing_rate_pct:45.0, health_zones:24, new_cases_24h:19,
+      note:'SOURCE OFFICIELLE. 363 cas cumulés (+19 le 02/06), 206 actifs/isolement, 116 suspects investigation, 6 guéris, 62 décès, CFR 17.1%.',
+      url:'https://insp.cd/blog-2/',
       is_primary:true,
     },
-    { name:'WHO DON603', date:'2026-05-20', confirmed_cases:121, confirmed_deaths:17,
-      note:'Retard 12j. 121 vs 321 cas (+200). 17 vs 48 décès (+31).',
+    { name:'ECDC Rapid Risk (mis à jour 03 juin 13h30)', date:'2026-06-02', confirmed_cases:344, confirmed_deaths:60,
+      suspected_cases:116,
+      note:'Réf. SitRep N°018 (01/06). 344 cas, 60 décès. Mise à jour ECDC 03/06 13:30.',
+      url:'https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda' },
+    { name:'WHO / Reuters 03 juin 2026', date:'2026-06-03', confirmed_cases:344, confirmed_deaths:60,
+      note:'WHO confirme 344 cas, 60 décès au 03/06. +Uganda 15 cas 1 décès.',
       url:'https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603' },
-    { name:'ECDC Rapid Risk', date:'2026-05-28', confirmed_cases:125, suspected_cases:1077, confirmed_deaths:17,
-      note:'4j retard. Suspects ECDC=cumul depuis début. INSP=actifs du jour. Méthodes différentes.',
-      url:'https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda' },
+    { name:'WHO DON603 (ancienne)', date:'2026-05-20', confirmed_cases:121, confirmed_deaths:17,
+      note:'Retard historique 12j. Remplacé par mise à jour WHO 03/06.',
+      url:'https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603' },
   ],
 
   source_discrepancies: {
     title: 'Pourquoi les chiffres diffèrent entre sources ?',
     reasons: [
-      { label:'INSP = source primaire temps réel',
-        detail:'PDF quotidien. N°017 (01/06): 321 cas, 48 décès, CFR 15%. WHO DON603 (20/05): 121 cas, 17 décès — 12 jours retard.' },
+      { label:'INSP N°019 = source primaire temps réel (02/06)',
+        detail:'363 cas, 62 décès, CFR 17.1%. +19 nouveaux cas 02 juin. WHO/ECDC (03/06): 344 cas, 60 décès — basé sur N°018 (01/06), 1 jour de retard.' },
       { label:'Suspects INSP = actifs du jour (PAS cumulatifs)',
-        detail:'INSP: 104 suspects actifs en investigation. ECDC/WHO: cumul depuis début (ȧ1000). Ne pas comparer directement.' },
-      { label:'Données en cours d’harmonisation',
-        detail:'Note PDF INSP: *Données en cours d’harmonisation. Chiffres définitifs peuvent varier légèrement dans les sitreps suivants.' },
+        detail:'INSP: 116 suspects actifs en investigation. ECDC/WHO: cumul depuis début (>1000). Ne pas comparer directement.' },
+      { label:'Révision massive des suspects (OMS 02/06)',
+        detail:'OMS a confirmé que les ~1000 suspects précédents incluaient des doublons/erreurs de saisie. Chiffre officiel révisé à 116 suspects actifs.' },
       { label:'Délai rapportage',
-        detail:'INSP: quotidien. WHO DON: 10–12j. ECDC: 2x/semaine. Auto-parse erroné exclu (parse_confidence=auto_invalid).' },
+        detail:'INSP: quotidien. WHO: 1-2j retard. ECDC: 2x/semaine. Source retenue: INSP N°019 (02/06/2026).' },
     ],
-    consensus: 'Source retenue: INSP N°017 PDF (01/06/2026). 321 confirmés cumulés, 104 suspects actifs, 48 décès, 6 guéris, 238 actifs, CFR 15.0%, suivi contacts 43%.',
+    consensus: 'Source retenue: INSP N°019 (02/06/2026). 363 confirmés cumulés, 116 suspects actifs, 62 décès, 6 guéris, 206 actifs isolement, CFR 17.1%. Uganda: 15 cas, 1 décès.',
   },
 };
 
@@ -222,10 +226,10 @@ export default async function handler(req, res) {
     methodology: {
       primary_source    : 'INSP RDC SitReps MVE PDF quotidiens (insp.cd/blog-2).',
       suspects_insp     : 'suspected_cases = suspects ACTIFS du jour (INSP). PAS cumulatif. ECDC/WHO = cumul.',
-      confirmed_active  : 'confirmed_active = confirmés - décès - guéris.',
+      confirmed_active  : 'confirmed_active = hospitalisés/isolement (INSP N°019).',
       cfr               : 'CFR = Décès confirmés / Cas confirmés × 100.',
       insp_sitrep_list  : 'https://insp.cd/blog-2/',
-      note_harmonisation: 'Note INSP PDF: *Données en cours d’harmonisation.',
+      note_harmonisation: 'Note INSP PDF: *Données en cours d\'harmonisation.',
     },
     outbreak_2026: {
       meta: {
