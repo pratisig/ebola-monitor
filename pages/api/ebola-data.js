@@ -1,38 +1,26 @@
 /**
- * /api/ebola-data — EBOLA-MONITOR v4.5.7
+ * /api/ebola-data — EBOLA-MONITOR v4.6.0
+ *
+ * CORRECTIONS v4.6.0 (04/06/2026) :
+ *  #2 — Supabase est retenu UNIQUEMENT si data_as_of > fallback statique (2026-06-02)
+ *       Sinon le fallback statique (plus récent) est utilisé
+ *  #3 — Cache réduit à 1h (était 4h) pour refléter les màj Supabase plus vite
  *
  * SOURCE PRIMAIRE : INSP RDC PDF quotidiens — https://insp.cd/blog-2/
  *
- * DERNIÈRES DONNÉES VÉRIFIÉES (04/06/2026 11h30 UTC) :
- *
- * INSP SitRep N°019/MVB_02/2026 (02/06/2026) — SOURCE OFFICIELLE RDC :
- *   Cumul cas confirmés            : 363   (+19 en 24h vs N°018)
- *   Cumul décès confirmés          : 62
- *   CFR                            : 17.1%  (62/363)
- *   Hospitalisés ou en isolement   : 206
- *   Cas suspects actifs            : 116
- *   Guéris cumulés DRC             : 6
- *   Ituri                          : 335 cas, 58 décès — 16 ZS
- *   Nord-Kivu                      : 22 cas, 3 décès — 7 ZS
- *   Sud-Kivu                       : 6 cas, 1 décès — 1 ZS
- *
- * ECDC (mis à jour 03/06/2026 13h30 UTC) :
- *   DRC confirmés                  : 344 (réf. N°018 du 01/06 — 1j retard)
- *   Uganda confirmés               : 15 (dont 1 décès)
- *   Uganda transmission locale     : ≥7 cas, 4 liés à voyages RDC
- *   Uganda zones                   : Kampala (8 cas), Wakiso (1 cas)
- *   Suspects actifs DRC            : 116
- *
- * WHO / Reuters 03/06/2026 :
- *   DRC                            : 344 cas, 60 décès (réf. N°018)
- *   OMS : "catching up" avec l'épidémie
- *
- * SOURCE RETENUE : INSP N°019 (02/06) pour DRC + ECDC 03/06 pour Uganda
- * SitRep N°020 pas encore publié à 11h30 UTC le 04/06/2026
+ * DERNIÈRES DONNÉES VÉRIFIÉES (04/06/2026) :
+ *  INSP SitRep N°019/MVB_02/2026 (02/06/2026) :
+ *   Cas confirmés : 363 | Décès : 62 | CFR : 17.1%
+ *   Suspects actifs : 116 | Actifs isolement : 206 | Guéris : 6
+ *   Ituri: 335 cas | Nord-Kivu: 22 cas | Sud-Kivu: 6 cas
+ *  Uganda (ECDC 03/06/2026) : 15 cas, 1 décès (Kampala 8, Wakiso 1)
  */
 
 import { supabase } from '../../lib/supabase';
 import { HISTORICAL_DATA, DRC_HISTORY_BASE, RT_METADATA, RISK_FACTORS_BASE } from '../../lib/historical-data';
+
+// Date du fallback statique — Supabase n'est retenu que si PLUS RÉCENT que cette date
+const FALLBACK_STATIC_DATE = '2026-06-02T00:00:00Z';
 
 const FALLBACK_SNAPSHOT = {
   confirmed_cases         : 363,
@@ -47,7 +35,7 @@ const FALLBACK_SNAPSHOT = {
   uganda_recovered        : 0,
   countries_affected      : 2,
   health_zones_affected   : 24,
-  data_as_of              : '2026-06-02T00:00:00Z',
+  data_as_of              : FALLBACK_STATIC_DATE,
   source                  : 'INSP RDC SitRep MVE N°019/MVB_02/2026 — 02 juin 2026 + ECDC 03/06/2026 [SOURCES OFFICIELLES]',
   source_url              : 'https://insp.cd/blog-2/',
 
@@ -57,41 +45,32 @@ const FALLBACK_SNAPSHOT = {
     gueris_cumul               : 6,
     contact_tracing_rate_pct   : 45.0,
     contact_tracing_target_pct : 95.0,
-    contact_tracing_ituri_pct  : 38.0,
-    patients_en_isolement_total: 206,
-    echantillons_collectes_24h : null,
     echantillons_positifs_24h  : 19,
-    taux_positivite_pct        : null,
-    echantillons_en_attente    : null,
-    alertes_remontees_24h      : null,
-    alertes_investiguees_pct   : null,
-    voyageurs_POE_24h          : null,
-    voyageurs_screnes_pct      : null,
     source                     : 'INSP RDC N°019 + ECDC 03/06/2026',
-    source_date                : '2026-06-03',
+    source_date                : '2026-06-02',
   },
 
   trend: {
     source      : 'INSP RDC SitReps MVE N°001–019 PDF officiels',
     source_url  : 'https://insp.cd/blog-2/',
-    note        : 'Confirmés=cumulés. Suspects=actifs jour J (INSP). +19 nouveaux cas 02 juin. SitRep N°020 attendu.',
-    dates            : ['15 mai','17 mai','19 mai','21 mai','23 mai','26 mai','28 mai','01 juin','01 juin (N018)','02 juin (N019)'],
-    confirmed        : [8,       10,      22,      31,      101,     121,     125,     321,     344,             363],
-    suspected_active : [null,    null,    null,    null,    null,    null,    null,    104,     116,             116],
-    deaths_conf      : [1,       2,       5,       7,       null,    17,      17,      48,      60,              62],
-    recovered        : [0,       0,       0,       0,       null,    0,       0,       6,       6,               6],
-    new_cases_24h    : [null,    null,    null,    null,    null,    null,    null,    12,      23,              19],
+    note        : 'Confirmés=cumulés. Suspects=actifs jour J (INSP). +19 nouveaux cas 02 juin.',
+    dates            : ['15 mai','17 mai','19 mai','21 mai','23 mai','26 mai','28 mai','01 juin (N017)','01 juin (N018)','02 juin (N019)'],
+    confirmed        : [8,       10,      22,      31,      101,     121,     125,     321,             344,             363],
+    suspected_active : [null,    null,    null,    null,    null,    null,    null,    104,             116,             116],
+    deaths_conf      : [1,       2,       5,       7,       null,    17,      17,      48,              60,              62],
+    recovered        : [0,       0,       0,       0,       null,    0,       0,       6,               6,               6],
+    new_cases_24h    : [null,    null,    null,    null,    null,    null,    null,    12,              23,              19],
   },
 
   provinces: [
-    { province:'Ituri',     cases:335, deaths:58, cfr:17.3, zones_touchees:16, zones_total:36, pct_zones:44.4, new_cases_24h:17, country:'DRC',    source:'INSP N°019', source_date:'2026-06-02',
+    { province:'Ituri',     cases:335, deaths:58, cfr:17.3, zones_touchees:16, new_cases_24h:17, country:'DRC',    source:'INSP N°019', source_date:'2026-06-02',
       zones:['Aru','Aungba','Bambu','Bunia','Damas','Gety','Kilo','Komanda','Lita','Logo','Mangala','Mongbwalu','Nizi','Nyankunde','Rwampara','Fataki'] },
-    { province:'Nord-Kivu', cases:22,  deaths:3,  cfr:13.6, zones_touchees:7,  zones_total:34, pct_zones:20.6, new_cases_24h:2,  country:'DRC',    source:'INSP N°019', source_date:'2026-06-02',
+    { province:'Nord-Kivu', cases:22,  deaths:3,  cfr:13.6, zones_touchees:7,  new_cases_24h:2,  country:'DRC',    source:'INSP N°019', source_date:'2026-06-02',
       zones:['Beni','Butembo','Goma','Kalunguta','Katwa','Kyondo','Oicha'] },
-    { province:'Sud-Kivu',  cases:6,   deaths:1,  cfr:16.7, zones_touchees:1,  zones_total:34, pct_zones:2.9,  new_cases_24h:0,  country:'DRC',    source:'INSP N°019', source_date:'2026-06-02',
+    { province:'Sud-Kivu',  cases:6,   deaths:1,  cfr:16.7, zones_touchees:1,  new_cases_24h:0,  country:'DRC',    source:'INSP N°019', source_date:'2026-06-02',
       zones:['Miti-Murhesa'] },
-    { province:'Uganda',    cases:15,  deaths:1,  cfr:6.7,  zones_touchees:2,  zones_total:null, pct_zones:null, new_cases_24h:null, country:'Uganda', source:'ECDC 03/06/2026', source_date:'2026-06-03',
-      zones:['Kampala','Wakiso'] },
+    { province:'Uganda',    cases:15,  deaths:1,  cfr:6.7,  zones_touchees:2,  country:'Uganda', source:'ECDC 03/06/2026', source_date:'2026-06-03',
+      zones:['Kampala (8 cas)','Wakiso (1 cas)'] },
   ],
 
   sources_comparison: [
@@ -99,27 +78,14 @@ const FALLBACK_SNAPSHOT = {
       name:'INSP RDC SitRep N°019/MVB_02 (source officielle)',
       date:'2026-06-02', confirmed_cases:363, suspected_cases:116, confirmed_deaths:62,
       confirmed_active:206, confirmed_recovered:6, contact_tracing_rate_pct:45.0, health_zones:24, new_cases_24h:19,
-      note:'SOURCE OFFICIELLE RDC. 363 cas cumulés (+19 le 02/06), 206 actifs/isolement, 116 suspects actifs, 6 guéris, 62 décès, CFR 17.1%. 24 ZS.',
-      url:'https://insp.cd/blog-2/',
-      is_primary:true,
+      note:'SOURCE OFFICIELLE RDC. 363 cas cumulés (+19 le 02/06), 206 actifs/isolement, 116 suspects actifs, 6 guéris, 62 décès, CFR 17.1%.',
+      url:'https://insp.cd/blog-2/', is_primary:true,
     },
     {
       name:'ECDC (mis à jour 03 juin 13h30 UTC)',
       date:'2026-06-03', confirmed_cases:344, confirmed_deaths:60, suspected_cases:116,
-      note:'Réf. SitRep N°018 (01/06) — 1j retard. Uganda: 15 cas (8 Kampala, 1 Wakiso), 1 décès, ≥7 transmission locale, 4 liés voyages RDC.',
+      note:'Réf. SitRep N°018 (01/06) — 1j retard. Uganda: 15 cas (8 Kampala, 1 Wakiso), 1 décès, ≥7 transmission locale.',
       url:'https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda',
-    },
-    {
-      name:'WHO / Reuters 03 juin 2026',
-      date:'2026-06-03', confirmed_cases:344, confirmed_deaths:60,
-      note:'WHO: "catching up" avec l\'épidémie. Réf. N°018. Uganda 15 cas 1 décès confirmés.',
-      url:'https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603',
-    },
-    {
-      name:'WHO DON603 (historique)',
-      date:'2026-05-20', confirmed_cases:121, confirmed_deaths:17,
-      note:'Retard historique 12j. Remplacé par mise à jour WHO/ECDC 03/06.',
-      url:'https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603',
     },
   ],
 
@@ -127,15 +93,13 @@ const FALLBACK_SNAPSHOT = {
     title: 'Pourquoi les chiffres diffèrent entre sources ?',
     reasons: [
       { label:'INSP N°019 = source primaire temps réel (02/06)',
-        detail:'363 cas, 62 décès, CFR 17.1%. +19 nouveaux cas 02 juin. WHO/ECDC (03/06): 344 cas, 60 décès — basé sur N°018 (01/06), 1 jour de retard. SitRep N°020 attendu le 04/06.' },
+        detail:'363 cas, 62 décès, CFR 17.1%. WHO/ECDC (03/06): 344 cas, 60 décès — basé sur N°018 (01/06), 1 jour de retard.' },
       { label:'Suspects INSP = actifs du jour (PAS cumulatifs)',
-        detail:'INSP: 116 suspects actifs en investigation. ECDC/WHO: cumul depuis début (>1000 avant révision). Ne pas comparer directement.' },
+        detail:'INSP: 116 suspects actifs en investigation. Ne pas comparer avec les cumuls WHO/ECDC.' },
       { label:'Uganda — transmission locale confirmée (ECDC 03/06)',
         detail:'15 cas Uganda: ≥7 transmission locale, 4 liés à voyages RDC. 8 cas Kampala, 1 Wakiso. 1 décès.' },
-      { label:'Délai rapportage',
-        detail:'INSP: quotidien. WHO: 1-2j retard. ECDC: 2-3x/semaine. Source DRC retenue: INSP N°019 (02/06). Source Uganda: ECDC 03/06.' },
     ],
-    consensus: 'Source retenue: INSP N°019 (02/06) pour DRC + ECDC 03/06 pour Uganda. DRC: 363 confirmés, 116 suspects actifs, 62 décès, 6 guéris, 206 actifs isolement, CFR 17.1%. Uganda: 15 cas, 1 décès, 2 zones (Kampala/Wakiso). SitRep N°020 pas encore publié au 04/06 11h30 UTC.',
+    consensus: 'Source retenue: INSP N°019 (02/06) pour DRC + ECDC 03/06 pour Uganda. DRC: 363 confirmés, 62 décès, CFR 17.1%.',
   },
 };
 
@@ -143,6 +107,17 @@ function parseField(val) {
   if (val === null || val === undefined) return null;
   if (typeof val === 'string') { try { return JSON.parse(val); } catch { return null; } }
   return val;
+}
+
+/**
+ * FIX #2 — Supabase est retenu UNIQUEMENT si sa date est strictement postérieure au fallback.
+ * Évite qu'un row Supabase ancien (N°017) écrase un fallback statique plus récent (N°019).
+ */
+function shouldUseSupabase(rawDataAsOf) {
+  if (!rawDataAsOf) return false;
+  const supabaseDate = new Date(rawDataAsOf);
+  const fallbackDate = new Date(FALLBACK_STATIC_DATE);
+  return supabaseDate > fallbackDate;
 }
 
 function mergeWithFallback(raw) {
@@ -196,10 +171,12 @@ function mergeWithFallback(raw) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Cache-Control', 's-maxage=14400, stale-while-revalidate=28800');
+  // FIX #5 — Cache réduit à 1h (était 4h) pour refléter les màj Supabase plus vite
+  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=7200');
 
   let rawSnapshot = null;
   let supabaseError = null;
+  let supabaseSkipped = false;
 
   try {
     const { data, error } = await supabase
@@ -210,7 +187,14 @@ export default async function handler(req, res) {
       .limit(1)
       .single();
     if (error) throw error;
-    rawSnapshot = data;
+
+    // FIX #2 — N'utiliser Supabase que si plus récent que le fallback statique
+    if (data && shouldUseSupabase(data.data_as_of)) {
+      rawSnapshot = data;
+    } else {
+      supabaseSkipped = true;
+      supabaseError = `Supabase data (${data?.data_as_of}) not newer than fallback (${FALLBACK_STATIC_DATE}) — using static fallback`;
+    }
   } catch (err) {
     supabaseError = err.message;
   }
@@ -234,20 +218,25 @@ export default async function handler(req, res) {
     success       : true,
     generated_at  : new Date().toISOString(),
     data_as_of    : snapshot.data_as_of,
-    data_source   : supabaseError ? 'FALLBACK_STATIC' : 'Supabase (data_as_of DESC, excl. auto_invalid)',
+    data_source   : rawSnapshot ? 'Supabase' : (supabaseSkipped ? 'FALLBACK_STATIC (Supabase older than fallback)' : 'FALLBACK_STATIC (Supabase error)'),
     primary_source: 'INSP RDC — https://insp.cd/blog-2/',
     supabase_error: supabaseError || null,
-    automation    : { edge_function:'insp-scraper', cron:'0 8 * * * UTC', fallback_levels:['INSP WordPress API','ReliefWeb API','static fallback'] },
-    disclaimer    : 'Source primaire: INSP RDC PDF quotidiens (insp.cd/blog-2). Complété par WHO, ECDC. SitRep N°020 attendu le 04/06/2026.',
+    automation    : {
+      edge_function : 'insp-scraper v2',
+      cron          : '0 8,14 * * * UTC',
+      fallback_levels: ['INSP WordPress API','ReliefWeb API','static fallback'],
+    },
+    disclaimer    : 'Source primaire: INSP RDC PDF quotidiens (insp.cd/blog-2/). Complété par WHO, ECDC.',
     methodology: {
-      primary_source    : 'INSP RDC SitReps MVE PDF quotidiens (insp.cd/blog-2).',
-      secondary_source  : 'ECDC (03/06/2026 13h30 UTC) pour Uganda et validation croisée.',
-      suspects_insp     : 'suspected_cases = suspects ACTIFS du jour (INSP). PAS cumulatif. ECDC/WHO = cumul.',
+      primary_source    : 'INSP RDC SitReps MVE PDF quotidiens (insp.cd/blog-2/).',
+      secondary_source  : 'ECDC (03/06/2026 13h30 UTC) pour Uganda.',
+      suspects_insp     : 'suspected_cases = suspects ACTIFS du jour (INSP). PAS cumulatif.',
       confirmed_active  : 'confirmed_active = hospitalisés/isolement (INSP N°019).',
       cfr               : 'CFR = Décès confirmés / Cas confirmés × 100.',
-      insp_sitrep_list  : 'https://insp.cd/blog-2/',
-      note_harmonisation: 'Note INSP PDF: *Données en cours d\'harmonisation.',
-      last_checked      : '2026-06-04T11:30:00Z',
+      fallback_static_date: FALLBACK_STATIC_DATE,
+      supabase_priority : 'Supabase retenu uniquement si data_as_of > fallback_static_date (FIX #2)',
+      cache_ttl         : '3600s (1h) — FIX #5',
+      last_checked      : '2026-06-04T12:00:00Z',
     },
     outbreak_2026: {
       meta: {

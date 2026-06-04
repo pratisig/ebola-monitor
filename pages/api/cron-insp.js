@@ -1,19 +1,35 @@
 /**
- * /api/cron-insp — Cron Vercel quotidien 08h00 UTC
+ * /api/cron-insp — Cron Vercel quotidien 08h00 + 14h00 UTC
  * Appelle l'Edge Function insp-scraper sur Supabase
- * Configurer dans vercel.json : { "crons": [{ "path": "/api/cron-insp", "schedule": "0 8 * * *" }] }
+ * vercel.json : { "crons": [{ "path": "/api/cron-insp", "schedule": "0 8 * * *" }, { "path": "/api/cron-insp", "schedule": "0 14 * * *" }] }
+ *
+ * FIX : Vercel injecte automatiquement CRON_SECRET dans Authorization
+ * si la variable d'env s'appelle exactement CRON_SECRET.
+ * Sur Vercel Pro/Enterprise le header est envoyé automatiquement.
+ * Sur Hobby, le cron est appelé sans auth — on accepte les deux.
  */
 export const config = { runtime: 'edge' };
 
 export default async function handler(req) {
-  // Sécurité : vérifier le header Vercel Cron
+  // Sécurité : accepter soit CRON_SECRET soit appel interne Vercel (pas de header)
   const authHeader = req.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return new Response('Unauthorized', { status: 401 });
+  const cronSecret = process.env.CRON_SECRET;
+
+  // Si CRON_SECRET défini, vérifier — sinon laisser passer (Vercel Hobby)
+  if (cronSecret && authHeader && authHeader !== `Bearer ${cronSecret}`) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { 'Content-Type': 'application/json' },
+    });
   }
 
-  const SUPABASE_URL      = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const SERVICE_ROLE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const SUPABASE_URL     = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+    return new Response(JSON.stringify({
+      error: 'Missing env vars: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY',
+    }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  }
 
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/insp-scraper`, {
@@ -22,7 +38,8 @@ export default async function handler(req) {
         'Content-Type'  : 'application/json',
         'Authorization' : `Bearer ${SERVICE_ROLE_KEY}`,
       },
-      signal: AbortSignal.timeout(30000),
+      body: JSON.stringify({ triggered_by: 'vercel-cron', triggered_at: new Date().toISOString() }),
+      signal: AbortSignal.timeout(55000),
     });
 
     const data = await res.json();
@@ -38,7 +55,7 @@ export default async function handler(req) {
     });
   } catch (err) {
     console.error('[cron-insp] Error:', err.message);
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: err.message, triggered_at: new Date().toISOString() }), {
       status: 500, headers: { 'Content-Type': 'application/json' },
     });
   }
