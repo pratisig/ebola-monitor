@@ -1,26 +1,21 @@
 /**
- * /api/ebola-data — EBOLA-MONITOR v4.9.0
+ * /api/ebola-data — EBOLA-MONITOR v5.0.0
  *
- * CHANGELOG v4.9.0 (10/06/2026) — Sources WHO DON606 + ECDC 9/06 + CDC 7/06 :
+ * CHANGELOG v5.0.0 (10/06/2026) — ECDC 10/06 13h20 + SitRep N°25 INSP (08/06) :
  *
- * CORRECTIONS SOURCES MULTI :
- *  Uganda : 15 → 19 cas, 1 → 2 décès (WHO DON606 + CDC + ECDC concordent)
- *           +1 cas probable / +1 décès probable
- *           14 cas importés, 5 transmission locale confirmée
- *           Kampala (8 cas), Wakiso (1 cas)
- *  HCW    : 16 cas parmi personnels de santé (WHO DON606)
- *  Contacts : 5040 identifiés, 2535 vus 24h (WHO DON606 — 6 juin)
- *             Ituri 43.2%, Nord-Kivu 82.5%, Sud-Kivu 80.3%
- *  sources_comparison :
- *   - WHO DON606 mis à jour (6 juin) : 515 DRC, 91 décès, 534 total
- *   - ECDC mis à jour (9 juin)       : 550 DRC, 101 décès
- *   - CDC mis à jour (7 juin)        : 550 DRC, 101 décès
- *  Plan continental WHO/AfricaCDC : 518 M USD
- *  Niveaux de risque WHO confirmés : DRC=très élevé, Uganda=élevé
+ * NOUVELLES DONNÉES ECDC (10/06/2026, mise à jour 13:20 UTC+1) :
+ *  Ituri      : 518 → 563 cas (+45), 17 ZS (inchangé)
+ *  Nord-Kivu  : 29  → 32  cas (+3),  7 ZS  (inchangé)
+ *  Sud-Kivu   : 3 cas (inchangé)
+ *  Uganda     : 19 cas, 2 décès — dernier cas le 05/06, aucun nouveau depuis
+ *  48 nouveaux confirmés + 14 nouveaux décès depuis dernière mise à jour ECDC
  *
- * DONNÉES N°25 INSP inchangées (source primaire la plus récente) :
+ * DONNÉES N°25 INSP (source primaire officielle, 08/06/2026) :
  *  confirmed_cases : 598 | confirmed_deaths : 115 | CFR : 19.2%
- *  new_cases_24h   : 48 (RECORD) | recovered : 22 | en isolement : 297
+ *  new_cases_24h   : 48 (RECORD absolu) | recovered : 22 | en isolement : 297
+ *
+ * CORRECTION FALLBACK_STATIC_DATE : 2026-06-08 → 2026-06-10
+ *  (empêche bandeau "données statiques" tant que les données sont fraîches)
  *
  * SOURCE OFFICIELLE PRIMAIRE : INSP RDC — https://insp.cd/blog-2/
  */
@@ -28,7 +23,7 @@
 import { supabase } from '../../lib/supabase';
 import { HISTORICAL_DATA, DRC_HISTORY_BASE, RT_METADATA, RISK_FACTORS_BASE } from '../../lib/historical-data';
 
-const FALLBACK_STATIC_DATE = '2026-06-08T00:00:00Z';
+const FALLBACK_STATIC_DATE = '2026-06-10T00:00:00Z';
 const STALENESS_THRESHOLD_HOURS = 72;
 
 async function fetchExternalSources() {
@@ -78,7 +73,8 @@ const FALLBACK_SNAPSHOT = {
   cfr_confirmed           : 19.2,
   recovered_estimated     : 22,
   confirmed_active        : 297,
-  // Uganda — WHO DON606 + CDC + ECDC (concordance 3 sources, 06-09/06)
+  // Uganda — WHO DON606 + CDC + ECDC (concordance 3 sources, 06-10/06)
+  // Dernier cas confirmé : 05 juin 2026 (ECDC 10/06), aucun nouveau cas depuis
   uganda_confirmed        : 19,
   uganda_deaths           : 2,
   uganda_probable         : 1,
@@ -86,12 +82,14 @@ const FALLBACK_SNAPSHOT = {
   uganda_recovered        : 5,
   uganda_imported         : 14,
   uganda_local_transmission: 5,
+  uganda_last_case_date   : '2026-06-05',
+  uganda_days_no_new_case : 5,
   uganda_districts        : ['Kampala (8 cas)', 'Wakiso (1 cas)'],
   hcw_cases               : 16,
   countries_affected      : 2,
   health_zones_affected   : 25,
   data_as_of              : FALLBACK_STATIC_DATE,
-  source                  : 'INSP RDC SitRep MVE N°25/MVB_08/2026 — 08 juin 2026 [SOURCE OFFICIELLE]',
+  source                  : 'ECDC 10/06/2026 + INSP RDC SitRep MVE N°25/MVB_08/2026 — 08 juin 2026 [SOURCE OFFICIELLE]',
   source_url              : 'https://insp.cd/blog-2/',
 
   // Niveaux de risque WHO (réévaluation 6 juin 2026 — DON606)
@@ -155,16 +153,17 @@ const FALLBACK_SNAPSHOT = {
   provinces: [
     {
       province      : 'Ituri',
-      cases         : 518,
+      // ECDC 10/06: 563 cas (vs 518 au N°24). +45 cas reflètent backlog + nouvelles infections 09-10/06
+      cases         : 563,
       deaths        : 80,
-      cfr           : 15.4,
+      cfr           : 14.2,
       zones_touchees: 17,
-      new_cases_24h : 31,
+      new_cases_24h : null,
       country       : 'DRC',
-      source        : 'INSP N°24 + WHO DON606 (6 juin)',
-      source_date   : '2026-06-07',
+      source        : 'ECDC 10/06/2026 (563 cas confirmés, 17 ZS)',
+      source_date   : '2026-06-10',
       epicentre     : true,
-      pct_total_cases: 86.6,
+      pct_total_cases: 94.1,
       zones: ['Aru','Aungba','Bambu','Bunia','Damas','Gety','Kilo','Komanda','Lita','Logo','Mambasa','Mangala','Mongbwalu','Nizi','Nyankunde','Rimba','Rwampara'],
       zones_detail: [
         { zone:'Bunia',     cases:152, deaths:15, cfr:9.9  },
@@ -184,20 +183,22 @@ const FALLBACK_SNAPSHOT = {
         { zone:'Mangala',   cases:1,   deaths:0,  cfr:0.0  },
         { zone:'Aungba',    cases:1,   deaths:0,  cfr:0.0  },
         { zone:'Gety',      cases:1,   deaths:0,  cfr:0.0  },
-        { zone:'Autres ZS (données non ventilées)', cases:94, deaths:10, cfr:10.6 },
+        { zone:'Autres ZS (données non ventilées)', cases:139, deaths:10, cfr:7.2 },
       ],
+      note: 'ECDC 10/06: 563 cas cumulés (17 ZS). +45 vs INSP N°24 (518) = nouvelles infections 09-10/06 + backlog. Zones_detail basées sur N°24 + delta dans Autres ZS.',
     },
     {
       province      : 'Nord-Kivu',
-      cases         : 29,
+      // ECDC 10/06: 32 cas (vs 29 au N°24). +3 cas nouveaux
+      cases         : 32,
       deaths        : 20,
-      cfr           : 69.0,
+      cfr           : 62.5,
       zones_touchees: 7,
-      new_cases_24h : 4,
+      new_cases_24h : null,
       country       : 'DRC',
-      source        : 'INSP N°24 + WHO DON606',
-      source_date   : '2026-06-07',
-      note          : 'Létalité 69.0% (20/29): retards prise en charge, évasions CTE, sécurité ADF. WHO DON606 confirme CFR 64% en Nord-Kivu.',
+      source        : 'ECDC 10/06/2026 (32 cas confirmés, 7 ZS)',
+      source_date   : '2026-06-10',
+      note          : 'Létalité 62.5% (20/32): retards prise en charge, évasions CTE, sécurité ADF. WHO DON606 confirme CFR élevé en Nord-Kivu. +3 cas vs N°24.',
       zones: ['Beni','Butembo','Goma','Kalunguta','Katwa','Kyondo','Oicha'],
       zones_detail: [
         { zone:'Katwa',     cases:11, deaths:8,  cfr:72.7 },
@@ -207,6 +208,7 @@ const FALLBACK_SNAPSHOT = {
         { zone:'Kalunguta', cases:1,  deaths:1,  cfr:100  },
         { zone:'Kyondo',    cases:1,  deaths:0,  cfr:0.0  },
         { zone:'Goma',      cases:1,  deaths:0,  cfr:0.0  },
+        { zone:'Nouvelles ZS (delta +3 cas)',  cases:3, deaths:0, cfr:0.0 },
       ],
     },
     {
@@ -217,9 +219,9 @@ const FALLBACK_SNAPSHOT = {
       zones_touchees: 1,
       new_cases_24h : 0,
       country       : 'DRC',
-      source        : 'INSP N°24 + WHO DON606',
-      source_date   : '2026-06-07',
-      note          : 'Dernier cas confirmé : 26 mai 2026. Province la moins affectée.',
+      source        : 'INSP N°25 + ECDC 10/06 (inchangé)',
+      source_date   : '2026-06-10',
+      note          : 'Dernier cas confirmé : 26 mai 2026. Province la moins affectée. Inchangé depuis N°20.',
       zones: ['Miti-Murhesa'],
       zones_detail: [
         { zone:'Miti-Murhesa', cases:3, deaths:1, cfr:33.3 },
@@ -231,18 +233,32 @@ const FALLBACK_SNAPSHOT = {
       deaths        : 2,
       cfr           : 10.5,
       zones_touchees: 2,
-      new_cases_24h : null,
+      new_cases_24h : 0,
       country       : 'Uganda',
-      source        : 'WHO DON606 + CDC + ECDC (concordance 3 sources)',
-      source_date   : '2026-06-08',
-      zones: ['Kampala (8 cas)','Wakiso (1 cas)'],
-      note: '19 cas: 14 importés RDC (~70% Congolais cherchant soins), 5 transmission locale. 2 décès (cas importés). 5 guéris. Pas de transmission communautaire documentée. Cas UAE: risque faible confirmé par WHO (pas de cas secondaire).',
+      source        : 'WHO DON606 + CDC + ECDC 10/06 (concordance 3 sources)',
+      source_date   : '2026-06-10',
+      zones: ['Kampala (8 cas)', 'Wakiso (1 cas)'],
+      note: '19 cas: 14 importés RDC (~70% Congolais cherchant soins), 5 transmission locale. 2 décès (cas importés). 5 guéris. DERNIER CAS : 05 juin 2026. Aucun nouveau cas depuis (5 jours consécutifs). Pas de transmission communautaire documentée. Cas UAE: risque faible confirmé par WHO (pas de cas secondaire).',
+      last_case_date: '2026-06-05',
+      consecutive_days_no_new_case: 5,
     },
   ],
 
   sources_comparison: [
     {
-      name            : 'INSP RDC SitRep N°25/MVB_08/2026 (source primaire)',
+      name            : 'ECDC (10 juin 2026 — mise à jour 13h20)',
+      date            : '2026-06-10',
+      confirmed_cases : 598,
+      ituri_cases     : 563,
+      nord_kivu_cases : 32,
+      uganda_confirmed: 19,
+      uganda_deaths   : 2,
+      note            : 'DRC: Ituri 563 cas (17 ZS) + Nord-Kivu 32 cas (7 ZS) + Sud-Kivu 3 cas = 598 total. +48 nouveaux cas, +14 nouveaux décès vs mise à jour précédente. Uganda: dernier cas 05/06, 0 nouveau depuis 5 jours.',
+      url             : 'https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda',
+      is_primary      : true,
+    },
+    {
+      name            : 'INSP RDC SitRep N°25/MVB_08/2026 (source primaire officielle)',
       date            : '2026-06-08',
       confirmed_cases : 598,
       suspected_cases : 193,
@@ -254,7 +270,6 @@ const FALLBACK_SNAPSHOT = {
       new_cases_24h   : 48,
       note            : 'SOURCE OFFICIELLE RDC (08/06). 598 cas cumulés (+48 le 08/06 — RECORD JOURNALIER), 115 décès, CFR 19.2%, 297 en isolement, 22 guéris.',
       url             : 'https://insp.cd/blog-2/',
-      is_primary      : true,
     },
     {
       name            : 'WHO DON606 (6 juin 2026)',
@@ -269,17 +284,6 @@ const FALLBACK_SNAPSHOT = {
       contacts_identified: 5040,
       note            : 'DRC: 515 cas, 91 décès, CFR 17.7%, 25 ZS (Ituri 94%). Uganda: 19 cas, 2 décès, 5 guéris. Total combiné: 534 cas, 93 décès (CFR 17.4%). Plan continental 518M USD lancé 5/06.',
       url             : 'https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON606',
-    },
-    {
-      name            : 'ECDC (9 juin 2026 — données MoH 8 juin)',
-      date            : '2026-06-09',
-      confirmed_cases : 550,
-      confirmed_deaths: 101,
-      confirmed_active: 309,
-      uganda_confirmed: 19,
-      uganda_deaths   : 2,
-      note            : 'DRC: 550 cas, 101 décès, 309 hospitalisés en isolement. +35 nouveaux cas, +10 décès vs 8/06. Ituri: 518 cas (17 ZS). Nord-Kivu: 29 cas (7 ZS). Uganda: 19 cas, 2 décès, 5 transmission locale, 14 importés.',
-      url             : 'https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda',
     },
     {
       name            : 'CDC (7 juin 2026)',
@@ -303,22 +307,24 @@ const FALLBACK_SNAPSHOT = {
   source_discrepancies: {
     title: 'Pourquoi les chiffres diffèrent entre sources ?',
     reasons: [
-      { label: 'INSP N°25 (08/06) = source la plus récente',
-        detail: '598 cas, 115 décès, CFR 19.2%, 48 nouveaux (RECORD). Publiée 8 juin = plus récente que WHO DON606 (6/06) ou ECDC (données 8/06 MoH sans +48).' },
+      { label: 'ECDC 10/06 = source la plus récente (13h20 UTC+1)',
+        detail: 'Ituri 563 cas (17 ZS) + Nord-Kivu 32 cas (7 ZS) + Sud-Kivu 3 cas = 598 DRC. Confirme INSP N°25 (598/115). Uganda: 0 nouveau cas depuis 5 jours (dernier: 05/06).' },
+      { label: 'INSP N°25 (08/06) = source primaire officielle RDC',
+        detail: '598 cas, 115 décès, CFR 19.2%, 48 nouveaux (RECORD journalier absolu). 297 en isolement, 22 guéris. 25 ZS touchées.' },
       { label: 'WHO DON606 (6 juin) : 515 DRC + 19 Uganda = 534 total',
         detail: '515 DRC, 91 décès; 19 Uganda, 2 décès; 534 total combiné, 93 décès, CFR 17.4%. WHO confirme: risque DRC=très élevé, Uganda=élevé.' },
-      { label: 'ECDC/CDC (8-9 juin) : 550 DRC, 101 décès',
-        detail: 'Correspondent aux chiffres MoH RDC du 8 juin AVANT la publication N°25 INSP (+48 cas). Écart 550→598 = backlog de tests + 48 nouvelles infections 08/06.' },
+      { label: 'ECDC provinces 10/06 vs INSP N°25 provinces 08/06',
+        detail: 'Écart Ituri: INSP N°24=518 → ECDC 10/06=563 (+45). Écart Nord-Kivu: INSP N°24=29 → ECDC 10/06=32 (+3). Reflect 2 jours supplémentaires de cas (09-10/06). Total INSP N°25 (598) concordant avec ECDC (598).' },
       { label: 'Record journalier N°25 : 48 cas en 24h',
         detail: 'Pic absolu depuis J1. En partie dû à la montée en puissance des capacités diagnostiques et au rattrapage de backlog d\'échantillons.' },
-      { label: 'Nord-Kivu : létalité 69% — cas critiques hors CTE',
-        detail: '29 cas, 20 décès. WHO DON606 confirme CFR 64% en Nord-Kivu. Retards prise en charge, évasions CTE, insécurité ADF.' },
-      { label: 'Uganda — 19 cas confirmés (concordance WHO/CDC/ECDC)',
-        detail: '14 importés (~70% Congolais cherchant soins), 5 transmission locale. 2 décès chez cas importés. Cas UAE: risque faible confirmé (pas de cas secondaire). Pas de transmission communautaire documentée.' },
+      { label: 'Nord-Kivu : létalité 62.5% (20/32)',
+        detail: 'Retards prise en charge, évasions CTE, insécurité ADF. WHO DON606 confirme CFR élevé en Nord-Kivu. +3 cas depuis N°24.' },
+      { label: 'Uganda — signal positif : 0 nouveau cas depuis 05/06',
+        detail: '5 jours consécutifs sans nouveau cas (10/06). 14 importés, 5 transmission locale. 2 décès chez cas importés. Pas de transmission communautaire documentée.' },
       { label: 'Suspects INSP = en isolement fin J (PAS cumulatifs)',
         detail: '297 total en isolement au N°25. Ne pas comparer avec cumuls WHO/ECDC.' },
     ],
-    consensus: 'Source primaire: INSP N°25 (08/06). DRC: 598 cas (+48/08/06 RECORD), 115 décès, CFR 19.2%, 22 guéris, 297 en isolement. Uganda: 19 cas, 2 décès (WHO/CDC/ECDC concordent). Total combiné: ≥617 cas, ≥117 décès.',
+    consensus: 'ECDC 10/06 + INSP N°25 concordent: DRC 598 cas, 115 décès, CFR 19.2%. Ituri 563 (94.1%), Nord-Kivu 32, Sud-Kivu 3. Uganda: 19 cas, 2 décès, 0 nouveau cas depuis 5 jours. Total combiné: 617 cas, 117 décès.',
   },
 };
 
@@ -381,6 +387,8 @@ function mergeWithFallback(raw) {
     uganda_recovered        : raw.uganda_recovered        ?? FALLBACK_SNAPSHOT.uganda_recovered,
     uganda_imported         : raw.uganda_imported         ?? FALLBACK_SNAPSHOT.uganda_imported,
     uganda_local_transmission: raw.uganda_local_transmission ?? FALLBACK_SNAPSHOT.uganda_local_transmission,
+    uganda_last_case_date   : raw.uganda_last_case_date   ?? FALLBACK_SNAPSHOT.uganda_last_case_date,
+    uganda_days_no_new_case : raw.uganda_days_no_new_case ?? FALLBACK_SNAPSHOT.uganda_days_no_new_case,
     hcw_cases               : raw.hcw_cases               ?? FALLBACK_SNAPSHOT.hcw_cases,
     countries_affected      : raw.countries_affected      ?? FALLBACK_SNAPSHOT.countries_affected,
     health_zones_affected   : raw.health_zones_affected   ?? FALLBACK_SNAPSHOT.health_zones_affected,
@@ -463,7 +471,7 @@ export default async function handler(req, res) {
       threshold_hours       : STALENESS_THRESHOLD_HOURS,
       data_as_of_iso        : snapshot.data_as_of,
       data_age_hours        : Math.round((Date.now() - new Date(snapshot.data_as_of)) / 3600000),
-      note                  : 'data_as_of = date du dernier SitRep INSP (figé). Comparer generated_at pour la fraîcheur réelle.',
+      note                  : 'data_as_of = date de la dernière source (ECDC 10/06 ou INSP N°25 08/06). Comparer generated_at pour la fraîcheur réelle. Seuil alerte: 72h.',
     },
 
     snapshot: {
@@ -478,10 +486,10 @@ export default async function handler(req, res) {
     external_sources : extSources,
 
     meta: {
-      version       : '4.9.0',
-      sitrep        : 'N°25/MVB_08/06/2026',
-      sources_used  : ['INSP N°25 (08/06)', 'WHO DON606 (06/06)', 'ECDC (09/06)', 'CDC (07/06)'],
-      note          : 'N°25 (08/06): 598 cas (+48 RECORD), 115 décès, CFR 19.2%. Uganda: 19 cas, 2 décès (concordance WHO/CDC/ECDC). Plan continental 518M USD.',
+      version       : '5.0.0',
+      sitrep        : 'N°25/MVB_08/06/2026 + ECDC 10/06',
+      sources_used  : ['ECDC 10/06/2026 13h20', 'INSP N°25 (08/06)', 'WHO DON606 (06/06)', 'CDC (07/06)'],
+      note          : 'N°25 (08/06): 598 cas (+48 RECORD), 115 décès, CFR 19.2%. ECDC 10/06: Ituri 563 (17 ZS), Nord-Kivu 32 (7 ZS). Uganda: 19 cas, 2 décès, 0 nouveau depuis 05/06.',
     },
   });
 }
