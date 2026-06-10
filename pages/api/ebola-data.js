@@ -1,5 +1,11 @@
 /**
- * /api/ebola-data — EBOLA-MONITOR v5.0.0
+ * /api/ebola-data — EBOLA-MONITOR v5.0.1
+ *
+ * CHANGELOG v5.0.1 (10/06/2026) — CORRECTIF AFFICHAGE
+ *  - Problème : dashboard lisait d.confirmed_cases mais v5.0.0 avait encapsulé
+ *    toutes les données sous d.snapshot.confirmed_cases → tout undefined → placeholders vides.
+ *  - Correctif : on spread snapshot au niveau racine ET on conserve la clé snapshot
+ *    pour compatibilité forward. Le dashboard reçoit à nouveau les champs directement.
  *
  * CHANGELOG v5.0.0 (10/06/2026) — ECDC 10/06 13h20 + SitRep N°25 INSP (08/06) :
  *
@@ -13,9 +19,6 @@
  * DONNÉES N°25 INSP (source primaire officielle, 08/06/2026) :
  *  confirmed_cases : 598 | confirmed_deaths : 115 | CFR : 19.2%
  *  new_cases_24h   : 48 (RECORD absolu) | recovered : 22 | en isolement : 297
- *
- * CORRECTION FALLBACK_STATIC_DATE : 2026-06-08 → 2026-06-10
- *  (empêche bandeau "données statiques" tant que les données sont fraîches)
  *
  * SOURCE OFFICIELLE PRIMAIRE : INSP RDC — https://insp.cd/blog-2/
  */
@@ -456,7 +459,16 @@ export default async function handler(req, res) {
 
   const generatedAt = new Date().toISOString();
 
+  // FIX v5.0.1 : on spread snapshot au niveau RACINE de la réponse (compat dashboard)
+  // ET on conserve la clé snapshot imbriquée pour tout nouveau code qui l'utilise.
+  // Le dashboard lit directement res.confirmed_cases, res.provinces, etc.
+  const snapshotWithActive = { ...snapshot, confirmed_active: confirmedActive };
+
   res.status(200).json({
+    // === CHAMPS RACINE (compat dashboard) ===
+    ...snapshotWithActive,
+
+    // === MÉTADONNÉES ===
     success       : true,
     generated_at  : generatedAt,
     data_as_of    : snapshot.data_as_of,
@@ -474,10 +486,8 @@ export default async function handler(req, res) {
       note                  : 'data_as_of = date de la dernière source (ECDC 10/06 ou INSP N°25 08/06). Comparer generated_at pour la fraîcheur réelle. Seuil alerte: 72h.',
     },
 
-    snapshot: {
-      ...snapshot,
-      confirmed_active: confirmedActive,
-    },
+    // === CLÉ IMBRIQUÉE (compat nouveaux clients) ===
+    snapshot: snapshotWithActive,
 
     risk_factors     : RISK_FACTORS_BASE,
     rt_metadata      : RT_METADATA,
@@ -486,10 +496,11 @@ export default async function handler(req, res) {
     external_sources : extSources,
 
     meta: {
-      version       : '5.0.0',
+      version       : '5.0.1',
       sitrep        : 'N°25/MVB_08/06/2026 + ECDC 10/06',
       sources_used  : ['ECDC 10/06/2026 13h20', 'INSP N°25 (08/06)', 'WHO DON606 (06/06)', 'CDC (07/06)'],
       note          : 'N°25 (08/06): 598 cas (+48 RECORD), 115 décès, CFR 19.2%. ECDC 10/06: Ituri 563 (17 ZS), Nord-Kivu 32 (7 ZS). Uganda: 19 cas, 2 décès, 0 nouveau depuis 05/06.',
+      fix            : 'v5.0.1 — snapshot fields spread at root level for dashboard backward compatibility.',
     },
   });
 }
