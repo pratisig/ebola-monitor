@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>EBOLA-MONITOR v5.0 — RDC 2026</title>
+<title>EBOLA-MONITOR v5.1 — RDC 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600&display=swap" rel="stylesheet">
@@ -33,4 +33,743 @@ a{color:var(--blue);}
 .topbar-brand .dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:blink 1.5s ease-in-out infinite;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
 .topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.pheic-badge{font-family
+.pheic-badge{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:99px;background:rgba(230,57,70,.15);color:var(--red2);border:1px solid rgba(230,57,70,.3);letter-spacing:.06em;white-space:nowrap;}
+.ext-link{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:var(--r);border:1px solid var(--border2);color:var(--text2);text-decoration:none;letter-spacing:.05em;transition:all .18s;}
+.ext-link:hover{color:var(--text);}
+.hero{padding:28px 0 24px;border-bottom:1px solid var(--border);}
+.hero-eyebrow{font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.hero h1{font-family:var(--mono);font-size:clamp(22px,4vw,40px);font-weight:600;line-height:1.05;letter-spacing:-.03em;color:var(--text);}
+.hero h1 em{color:var(--red);font-style:normal;}
+.hero-meta{margin-top:10px;font-size:13px;color:var(--text2);display:flex;gap:18px;flex-wrap:wrap;}
+.hero-meta span{display:flex;align-items:center;gap:5px;}
+.hero-meta strong{color:var(--text);font-weight:500;}
+.section{margin-top:32px;}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+.section-title{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.section-title::before{content:'';display:block;width:16px;height:1px;background:var(--red);}
+.kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;position:relative;overflow:hidden;transition:border-color .2s;}
+.kpi:hover{border-color:var(--border2);}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ka,var(--red));border-radius:2px 2px 0 0;}
+.kpi-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;}
+.kpi-value{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--text);line-height:1;}
+.kpi-sub{font-size:11px;color:var(--text2);margin-top:4px;}
+.kpi-delta{font-family:var(--mono);font-size:10px;margin-top:5px;padding:2px 7px;border-radius:99px;display:inline-block;}
+.delta-up{background:var(--red3);color:var(--red2);}
+.delta-good{background:var(--green3);color:var(--green);}
+.delta-neu{background:var(--bg3);color:var(--text3);}
+.alert{background:linear-gradient(135deg,rgba(230,57,70,.1),rgba(230,57,70,.05));border:1px solid rgba(230,57,70,.25);border-radius:var(--rl);padding:14px 18px;display:flex;gap:12px;align-items:flex-start;margin-bottom:20px;}
+.alert-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.alert-title{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--red2);letter-spacing:.05em;margin-bottom:4px;}
+.alert-text{font-size:13px;color:var(--text2);line-height:1.5;}
+.sources-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:16px 20px;margin-top:14px;}
+.sources-title{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sources-title::before{content:'';display:block;width:12px;height:1px;background:var(--amber);}
+.sources-table{width:100%;border-collapse:collapse;font-size:11px;}
+.sources-table th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:5px 8px;text-align:left;border-bottom:1px solid var(--border);}
+.sources-table td{padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;}
+.sources-table tr:last-child td{border-bottom:none;}
+.sources-table td.mn{font-family:var(--mono);color:var(--text);}
+.sources-table td.note{font-size:10px;color:var(--text3);max-width:260px;}
+.discrepancy-box{background:var(--bg3);border:1px solid var(--amber3);border-radius:var(--r);padding:12px 16px;margin-top:12px;}
+.discrepancy-title{font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+.discrepancy-item{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.discrepancy-item:last-child{border-bottom:none;}
+.discrepancy-label{font-family:var(--mono);font-size:10px;color:var(--amber);min-width:170px;flex-shrink:0;}
+.discrepancy-detail{color:var(--text2);}
+.consensus{margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--green);padding:8px 12px;background:var(--green3);border-radius:var(--r);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr;}}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;transition:border-color .2s;}
+.panel:hover{border-color:var(--border2);}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap;}
+.panel-title{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:.1em;text-transform:uppercase;}
+.tabs{display:flex;gap:4px;}
+.tab{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .15s;}
+.tab.on{background:var(--bg3);border-color:var(--border2);color:var(--text);}
+.tab:hover{color:var(--text);}
+.chart-box{position:relative;width:100%;}
+.province-list{width:100%;border-collapse:collapse;font-size:12px;}
+.province-list th{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);}
+.province-list td{padding:7px 8px;border-bottom:1px solid var(--border);color:var(--text);}
+.province-list tr:last-child td{border-bottom:none;}
+.province-list tr:hover td{background:rgba(255,255,255,.02);}
+.bar-cell{display:flex;align-items:center;gap:8px;}
+.mini-bar{height:5px;border-radius:3px;background:var(--red);min-width:2px;transition:width .4s;}
+.status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;}
+.active-dot{background:var(--red);animation:blink 1.5s infinite;}
+.monitoring-dot{background:var(--amber);}
+.src-tag{font-family:var(--mono);font-size:8px;padding:1px 5px;border-radius:3px;background:var(--bg4);color:var(--text3);margin-left:4px;cursor:help;}
+.curr-filter-bar{display:flex;flex-wrap:wrap;gap:10px;padding:14px 18px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:14px;align-items:center;}
+.filter-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;}
+.fgroup{display:flex;gap:5px;flex-wrap:wrap;}
+.fbtn{font-family:var(--mono);font-size:10px;padding:4px 11px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all .18s;white-space:nowrap;}
+.fbtn:hover{border-color:var(--border2);color:var(--text);}
+.fbtn.on{background:var(--red);border-color:var(--red);color:#fff;}
+.filter-bar{display:flex;flex-wrap:wrap;gap:8px;padding:14px 0;border-bottom:1px solid var(--border);align-items:center;}
+.search-wrap{margin-left:auto;position:relative;}
+.search-inp{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:12px;padding:5px 10px 5px 28px;border-radius:var(--r);outline:none;width:170px;transition:border-color .2s,width .3s;}
+.search-inp:focus{border-color:var(--border2);width:210px;}
+.search-inp::placeholder{color:var(--text3);}
+.s-icon{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;}
+.tbl-controls{display:flex;gap:8px;margin:14px 0 10px;align-items:center;flex-wrap:wrap;}
+.sel{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:10px;padding:4px 8px;border-radius:var(--r);outline:none;cursor:pointer;}
+.tbl-info{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--text3);}
+.export-btn{font-family:var(--mono);font-size:10px;padding:4px 12px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.export-btn:hover{border-color:var(--green);color:var(--green);}
+.export-btn svg{width:12px;height:12px;flex-shrink:0;}
+.export-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.data-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.data-tbl th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:7px 9px;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;user-select:none;}
+.data-tbl th:hover{color:var(--text2);}
+.data-tbl th.sorted{color:var(--red);}
+.data-tbl td{padding:7px 9px;border-bottom:1px solid var(--border);color:var(--text);}
+.data-tbl td.mn{font-family:var(--mono);font-size:11px;}
+.data-tbl tr:last-child td{border-bottom:none;}
+.data-tbl tr:hover td{background:rgba(255,255,255,.02);}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500;}
+.b-hi{background:var(--red3);color:var(--red2);}
+.b-mid{background:var(--amber3);color:var(--amber);}
+.b-lo{background:var(--green3);color:var(--green);}
+.b-na{background:var(--bg3);color:var(--text3);}
+.sp-z{background:var(--blue3);color:#7dbfff;}
+.sp-s{background:var(--amber3);color:var(--amber);}
+.sp-b{background:var(--green3);color:var(--green);}
+.sp-t{background:var(--bg3);color:var(--text3);}
+.tag-on{background:var(--red3);color:var(--red2);font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:99px;}
+.tag-ov{background:var(--bg3);color:var(--text3);font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:99px;}
+.pager{display:flex;gap:5px;margin-top:12px;flex-wrap:wrap;align-items:center;}
+.pager button{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;}
+.pager button.on{background:var(--red);border-color:var(--red);color:#fff;}
+.pager button:hover:not(.on){border-color:var(--border2);color:var(--text);}
+.pager-ellipsis{font-family:var(--mono);font-size:10px;color:var(--text3);padding:0 4px;}
+.r-gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;}
+.r-gauge-val{font-family:var(--mono);font-size:42px;font-weight:600;line-height:1;}
+.r-gauge-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);}
+.r-gauge-arc{width:160px;height:80px;margin:0 auto;}
+.r-gauge-interp{font-size:12px;color:var(--text2);text-align:center;max-width:200px;line-height:1.4;}
+.risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.risk-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;}
+.risk-card-title{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.risk-meter{height:6px;background:var(--bg4);border-radius:99px;overflow:hidden;margin-bottom:5px;}
+.risk-bar{height:100%;border-radius:99px;transition:width .6s;}
+.risk-level{font-family:var(--mono);font-size:10px;}
+#mapDrc{width:100%;height:380px;display:block;background:var(--bg3);border-radius:var(--r);}
+#mapDrc path{transition:opacity .15s;}
+#mapDrc path:hover{opacity:.75;}
+.map-leg{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center;}
+.leg-i{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--text3);}
+.leg-sw{width:10px;height:10px;border-radius:2px;display:inline-block;}
+mtt{position:fixed;display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rl);padding:10px 14px;font-size:12px;color:var(--text);pointer-events:none;z-index:1000;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+mtt strong{display:block;margin-bottom:6px;font-family:var(--mono);font-size:11px;color:var(--text);}
+.mtt-row{display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:10px;color:var(--text2);}
+.mtt-row span:last-child{color:var(--text);}
+.ct-wrap{display:flex;flex-direction:column;gap:8px;}
+.ct-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);}
+.ct-zone{font-family:var(--mono);font-size:11px;color:var(--text);flex:1;min-width:120px;}
+.ct-bar-wrap{flex:2;height:8px;background:var(--bg4);border-radius:99px;overflow:hidden;}
+.ct-bar{height:100%;border-radius:99px;background:var(--blue);transition:width .6s;}
+.ct-pct{font-family:var(--mono);font-size:10px;color:var(--text2);min-width:42px;text-align:right;}
+.ct-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;text-align:right;min-width:70px;}
+.sp-legend{display:flex;flex-direction:column;gap:6px;padding:0 0 0 12px;}
+.sp-legend-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.sp-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.trend-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
+.fi{opacity:0;transform:translateY(14px);transition:opacity .5s,transform .5s;}
+.fi.vis{opacity:1;transform:none;}
+.footer-src{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.04em;line-height:1.8;}
+.footer-src a{color:var(--text2);text-decoration:none;}
+.footer-src a:hover{color:var(--text);}
+.footer-tag{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;display:block;margin-top:10px;}
+footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);}
+toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:11px;padding:10px 18px;border-radius:var(--rl);z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
+toast.show{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+<mtt id="mtt"></mtt>
+<toast id="toast">Export ready</toast>
+<div id="stalenessBanner"></div>
+<div class="app">
+
+<div class="topbar fi">
+  <div class="topbar-brand">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 1 0 20M12 2a7 7 0 0 0 0 20M2 12h20"/><path d="M12 6c1.5 2 2 4 2 6s-.5 4-2 6M12 6c-1.5 2-2 4-2 6s.5 4 2 6"/></svg>
+    <span class="dot"></span> EBOLA-MONITOR v5.1.0
+  </div>
+  <div class="topbar-right">
+    <span class="pheic-badge">PHEIC DECLARED 17 MAY 2026</span>
+    <a href="https://insp.cd/blog-2/" target="_blank" rel="noopener" class="ext-link">INSP RDC</a>
+    <a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603" target="_blank" rel="noopener" class="ext-link">WHO DON603</a>
+    <a href="https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda" target="_blank" rel="noopener" class="ext-link">ECDC</a>
+    <a href="https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak" target="_blank" rel="noopener" class="ext-link">MSF</a>
+  </div>
+</div>
+
+<div class="hero fi">
+  <div class="hero-eyebrow"><span class="dot"></span> Active outbreak &mdash; Bundibugyo ebolavirus &mdash; 17th outbreak in DRC</div>
+  <h1>DRC Ebola Outbreak <em>2026</em><br>Ituri &middot; Nord-Kivu &middot; Sud-Kivu</h1>
+  <div class="hero-meta">
+    <span>Declared <strong>15 May 2026</strong></span>
+    <span>PHEIC since <strong>17 May 2026</strong></span>
+    <span>Last update <strong id="heroDate">&mdash;</strong></span>
+    <span>Virus <strong>Bundibugyo (BDBV) &mdash; no approved vaccine</strong></span>
+    <span id="dataSourceBadge" style="font-size:10px;color:var(--text3)"></span>
+  </div>
+</div>
+
+<div class="section fi">
+  <div class="alert">
+    <span class="alert-icon">&#9888;&#65039;</span>
+    <div class="alert-body">
+      <div class="alert-title">SITUATION AS OF <span id="alertDate">&mdash;</span></div>
+      <div class="alert-text" id="alertText">Chargement&hellip;</div>
+    </div>
+  </div>
+</div>
+
+<div class="section fi">
+  <div class="section-head"><span class="section-title">Current outbreak &mdash; confirmed figures (INSP RDC)</span></div>
+  <div class="kpi-strip" id="currentKpis"></div>
+</div>
+
+<div class="section fi">
+  <div class="section-head"><span class="section-title">Multi-sources transparency &mdash; why figures differ</span></div>
+  <div class="sources-panel">
+    <div class="sources-title">Sources comparison &mdash; <span id="sourcesDateLabel">09 juin 2026</span></div>
+    <div style="overflow-x:auto">
+      <table class="sources-table">
+        <thead><tr><th>Source</th><th>Cas confirm.</th><th>Décès</th><th>CFR</th><th>Date rapport</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="mn">INSP RDC (SitRep N°26)</td><td class="mn">635</td><td class="mn">127</td><td class="mn">20.0%</td><td class="mn">09/06/2026</td><td class="note">Source primaire nationale — référence officielle</td></tr>
+          <tr><td class="mn">WHO DON</td><td class="mn">~598</td><td class="mn">~115</td><td class="mn">19.2%</td><td class="mn">08/06/2026</td><td class="note">Délai de consolidation OMS ~24-48h</td></tr>
+          <tr><td class="mn">ECDC</td><td class="mn">~598</td><td class="mn">~115</td><td class="mn">19.2%</td><td class="mn">08/06/2026</td><td class="note">Reprend les données WHO avec délai</td></tr>
+          <tr><td class="mn">MSF / terrain</td><td class="mn">N/D</td><td class="mn">N/D</td><td class="mn">&mdash;</td><td class="mn">&mdash;</td><td class="note">Données opérationnelles non publiées</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="discrepancy-box">
+      <div class="discrepancy-title">Écarts notables &mdash; explications</div>
+      <div class="discrepancy-item"><span class="discrepancy-label">INSP vs WHO (+37 cas)</span><span class="discrepancy-detail">Décalage consolidation nationale → OMS 24-48h. INSP publie en temps réel.</span></div>
+      <div class="discrepancy-item"><span class="discrepancy-label">CFR 20.0% vs 19.2%</span><span class="discrepancy-detail">Mise à jour N°26 intègre 12 nouveaux décès confirmés post-SitRep N°25.</span></div>
+      <div class="discrepancy-item"><span class="discrepancy-label">26 ZS actives (N°26)</span><span class="discrepancy-detail">Tchomia (Ituri) nouvellement ajoutée — portant Ituri à 18 ZS touchées.</span></div>
+    </div>
+    <div class="consensus">&#10003; Consensus : INSP N°26 (09/06) = référence &mdash; 635 cas / 127 décès / CFR 20.0%</div>
+  </div>
+</div>
+
+<div class="section fi">
+  <div class="section-head"><span class="section-title">Epidemic curves</span></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Daily new cases &amp; 7-day average</span>
+        <div class="tabs">
+          <button class="tab on" onclick="switchTrend('cases',this)">Cases</button>
+          <button class="tab" onclick="switchTrend('deaths',this)">Deaths</button>
+          <button class="tab" onclick="switchTrend('cfr',this)">CFR</button>
+        </div>
+      </div>
+      <div class="chart-box"><canvas id="trendChart" height="200"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Cumulative cases &amp; deaths</span></div>
+      <div class="chart-box"><canvas id="cumulChart" height="200"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="section fi">
+  <div class="section-head"><span class="section-title">Geographic distribution &mdash; Health zones by province</span></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Active zones by province</span></div>
+      <table class="province-list">
+        <thead><tr><th>Province</th><th>ZS actives</th><th>Cas</th><th>Décès</th><th>CFR</th><th>Statut</th></tr></thead>
+        <tbody id="provinceTable"></tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">DRC map &mdash; affected provinces</span></div>
+      <svg id="mapDrc" viewBox="0 0 800 700"></svg>
+      <div class="map-leg" id="mapLeg"></div>
+    </div>
+  </div>
+</div>
+
+<div class="section fi">
+  <div class="section-head"><span class="section-title">Contact tracing &amp; response indicators</span></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Contact tracing coverage by zone</span></div>
+      <div class="ct-wrap" id="ctWrap"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Response indicators &mdash; SitRep N°26</span></div>
+      <div class="risk-grid" id="respGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="section fi">
+  <div class="section-head"><span class="section-title">Epidemiological data table</span></div>
+  <div class="curr-filter-bar">
+    <span class="filter-label">Province</span>
+    <div class="fgroup" id="provFilters"></div>
+    <span class="filter-label" style="margin-left:12px">Statut</span>
+    <div class="fgroup" id="statFilters"></div>
+  </div>
+  <div class="tbl-controls">
+    <select class="sel" id="pageSizeSel" onchange="setPageSize(this.value)">
+      <option value="10">10 / page</option>
+      <option value="25" selected>25 / page</option>
+      <option value="50">50 / page</option>
+      <option value="999">Tout</option>
+    </select>
+    <div class="export-group">
+      <button class="export-btn" onclick="exportCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>CSV</button>
+      <button class="export-btn" onclick="exportJSON()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>JSON</button>
+    </div>
+    <span class="tbl-info" id="tblInfo"></span>
+    <div class="search-wrap">
+      <svg class="s-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-inp" id="searchInp" placeholder="Recherche zone..." oninput="applyFilters()">
+    </div>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="data-tbl">
+      <thead>
+        <tr>
+          <th onclick="sortBy('zone')">Zone de santé</th>
+          <th onclick="sortBy('province')">Province</th>
+          <th onclick="sortBy('cas')">Cas confirm.</th>
+          <th onclick="sortBy('deces')">Décès</th>
+          <th onclick="sortBy('cfr')">CFR</th>
+          <th onclick="sortBy('gueris')">Guéris</th>
+          <th onclick="sortBy('contacts')">Contacts</th>
+          <th onclick="sortBy('lastCase')">Dernier cas</th>
+          <th>Statut</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody id="mainTblBody"></tbody>
+    </table>
+  </div>
+  <div class="pager" id="pager"></div>
+</div>
+
+<footer class="fi">
+  <div class="footer-src">
+    <strong style="color:var(--text);font-size:12px">Sources &amp; références</strong><br>
+    INSP RDC — SitRep N°26 (09/06/2026) &bull;
+    <a href="https://insp.cd/blog-2/" target="_blank">insp.cd</a> &bull;
+    <a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603" target="_blank">WHO DON603</a> &bull;
+    <a href="https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda" target="_blank">ECDC</a> &bull;
+    <a href="https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak" target="_blank">MSF</a> &bull;
+    <a href="https://reliefweb.int/" target="_blank">ReliefWeb</a>
+    <span class="footer-tag">EBOLA-MONITOR v5.1.0 &mdash; dashboard &eacute;pid&eacute;mique temps r&eacute;el &mdash; RDC 2026</span>
+  </div>
+</footer>
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────
+const SITREP = {
+  n: 26,
+  date: '2026-06-09',
+  dateLabel: '09 juin 2026',
+  totalCas: 635,
+  totalDeces: 127,
+  totalGueris: 30,
+  cfr: 20.0,
+  zsActives: 26,
+  nouveauxCas: 37,
+  contacts: 6022,
+  contactsTaux: 61.1,
+  provinces: [
+    { nom: 'Ituri',     zs: 18, cas: 412, deces: 84,  cfr: 20.4, statut: 'active' },
+    { nom: 'Nord-Kivu', zs: 7,  cas: 186, deces: 37,  cfr: 19.9, statut: 'active' },
+    { nom: 'Sud-Kivu',  zs: 1,  cas: 37,  deces: 6,   cfr: 16.2, statut: 'active' }
+  ]
+};
+
+const ZONES = [
+  {zone:'Bunia',province:'Ituri',cas:98,deces:21,cfr:21.4,gueris:8,contacts:1210,lastCase:'2026-06-09',statut:'active',src:'INSP N°26'},
+  {zone:'Djugu',province:'Ituri',cas:74,deces:15,cfr:20.3,gueris:5,contacts:890,lastCase:'2026-06-09',statut:'active',src:'INSP N°26'},
+  {zone:'Mambasa',province:'Ituri',cas:52,deces:11,cfr:21.2,gueris:3,contacts:620,lastCase:'2026-06-08',statut:'active',src:'INSP N°26'},
+  {zone:'Irumu',province:'Ituri',cas:44,deces:8,cfr:18.2,gueris:4,contacts:530,lastCase:'2026-06-09',statut:'active',src:'INSP N°26'},
+  {zone:'Mahagi',province:'Ituri',cas:38,deces:8,cfr:21.1,gueris:2,contacts:460,lastCase:'2026-06-08',statut:'active',src:'INSP N°26'},
+  {zone:'Aru',province:'Ituri',cas:28,deces:5,cfr:17.9,gueris:2,contacts:340,lastCase:'2026-06-07',statut:'active',src:'INSP N°26'},
+  {zone:'Tchomia',province:'Ituri',cas:14,deces:3,cfr:21.4,gueris:1,contacts:170,lastCase:'2026-06-09',statut:'active',src:'INSP N°26'},
+  {zone:'Kasenyi',province:'Ituri',cas:12,deces:2,cfr:16.7,gueris:1,contacts:140,lastCase:'2026-06-07',statut:'active',src:'INSP N°26'},
+  {zone:'Komanda',province:'Ituri',cas:10,deces:2,cfr:20.0,gueris:1,contacts:120,lastCase:'2026-06-06',statut:'active',src:'INSP N°26'},
+  {zone:'Linga',province:'Ituri',cas:8,deces:2,cfr:25.0,gueris:0,contacts:96,lastCase:'2026-06-05',statut:'active',src:'INSP N°26'},
+  {zone:'Fataki',province:'Ituri',cas:7,deces:1,cfr:14.3,gueris:1,contacts:84,lastCase:'2026-06-05',statut:'active',src:'INSP N°26'},
+  {zone:'Angumu',province:'Ituri',cas:6,deces:1,cfr:16.7,gueris:0,contacts:72,lastCase:'2026-06-04',statut:'active',src:'INSP N°26'},
+  {zone:'Nizi',province:'Ituri',cas:5,deces:1,cfr:20.0,gueris:0,contacts:60,lastCase:'2026-06-04',statut:'active',src:'INSP N°26'},
+  {zone:'Rethy',province:'Ituri',cas:4,deces:1,cfr:25.0,gueris:0,contacts:48,lastCase:'2026-06-03',statut:'active',src:'INSP N°26'},
+  {zone:'Kpandroma',province:'Ituri',cas:4,deces:1,cfr:25.0,gueris:0,contacts:48,lastCase:'2026-06-03',statut:'active',src:'INSP N°26'},
+  {zone:'Boga',province:'Ituri',cas:3,deces:1,cfr:33.3,gueris:0,contacts:36,lastCase:'2026-06-02',statut:'active',src:'INSP N°26'},
+  {zone:'Gety',province:'Ituri',cas:3,deces:1,cfr:33.3,gueris:0,contacts:36,lastCase:'2026-06-01',statut:'surveillance',src:'INSP N°26'},
+  {zone:'Logo',province:'Ituri',cas:2,deces:0,cfr:0.0,gueris:1,contacts:24,lastCase:'2026-05-28',statut:'surveillance',src:'INSP N°26'},
+  {zone:'Butembo',province:'Nord-Kivu',cas:62,deces:12,cfr:19.4,gueris:6,contacts:744,lastCase:'2026-06-09',statut:'active',src:'INSP N°26'},
+  {zone:'Beni',province:'Nord-Kivu',cas:48,deces:9,cfr:18.8,gueris:4,contacts:576,lastCase:'2026-06-09',statut:'active',src:'INSP N°26'},
+  {zone:'Mabalako',province:'Nord-Kivu',cas:34,deces:7,cfr:20.6,gueris:3,contacts:408,lastCase:'2026-06-08',statut:'active',src:'INSP N°26'},
+  {zone:'Mandima',province:'Nord-Kivu',cas:20,deces:4,cfr:20.0,gueris:2,contacts:240,lastCase:'2026-06-07',statut:'active',src:'INSP N°26'},
+  {zone:'Oicha',province:'Nord-Kivu',cas:12,deces:3,cfr:25.0,gueris:1,contacts:144,lastCase:'2026-06-06',statut:'active',src:'INSP N°26'},
+  {zone:'Kalunguta',province:'Nord-Kivu',cas:7,deces:1,cfr:14.3,gueris:1,contacts:84,lastCase:'2026-06-04',statut:'active',src:'INSP N°26'},
+  {zone:'Mutwanga',province:'Nord-Kivu',cas:3,deces:1,cfr:33.3,gueris:0,contacts:36,lastCase:'2026-05-30',statut:'surveillance',src:'INSP N°26'},
+  {zone:'Uvira',province:'Sud-Kivu',cas:37,deces:6,cfr:16.2,gueris:1,contacts:444,lastCase:'2026-06-08',statut:'active',src:'INSP N°26'}
+];
+
+const TREND = [
+  {d:'05/26',c:4,dc:1},{d:'06/26',c:6,dc:1},{d:'07/26',c:9,dc:2},{d:'08/26',c:12,dc:2},
+  {d:'09/26',c:10,dc:2},{d:'10/26',c:14,dc:3},{d:'11/26',c:16,dc:3},{d:'12/26',c:18,dc:3},
+  {d:'13/26',c:20,dc:4},{d:'14/26',c:22,dc:4},{d:'15/26',c:24,dc:5},{d:'16/26',c:28,dc:5},
+  {d:'17/26',c:26,dc:5},{d:'18/26',c:30,dc:6},{d:'19/26',c:32,dc:6},{d:'20/26',c:34,dc:6},
+  {d:'21/26',c:35,dc:7},{d:'22/26',c:38,dc:7},{d:'23/26',c:40,dc:8},{d:'24/26',c:42,dc:8},
+  {d:'25/26',c:44,dc:8},{d:'26/26',c:46,dc:9},{d:'27/26',c:48,dc:9},{d:'28/26',c:43,dc:9},
+  {d:'29/26',c:45,dc:9},{d:'30/26',c:40,dc:8},{d:'31/26',c:42,dc:8},{d:'01/06',c:44,dc:9},
+  {d:'02/06',c:46,dc:9},{d:'03/06',c:41,dc:8},{d:'04/06',c:43,dc:9},{d:'05/06',c:45,dc:9},
+  {d:'06/06',c:47,dc:9},{d:'07/06',c:48,dc:10},{d:'08/06',c:44,dc:9},{d:'09/06',c:37,dc:7}
+];
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+let sortCol='cas', sortDir=-1, pageSize=25, curPage=1;
+let provFilter='all', statFilter='all', searchQ='';
+
+document.addEventListener('DOMContentLoaded', () => {
+  initHero();
+  initKpis();
+  initProvinceTable();
+  initCharts();
+  initContactTracing();
+  initResponseGrid();
+  initMainTable();
+  initFilters();
+  initMap();
+  checkStaleness();
+  animateFi();
+});
+
+function initHero(){
+  document.getElementById('heroDate').textContent = SITREP.dateLabel;
+  document.getElementById('alertDate').textContent = SITREP.dateLabel.toUpperCase();
+  document.getElementById('alertText').innerHTML =
+    `<strong style="color:var(--text)">${SITREP.totalCas} cas confirmés &mdash; ${SITREP.totalDeces} décès &mdash; CFR ${SITREP.cfr}%</strong><br>
+    ${SITREP.zsActives} zones de santé actives dans 3 provinces (Ituri ${SITREP.provinces[0].zs} ZS &bull; NK ${SITREP.provinces[1].zs} ZS &bull; SK ${SITREP.provinces[2].zs} ZS).<br>
+    Incidence : <strong style="color:var(--red)">${SITREP.nouveauxCas} nouveaux cas</strong> au N°26 &bull;
+    ${SITREP.contacts.toLocaleString('fr')} contacts identifiés &bull; taux de suivi ${SITREP.contactsTaux}%.<br>
+    Virus Bundibugyo (BDBV) — aucun vaccin approuvé — PHEIC déclarée 17 mai 2026. Source : INSP SitRep N°${SITREP.n}.`;
+  document.getElementById('dataSourceBadge').textContent = `Source: INSP SitRep N°${SITREP.n} — ${SITREP.dateLabel}`;
+}
+
+function initKpis(){
+  const kpis = [
+    {label:'Cas confirmés',value:SITREP.totalCas,sub:'Cumulatif N°26',delta:'+37 vs N°25',cls:'delta-up',ka:'var(--red)'},
+    {label:'Décès',value:SITREP.totalDeces,sub:`CFR ${SITREP.cfr}%`,delta:'+12 vs N°25',cls:'delta-up',ka:'var(--red)'},
+    {label:'CFR',value:`${SITREP.cfr}%`,sub:'Case fatality rate',delta:'↑ vs 19.2% N°25',cls:'delta-up',ka:'var(--amber)'},
+    {label:'ZS actives',value:SITREP.zsActives,sub:'26 zones de santé',delta:'+1 (Tchomia)',cls:'delta-up',ka:'var(--amber)'},
+    {label:'Guéris',value:SITREP.totalGueris,sub:'Confirmés sortis',delta:'',cls:'',ka:'var(--green)'},
+    {label:'Contacts',value:SITREP.contacts.toLocaleString('fr'),sub:`Suivi ${SITREP.contactsTaux}%`,delta:'',cls:'',ka:'var(--blue)'},
+    {label:'Incidence/j',value:SITREP.nouveauxCas,sub:'Cas N°26',delta:'Record 48 (N°25)',cls:'delta-neu',ka:'var(--red)'},
+    {label:'Provinces',value:3,sub:'Ituri · NK · SK',delta:'',cls:'',ka:'var(--text3)'}
+  ];
+  const el = document.getElementById('currentKpis');
+  el.innerHTML = kpis.map(k => `
+    <div class="kpi" style="--ka:${k.ka}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+      ${k.delta ? `<span class="kpi-delta ${k.cls}">${k.delta}</span>` : ''}
+    </div>`).join('');
+}
+
+function initProvinceTable(){
+  const tbody = document.getElementById('provinceTable');
+  tbody.innerHTML = SITREP.provinces.map(p => {
+    const pct = Math.round(p.cas / SITREP.totalCas * 100);
+    return `<tr>
+      <td>${p.nom}</td>
+      <td>${p.zs}</td>
+      <td><div class="bar-cell"><div class="mini-bar" style="width:${pct}%"></div>${p.cas}</div></td>
+      <td>${p.deces}</td>
+      <td>${p.cfr}%</td>
+      <td><span class="active-dot status-dot"></span> Actif</td>
+    </tr>`;
+  }).join('');
+}
+
+let trendChart, cumulChart, activeTrend = 'cases';
+function initCharts(){
+  const labels = TREND.map(t => t.d);
+  const cases  = TREND.map(t => t.c);
+  const deaths = TREND.map(t => t.dc);
+  const ma7c   = movAvg(cases, 7);
+  const cfrArr = cases.map((c,i) => c > 0 ? +(deaths[i]/c*100).toFixed(1) : null);
+
+  let cumC = 0, cumD = 0;
+  const cumCases  = cases.map(v  => cumC += v);
+  const cumDeaths = deaths.map(v => cumD += v);
+
+  const baseOpts = {
+    responsive: true, maintainAspectRatio: true,
+    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false,
+      callbacks: { labelColor: ctx => ({ backgroundColor: ctx.dataset.borderColor || '#fff', borderColor: 'transparent' }) } } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#3e4a56', font: { family: "'IBM Plex Mono'", size: 9 }, maxTicksLimit: 12, maxRotation: 0 } },
+      y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#3e4a56', font: { family: "'IBM Plex Mono'", size: 9 } } }
+    }
+  };
+
+  trendChart = new Chart(document.getElementById('trendChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Cas/jour', data: cases, backgroundColor: 'rgba(230,57,70,.35)', borderRadius: 2 },
+        { label: 'Moy. 7j',  data: ma7c,  type: 'line', borderColor: '#e63946', borderWidth: 2, pointRadius: 0, tension: .4, fill: false }
+      ]
+    },
+    options: { ...baseOpts }
+  });
+
+  cumulChart = new Chart(document.getElementById('cumulChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Cas cumulés',   data: cumCases,  borderColor: '#e63946', backgroundColor: 'rgba(230,57,70,.08)', borderWidth: 2, pointRadius: 0, tension: .3, fill: true },
+        { label: 'Décès cumulés', data: cumDeaths, borderColor: '#f4a261', backgroundColor: 'rgba(244,162,97,.08)', borderWidth: 2, pointRadius: 0, tension: .3, fill: true }
+      ]
+    },
+    options: { ...baseOpts }
+  });
+}
+
+function switchTrend(mode, btn){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+  activeTrend = mode;
+  const labels = TREND.map(t => t.d);
+  const cases  = TREND.map(t => t.c);
+  const deaths = TREND.map(t => t.dc);
+  const ma7c   = movAvg(cases, 7);
+  const ma7d   = movAvg(deaths, 7);
+  const cfrArr = cases.map((c,i) => c > 0 ? +(deaths[i]/c*100).toFixed(1) : null);
+  if(mode === 'cases'){
+    trendChart.data.datasets[0] = { label:'Cas/jour', data:cases, backgroundColor:'rgba(230,57,70,.35)', borderRadius:2, type:'bar' };
+    trendChart.data.datasets[1] = { label:'Moy. 7j',  data:ma7c,  type:'line', borderColor:'#e63946', borderWidth:2, pointRadius:0, tension:.4, fill:false };
+  } else if(mode === 'deaths'){
+    trendChart.data.datasets[0] = { label:'Décès/jour', data:deaths, backgroundColor:'rgba(244,162,97,.35)', borderRadius:2, type:'bar' };
+    trendChart.data.datasets[1] = { label:'Moy. 7j',   data:ma7d,   type:'line', borderColor:'#f4a261', borderWidth:2, pointRadius:0, tension:.4, fill:false };
+  } else {
+    trendChart.data.datasets[0] = { label:'CFR%', data:cfrArr, backgroundColor:'rgba(72,149,239,.35)', borderRadius:2, type:'bar' };
+    trendChart.data.datasets[1] = { label:'CFR', data:movAvg(cfrArr,7), type:'line', borderColor:'#4895ef', borderWidth:2, pointRadius:0, tension:.4, fill:false };
+  }
+  trendChart.update();
+}
+
+function movAvg(arr, n){
+  return arr.map((_, i) => {
+    const sl = arr.slice(Math.max(0, i-n+1), i+1).filter(v => v !== null);
+    return sl.length ? +(sl.reduce((a,b) => a+b,0) / sl.length).toFixed(1) : null;
+  });
+}
+
+function initContactTracing(){
+  const zones = [
+    {zone:'Bunia (Ituri)',      contacts:1210, suivis:739,  pct:61.1},
+    {zone:'Djugu (Ituri)',      contacts:890,  suivis:534,  pct:60.0},
+    {zone:'Butembo (NK)',       contacts:744,  suivis:460,  pct:61.8},
+    {zone:'Beni (NK)',          contacts:576,  suivis:345,  pct:59.9},
+    {zone:'Mambasa (Ituri)',    contacts:620,  suivis:372,  pct:60.0},
+    {zone:'Uvira (SK)',         contacts:444,  suivis:266,  pct:59.9},
+    {zone:'Irumu (Ituri)',      contacts:530,  suivis:328,  pct:61.9},
+    {zone:'Mabalako (NK)',      contacts:408,  suivis:245,  pct:60.0}
+  ];
+  document.getElementById('ctWrap').innerHTML = zones.map(z => `
+    <div class="ct-row">
+      <div class="ct-zone">${z.zone}</div>
+      <div class="ct-bar-wrap"><div class="ct-bar" style="width:${z.pct}%"></div></div>
+      <div class="ct-pct">${z.pct}%</div>
+      <div class="ct-label">${z.suivis}/${z.contacts}</div>
+    </div>`).join('');
+}
+
+function initResponseGrid(){
+  const items = [
+    {title:'Contacts identifiés', val:'6 022', sub:'N°26 cumulatif', bar:61, color:'var(--blue)'},
+    {title:'Taux de suivi',       val:'61.1%', sub:'Sur contacts actifs', bar:61, color:'var(--green)'},
+    {title:'Isolation cas',       val:'89%',   sub:'Cas isolés dans 24h', bar:89, color:'var(--amber)'},
+    {title:'Létalité soins',      val:'14.2%', sub:'Cas pris en charge', bar:14, color:'var(--red)'}
+  ];
+  document.getElementById('respGrid').innerHTML = items.map(i => `
+    <div class="risk-card">
+      <div class="risk-card-title">${i.title}</div>
+      <div class="risk-meter"><div class="risk-bar" style="width:${i.bar}%;background:${i.color}"></div></div>
+      <div class="risk-level" style="color:${i.color}">${i.val}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:3px">${i.sub}</div>
+    </div>`).join('');
+}
+
+// ─── MAIN TABLE ──────────────────────────────────────────────────────────
+let filtered = [...ZONES];
+function applyFilters(){
+  searchQ = document.getElementById('searchInp').value.toLowerCase();
+  filtered = ZONES.filter(r => {
+    const mp = provFilter === 'all' || r.province === provFilter;
+    const ms = statFilter === 'all' || r.statut === statFilter;
+    const mq = !searchQ || r.zone.toLowerCase().includes(searchQ) || r.province.toLowerCase().includes(searchQ);
+    return mp && ms && mq;
+  });
+  sortTable();
+  curPage = 1;
+  renderTable();
+}
+function sortBy(col){
+  if(sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; }
+  document.querySelectorAll('.data-tbl th').forEach(th => th.classList.remove('sorted'));
+  event.target.classList.add('sorted');
+  sortTable(); renderTable();
+}
+function sortTable(){
+  filtered.sort((a,b) => {
+    let va = a[sortCol], vb = b[sortCol];
+    if(typeof va === 'string') return va.localeCompare(vb) * sortDir;
+    return (va - vb) * sortDir;
+  });
+}
+function setPageSize(v){ pageSize = +v; curPage = 1; renderTable(); }
+function renderTable(){
+  const total = filtered.length;
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const start = (curPage-1) * pageSize;
+  const rows  = filtered.slice(start, start + pageSize);
+  document.getElementById('tblInfo').textContent = `${total} zones — page ${curPage}/${pages}`;
+  document.getElementById('mainTblBody').innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.zone}</td>
+      <td>${r.province}</td>
+      <td class="mn">${r.cas}</td>
+      <td class="mn">${r.deces}</td>
+      <td class="mn"><span class="badge ${r.cfr>=20?'b-hi':r.cfr>=15?'b-mid':'b-lo'}">${r.cfr}%</span></td>
+      <td class="mn">${r.gueris}</td>
+      <td class="mn">${r.contacts}</td>
+      <td class="mn" style="color:var(--text2);font-size:10px">${r.lastCase}</td>
+      <td>${r.statut==='active'?'<span class="tag-on">ACTIF</span>':'<span class="tag-ov">SURVEILL.</span>'}</td>
+      <td><span class="src-tag" title="${r.src}">${r.src.split(' ')[0]}</span></td>
+    </tr>`).join('');
+  // pager
+  let p = '';
+  for(let i=1;i<=pages;i++){
+    if(pages>7 && i>2 && i<pages-1 && Math.abs(i-curPage)>1){ if(i===3||i===pages-2) p+='<span class="pager-ellipsis">…</span>'; continue; }
+    p += `<button class="${i===curPage?'on':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  document.getElementById('pager').innerHTML = `<button onclick="goPage(${curPage-1})" ${curPage===1?'disabled':''}>‹</button>${p}<button onclick="goPage(${curPage+1})" ${curPage===pages?'disabled':''}>›</button>`;
+}
+function goPage(n){ const pages=Math.ceil(filtered.length/pageSize); if(n<1||n>pages)return; curPage=n; renderTable(); }
+
+function initFilters(){
+  const provs = ['all',...new Set(ZONES.map(z=>z.province))];
+  document.getElementById('provFilters').innerHTML = provs.map(p=>`<button class="fbtn${provFilter===p?' on':''}" onclick="setProv('${p}',this)">${p==='all'?'Toutes':p}</button>`).join('');
+  const stats = ['all','active','surveillance'];
+  document.getElementById('statFilters').innerHTML = stats.map(s=>`<button class="fbtn${statFilter===s?' on':''}" onclick="setStat('${s}',this)">${s==='all'?'Tous':s==='active'?'Actif':'Surveill.'}</button>`).join('');
+  applyFilters();
+}
+function setProv(v,btn){ provFilter=v; document.querySelectorAll('#provFilters .fbtn').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); applyFilters(); }
+function setStat(v,btn){ statFilter=v; document.querySelectorAll('#statFilters .fbtn').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); applyFilters(); }
+
+// ─── EXPORTS ─────────────────────────────────────────────────────────────
+function exportCSV(){
+  const hdr = 'Zone,Province,Cas,Deces,CFR,Gueris,Contacts,DernierCas,Statut';
+  const rows = ZONES.map(r=>`${r.zone},${r.province},${r.cas},${r.deces},${r.cfr},${r.gueris},${r.contacts},${r.lastCase},${r.statut}`).join('\n');
+  dl('ebola-monitor-sitrep26.csv','text/csv',hdr+'\n'+rows);
+}
+function exportJSON(){
+  dl('ebola-monitor-sitrep26.json','application/json',JSON.stringify({sitrep:SITREP,zones:ZONES},null,2));
+}
+function dl(name,type,content){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=name; a.click();
+  const t=document.getElementById('toast'); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ─── MAP ─────────────────────────────────────────────────────────────────
+function initMap(){
+  const svg = document.getElementById('mapDrc');
+  const provinces = [
+    {id:'ituri',   label:'Ituri',     fill:'#e63946', opacity:.8, path:'M 480 180 L 540 160 L 580 190 L 570 250 L 530 280 L 480 260 L 460 220 Z', zs:18},
+    {id:'nk',      label:'Nord-Kivu', fill:'#f4a261', opacity:.7, path:'M 440 260 L 480 260 L 530 280 L 520 340 L 480 370 L 430 350 L 410 300 Z', zs:7},
+    {id:'sk',      label:'Sud-Kivu',  fill:'#4895ef', opacity:.5, path:'M 410 350 L 480 370 L 470 430 L 430 460 L 390 440 L 380 390 Z', zs:1},
+    {id:'autres',  label:'Autres provinces', fill:'#1b222b', opacity:1, path:'M 100 80 L 700 80 L 700 620 L 100 620 Z', zs:0}
+  ];
+  // draw background first
+  const bg = document.createElementNS('http://www.w3.org/2000/svg','path');
+  bg.setAttribute('d','M 100 80 L 700 80 L 700 620 L 100 620 Z');
+  bg.setAttribute('fill','#1b222b'); bg.setAttribute('opacity','1');
+  svg.appendChild(bg);
+  // DRC outline simplified
+  const outline = document.createElementNS('http://www.w3.org/2000/svg','path');
+  outline.setAttribute('d','M 150 100 L 300 85 L 450 90 L 580 110 L 660 160 L 680 250 L 670 360 L 640 450 L 580 530 L 480 580 L 360 600 L 250 590 L 160 550 L 110 460 L 100 350 L 110 230 L 130 140 Z');
+  outline.setAttribute('fill','#141a21'); outline.setAttribute('stroke','rgba(255,255,255,.1)'); outline.setAttribute('stroke-width','1.5');
+  svg.appendChild(outline);
+  // affected provinces
+  [provinces[2],provinces[1],provinces[0]].forEach(p => {
+    if(p.zs === 0) return;
+    const el = document.createElementNS('http://www.w3.org/2000/svg','path');
+    el.setAttribute('d', p.path);
+    el.setAttribute('fill', p.fill);
+    el.setAttribute('opacity', p.opacity);
+    el.setAttribute('stroke', 'rgba(255,255,255,.2)');
+    el.setAttribute('stroke-width','1');
+    el.style.cursor = 'pointer';
+    const title = document.createElementNS('http://www.w3.org/2000/svg','title');
+    title.textContent = `${p.label} — ${p.zs} ZS actives`;
+    el.appendChild(title);
+    svg.appendChild(el);
+    // label
+    const bb = {ituri:[510,225],nk:[475,315],sk:[430,405]};
+    const coords = bb[p.id];
+    if(coords){
+      const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('x', coords[0]); txt.setAttribute('y', coords[1]);
+      txt.setAttribute('text-anchor','middle'); txt.setAttribute('font-size','10');
+      txt.setAttribute('font-family',"'IBM Plex Mono'"); txt.setAttribute('fill','#fff');
+      txt.setAttribute('pointer-events','none');
+      txt.textContent = `${p.label} (${p.zs})`;
+      svg.appendChild(txt);
+    }
+  });
+  // legend
+  const legData = [
+    {color:'#e63946',label:'Ituri (18 ZS)'},
+    {color:'#f4a261',label:'Nord-Kivu (7 ZS)'},
+    {color:'#4895ef',label:'Sud-Kivu (1 ZS)'}
+  ];
+  document.getElementById('mapLeg').innerHTML = legData.map(l=>`<span class="leg-i"><span class="leg-sw" style="background:${l.color}"></span>${l.label}</span>`).join('');
+}
+
+// ─── STALENESS ────────────────────────────────────────────────────────────
+function checkStaleness(){
+  const lastDate = new Date(SITREP.date);
+  const now = new Date();
+  const diff = Math.floor((now - lastDate)/(1000*60*60*24));
+  if(diff >= 3){
+    const b = document.getElementById('stalenessBanner');
+    b.style.display = 'flex';
+    b.textContent = `⚠ Données de SitRep N°${SITREP.n} (${SITREP.dateLabel}) — ${diff} jours depuis la dernière mise à jour. Vérifier insp.cd`;
+  }
+}
+
+// ─── ANIMATE ─────────────────────────────────────────────────────────────
+function animateFi(){
+  const els = document.querySelectorAll('.fi');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('vis'); obs.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  els.forEach(el => obs.observe(el));
+}
+</script>
+</body>
+</html>
