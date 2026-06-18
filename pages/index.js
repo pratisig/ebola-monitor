@@ -1,10 +1,13 @@
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
+// Redirect server-side — no client JS needed, no black flash
+export async function getServerSideProps() {
+  return {
+    redirect: {
+      destination: '/dashboard.html',
+      permanent: true,
+    },
+  };
+}
 
 export default function Home() {
-  const router = useRouter();
-  useEffect(() => {
-    router.replace('/dashboard.html');
-  }, [router]);
   return null;
 }
