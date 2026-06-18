@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>EBOLA-MONITOR v5.1 — RDC 2026</title>
+<title>EBOLA-MONITOR v5.2 — RDC 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600&display=swap" rel="stylesheet">
@@ -107,7 +107,6 @@ a{color:var(--blue);}
 .fbtn{font-family:var(--mono);font-size:10px;padding:4px 11px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all .18s;white-space:nowrap;}
 .fbtn:hover{border-color:var(--border2);color:var(--text);}
 .fbtn.on{background:var(--red);border-color:var(--red);color:#fff;}
-.filter-bar{display:flex;flex-wrap:wrap;gap:8px;padding:14px 0;border-bottom:1px solid var(--border);align-items:center;}
 .search-wrap{margin-left:auto;position:relative;}
 .search-inp{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:12px;padding:5px 10px 5px 28px;border-radius:var(--r);outline:none;width:170px;transition:border-color .2s,width .3s;}
 .search-inp:focus{border-color:var(--border2);width:210px;}
@@ -133,10 +132,6 @@ a{color:var(--blue);}
 .b-mid{background:var(--amber3);color:var(--amber);}
 .b-lo{background:var(--green3);color:var(--green);}
 .b-na{background:var(--bg3);color:var(--text3);}
-.sp-z{background:var(--blue3);color:#7dbfff;}
-.sp-s{background:var(--amber3);color:var(--amber);}
-.sp-b{background:var(--green3);color:var(--green);}
-.sp-t{background:var(--bg3);color:var(--text3);}
 .tag-on{background:var(--red3);color:var(--red2);font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:99px;}
 .tag-ov{background:var(--bg3);color:var(--text3);font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:99px;}
 .pager{display:flex;gap:5px;margin-top:12px;flex-wrap:wrap;align-items:center;}
@@ -144,11 +139,6 @@ a{color:var(--blue);}
 .pager button.on{background:var(--red);border-color:var(--red);color:#fff;}
 .pager button:hover:not(.on){border-color:var(--border2);color:var(--text);}
 .pager-ellipsis{font-family:var(--mono);font-size:10px;color:var(--text3);padding:0 4px;}
-.r-gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;}
-.r-gauge-val{font-family:var(--mono);font-size:42px;font-weight:600;line-height:1;}
-.r-gauge-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);}
-.r-gauge-arc{width:160px;height:80px;margin:0 auto;}
-.r-gauge-interp{font-size:12px;color:var(--text2);text-align:center;max-width:200px;line-height:1.4;}
 .risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .risk-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;}
 .risk-card-title{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
@@ -172,12 +162,10 @@ mtt strong{display:block;margin-bottom:6px;font-family:var(--mono);font-size:11p
 .ct-bar{height:100%;border-radius:99px;background:var(--blue);transition:width .6s;}
 .ct-pct{font-family:var(--mono);font-size:10px;color:var(--text2);min-width:42px;text-align:right;}
 .ct-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;text-align:right;min-width:70px;}
-.sp-legend{display:flex;flex-direction:column;gap:6px;padding:0 0 0 12px;}
-.sp-legend-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
-.sp-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
-.trend-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
-.fi{opacity:0;transform:translateY(14px);transition:opacity .5s,transform .5s;}
-.fi.vis{opacity:1;transform:none;}
+/* ── FIX PAGE NOIRE : .fi visible par défaut, animation en bonus ── */
+.fi{opacity:1;transform:none;}
+.fi.anim{opacity:0;transform:translateY(14px);transition:opacity .5s,transform .5s;}
+.fi.anim.vis{opacity:1;transform:none;}
 .footer-src{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.04em;line-height:1.8;}
 .footer-src a{color:var(--text2);text-decoration:none;}
 .footer-src a:hover{color:var(--text);}
@@ -196,7 +184,7 @@ toast.show{opacity:1;transform:translateY(0);}
 <div class="topbar fi">
   <div class="topbar-brand">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 1 0 20M12 2a7 7 0 0 0 0 20M2 12h20"/><path d="M12 6c1.5 2 2 4 2 6s-.5 4-2 6M12 6c-1.5 2-2 4-2 6s.5 4 2 6"/></svg>
-    <span class="dot"></span> EBOLA-MONITOR v5.1.0
+    <span class="dot"></span> EBOLA-MONITOR v5.2.0
   </div>
   <div class="topbar-right">
     <span class="pheic-badge">PHEIC DECLARED 17 MAY 2026</span>
@@ -240,22 +228,22 @@ toast.show{opacity:1;transform:translateY(0);}
     <div class="sources-title">Sources comparison &mdash; <span id="sourcesDateLabel">09 juin 2026</span></div>
     <div style="overflow-x:auto">
       <table class="sources-table">
-        <thead><tr><th>Source</th><th>Cas confirm.</th><th>Décès</th><th>CFR</th><th>Date rapport</th><th>Notes</th></tr></thead>
+        <thead><tr><th>Source</th><th>Cas confirm.</th><th>D&eacute;c&egrave;s</th><th>CFR</th><th>Date rapport</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr><td class="mn">INSP RDC (SitRep N°26)</td><td class="mn">635</td><td class="mn">127</td><td class="mn">20.0%</td><td class="mn">09/06/2026</td><td class="note">Source primaire nationale — référence officielle</td></tr>
-          <tr><td class="mn">WHO DON</td><td class="mn">~598</td><td class="mn">~115</td><td class="mn">19.2%</td><td class="mn">08/06/2026</td><td class="note">Délai de consolidation OMS ~24-48h</td></tr>
-          <tr><td class="mn">ECDC</td><td class="mn">~598</td><td class="mn">~115</td><td class="mn">19.2%</td><td class="mn">08/06/2026</td><td class="note">Reprend les données WHO avec délai</td></tr>
-          <tr><td class="mn">MSF / terrain</td><td class="mn">N/D</td><td class="mn">N/D</td><td class="mn">&mdash;</td><td class="mn">&mdash;</td><td class="note">Données opérationnelles non publiées</td></tr>
+          <tr><td class="mn">INSP RDC (SitRep N&deg;26)</td><td class="mn">635</td><td class="mn">127</td><td class="mn">20.0%</td><td class="mn">09/06/2026</td><td class="note">Source primaire nationale &mdash; r&eacute;f&eacute;rence officielle</td></tr>
+          <tr><td class="mn">WHO DON</td><td class="mn">~598</td><td class="mn">~115</td><td class="mn">19.2%</td><td class="mn">08/06/2026</td><td class="note">D&eacute;lai de consolidation OMS ~24-48h</td></tr>
+          <tr><td class="mn">ECDC</td><td class="mn">~598</td><td class="mn">~115</td><td class="mn">19.2%</td><td class="mn">08/06/2026</td><td class="note">Reprend les donn&eacute;es WHO avec d&eacute;lai</td></tr>
+          <tr><td class="mn">MSF / terrain</td><td class="mn">N/D</td><td class="mn">N/D</td><td class="mn">&mdash;</td><td class="mn">&mdash;</td><td class="note">Donn&eacute;es op&eacute;rationnelles non publi&eacute;es</td></tr>
         </tbody>
       </table>
     </div>
     <div class="discrepancy-box">
-      <div class="discrepancy-title">Écarts notables &mdash; explications</div>
-      <div class="discrepancy-item"><span class="discrepancy-label">INSP vs WHO (+37 cas)</span><span class="discrepancy-detail">Décalage consolidation nationale → OMS 24-48h. INSP publie en temps réel.</span></div>
-      <div class="discrepancy-item"><span class="discrepancy-label">CFR 20.0% vs 19.2%</span><span class="discrepancy-detail">Mise à jour N°26 intègre 12 nouveaux décès confirmés post-SitRep N°25.</span></div>
-      <div class="discrepancy-item"><span class="discrepancy-label">26 ZS actives (N°26)</span><span class="discrepancy-detail">Tchomia (Ituri) nouvellement ajoutée — portant Ituri à 18 ZS touchées.</span></div>
+      <div class="discrepancy-title">&Eacute;carts notables &mdash; explications</div>
+      <div class="discrepancy-item"><span class="discrepancy-label">INSP vs WHO (+37 cas)</span><span class="discrepancy-detail">D&eacute;calage consolidation nationale &rarr; OMS 24-48h. INSP publie en temps r&eacute;el.</span></div>
+      <div class="discrepancy-item"><span class="discrepancy-label">CFR 20.0% vs 19.2%</span><span class="discrepancy-detail">Mise &agrave; jour N&deg;26 int&egrave;gre 12 nouveaux d&eacute;c&egrave;s confirm&eacute;s post-SitRep N&deg;25.</span></div>
+      <div class="discrepancy-item"><span class="discrepancy-label">26 ZS actives (N&deg;26)</span><span class="discrepancy-detail">Tchomia (Ituri) nouvellement ajout&eacute;e &mdash; portant Ituri &agrave; 18 ZS touch&eacute;es.</span></div>
     </div>
-    <div class="consensus">&#10003; Consensus : INSP N°26 (09/06) = référence &mdash; 635 cas / 127 décès / CFR 20.0%</div>
+    <div class="consensus">&#10003; Consensus : INSP N&deg;26 (09/06) = r&eacute;f&eacute;rence &mdash; 635 cas / 127 d&eacute;c&egrave;s / CFR 20.0%</div>
   </div>
 </div>
 
@@ -286,7 +274,7 @@ toast.show{opacity:1;transform:translateY(0);}
     <div class="panel">
       <div class="panel-head"><span class="panel-title">Active zones by province</span></div>
       <table class="province-list">
-        <thead><tr><th>Province</th><th>ZS actives</th><th>Cas</th><th>Décès</th><th>CFR</th><th>Statut</th></tr></thead>
+        <thead><tr><th>Province</th><th>ZS actives</th><th>Cas</th><th>D&eacute;c&egrave;s</th><th>CFR</th><th>Statut</th></tr></thead>
         <tbody id="provinceTable"></tbody>
       </table>
     </div>
@@ -306,7 +294,7 @@ toast.show{opacity:1;transform:translateY(0);}
       <div class="ct-wrap" id="ctWrap"></div>
     </div>
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Response indicators &mdash; SitRep N°26</span></div>
+      <div class="panel-head"><span class="panel-title">Response indicators &mdash; SitRep N&deg;26</span></div>
       <div class="risk-grid" id="respGrid"></div>
     </div>
   </div>
@@ -341,12 +329,12 @@ toast.show{opacity:1;transform:translateY(0);}
     <table class="data-tbl">
       <thead>
         <tr>
-          <th onclick="sortBy('zone')">Zone de santé</th>
+          <th onclick="sortBy('zone')">Zone de sant&eacute;</th>
           <th onclick="sortBy('province')">Province</th>
           <th onclick="sortBy('cas')">Cas confirm.</th>
-          <th onclick="sortBy('deces')">Décès</th>
+          <th onclick="sortBy('deces')">D&eacute;c&egrave;s</th>
           <th onclick="sortBy('cfr')">CFR</th>
-          <th onclick="sortBy('gueris')">Guéris</th>
+          <th onclick="sortBy('gueris')">Gu&eacute;ris</th>
           <th onclick="sortBy('contacts')">Contacts</th>
           <th onclick="sortBy('lastCase')">Dernier cas</th>
           <th>Statut</th>
@@ -361,14 +349,14 @@ toast.show{opacity:1;transform:translateY(0);}
 
 <footer class="fi">
   <div class="footer-src">
-    <strong style="color:var(--text);font-size:12px">Sources &amp; références</strong><br>
-    INSP RDC — SitRep N°26 (09/06/2026) &bull;
+    <strong style="color:var(--text);font-size:12px">Sources &amp; r&eacute;f&eacute;rences</strong><br>
+    INSP RDC &mdash; SitRep N&deg;26 (09/06/2026) &bull;
     <a href="https://insp.cd/blog-2/" target="_blank">insp.cd</a> &bull;
     <a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603" target="_blank">WHO DON603</a> &bull;
     <a href="https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda" target="_blank">ECDC</a> &bull;
     <a href="https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak" target="_blank">MSF</a> &bull;
     <a href="https://reliefweb.int/" target="_blank">ReliefWeb</a>
-    <span class="footer-tag">EBOLA-MONITOR v5.1.0 &mdash; dashboard &eacute;pid&eacute;mique temps r&eacute;el &mdash; RDC 2026</span>
+    <span class="footer-tag">EBOLA-MONITOR v5.2.0 &mdash; dashboard &eacute;pid&eacute;mique temps r&eacute;el &mdash; RDC 2026</span>
   </div>
 </footer>
 </div>
@@ -440,41 +428,40 @@ let sortCol='cas', sortDir=-1, pageSize=25, curPage=1;
 let provFilter='all', statFilter='all', searchQ='';
 
 document.addEventListener('DOMContentLoaded', () => {
-  initHero();
-  initKpis();
-  initProvinceTable();
-  initCharts();
-  initContactTracing();
-  initResponseGrid();
-  initMainTable();
-  initFilters();
-  initMap();
-  checkStaleness();
-  animateFi();
+  try { initHero(); } catch(e){ console.warn('initHero',e); }
+  try { initKpis(); } catch(e){ console.warn('initKpis',e); }
+  try { initProvinceTable(); } catch(e){ console.warn('initProvinceTable',e); }
+  try { initCharts(); } catch(e){ console.warn('initCharts',e); }
+  try { initContactTracing(); } catch(e){ console.warn('initContactTracing',e); }
+  try { initResponseGrid(); } catch(e){ console.warn('initResponseGrid',e); }
+  try { initFilters(); } catch(e){ console.warn('initFilters',e); }
+  try { initMap(); } catch(e){ console.warn('initMap',e); }
+  try { checkStaleness(); } catch(e){ console.warn('checkStaleness',e); }
+  try { animateFi(); } catch(e){ console.warn('animateFi',e); }
 });
 
 function initHero(){
   document.getElementById('heroDate').textContent = SITREP.dateLabel;
   document.getElementById('alertDate').textContent = SITREP.dateLabel.toUpperCase();
   document.getElementById('alertText').innerHTML =
-    `<strong style="color:var(--text)">${SITREP.totalCas} cas confirmés &mdash; ${SITREP.totalDeces} décès &mdash; CFR ${SITREP.cfr}%</strong><br>
-    ${SITREP.zsActives} zones de santé actives dans 3 provinces (Ituri ${SITREP.provinces[0].zs} ZS &bull; NK ${SITREP.provinces[1].zs} ZS &bull; SK ${SITREP.provinces[2].zs} ZS).<br>
-    Incidence : <strong style="color:var(--red)">${SITREP.nouveauxCas} nouveaux cas</strong> au N°26 &bull;
-    ${SITREP.contacts.toLocaleString('fr')} contacts identifiés &bull; taux de suivi ${SITREP.contactsTaux}%.<br>
-    Virus Bundibugyo (BDBV) — aucun vaccin approuvé — PHEIC déclarée 17 mai 2026. Source : INSP SitRep N°${SITREP.n}.`;
-  document.getElementById('dataSourceBadge').textContent = `Source: INSP SitRep N°${SITREP.n} — ${SITREP.dateLabel}`;
+    `<strong style="color:var(--text)">${SITREP.totalCas} cas confirm&eacute;s &mdash; ${SITREP.totalDeces} d&eacute;c&egrave;s &mdash; CFR ${SITREP.cfr}%</strong><br>
+    ${SITREP.zsActives} zones de sant&eacute; actives dans 3 provinces (Ituri ${SITREP.provinces[0].zs} ZS &bull; NK ${SITREP.provinces[1].zs} ZS &bull; SK ${SITREP.provinces[2].zs} ZS).<br>
+    Incidence&nbsp;: <strong style="color:var(--red)">${SITREP.nouveauxCas} nouveaux cas</strong> au N&deg;26 &bull;
+    ${SITREP.contacts.toLocaleString('fr')} contacts identifi&eacute;s &bull; taux de suivi ${SITREP.contactsTaux}%.<br>
+    Virus Bundibugyo (BDBV) &mdash; aucun vaccin approuv&eacute; &mdash; PHEIC d&eacute;clar&eacute;e 17 mai 2026. Source&nbsp;: INSP SitRep N&deg;${SITREP.n}.`;
+  document.getElementById('dataSourceBadge').textContent = `Source: INSP SitRep N\u00b0${SITREP.n} \u2014 ${SITREP.dateLabel}`;
 }
 
 function initKpis(){
   const kpis = [
-    {label:'Cas confirmés',value:SITREP.totalCas,sub:'Cumulatif N°26',delta:'+37 vs N°25',cls:'delta-up',ka:'var(--red)'},
-    {label:'Décès',value:SITREP.totalDeces,sub:`CFR ${SITREP.cfr}%`,delta:'+12 vs N°25',cls:'delta-up',ka:'var(--red)'},
-    {label:'CFR',value:`${SITREP.cfr}%`,sub:'Case fatality rate',delta:'↑ vs 19.2% N°25',cls:'delta-up',ka:'var(--amber)'},
-    {label:'ZS actives',value:SITREP.zsActives,sub:'26 zones de santé',delta:'+1 (Tchomia)',cls:'delta-up',ka:'var(--amber)'},
-    {label:'Guéris',value:SITREP.totalGueris,sub:'Confirmés sortis',delta:'',cls:'',ka:'var(--green)'},
+    {label:'Cas confirm\u00e9s',value:SITREP.totalCas,sub:'Cumulatif N\u00b026',delta:'+37 vs N\u00b025',cls:'delta-up',ka:'var(--red)'},
+    {label:'D\u00e9c\u00e8s',value:SITREP.totalDeces,sub:`CFR ${SITREP.cfr}%`,delta:'+12 vs N\u00b025',cls:'delta-up',ka:'var(--red)'},
+    {label:'CFR',value:`${SITREP.cfr}%`,sub:'Case fatality rate',delta:'\u2191 vs 19.2% N\u00b025',cls:'delta-up',ka:'var(--amber)'},
+    {label:'ZS actives',value:SITREP.zsActives,sub:'26 zones de sant\u00e9',delta:'+1 (Tchomia)',cls:'delta-up',ka:'var(--amber)'},
+    {label:'Gu\u00e9ris',value:SITREP.totalGueris,sub:'Confirm\u00e9s sortis',delta:'',cls:'',ka:'var(--green)'},
     {label:'Contacts',value:SITREP.contacts.toLocaleString('fr'),sub:`Suivi ${SITREP.contactsTaux}%`,delta:'',cls:'',ka:'var(--blue)'},
-    {label:'Incidence/j',value:SITREP.nouveauxCas,sub:'Cas N°26',delta:'Record 48 (N°25)',cls:'delta-neu',ka:'var(--red)'},
-    {label:'Provinces',value:3,sub:'Ituri · NK · SK',delta:'',cls:'',ka:'var(--text3)'}
+    {label:'Incidence/j',value:SITREP.nouveauxCas,sub:'Cas N\u00b026',delta:'Record 48 (N\u00b025)',cls:'delta-neu',ka:'var(--red)'},
+    {label:'Provinces',value:3,sub:'Ituri \u00b7 NK \u00b7 SK',delta:'',cls:'',ka:'var(--text3)'}
   ];
   const el = document.getElementById('currentKpis');
   el.innerHTML = kpis.map(k => `
@@ -503,11 +490,11 @@ function initProvinceTable(){
 
 let trendChart, cumulChart, activeTrend = 'cases';
 function initCharts(){
+  if(typeof Chart === 'undefined'){ console.warn('Chart.js non charg\u00e9'); return; }
   const labels = TREND.map(t => t.d);
   const cases  = TREND.map(t => t.c);
   const deaths = TREND.map(t => t.dc);
   const ma7c   = movAvg(cases, 7);
-  const cfrArr = cases.map((c,i) => c > 0 ? +(deaths[i]/c*100).toFixed(1) : null);
 
   let cumC = 0, cumD = 0;
   const cumCases  = cases.map(v  => cumC += v);
@@ -515,8 +502,7 @@ function initCharts(){
 
   const baseOpts = {
     responsive: true, maintainAspectRatio: true,
-    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false,
-      callbacks: { labelColor: ctx => ({ backgroundColor: ctx.dataset.borderColor || '#fff', borderColor: 'transparent' }) } } },
+    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
     scales: {
       x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#3e4a56', font: { family: "'IBM Plex Mono'", size: 9 }, maxTicksLimit: 12, maxRotation: 0 } },
       y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#3e4a56', font: { family: "'IBM Plex Mono'", size: 9 } } }
@@ -540,8 +526,8 @@ function initCharts(){
     data: {
       labels,
       datasets: [
-        { label: 'Cas cumulés',   data: cumCases,  borderColor: '#e63946', backgroundColor: 'rgba(230,57,70,.08)', borderWidth: 2, pointRadius: 0, tension: .3, fill: true },
-        { label: 'Décès cumulés', data: cumDeaths, borderColor: '#f4a261', backgroundColor: 'rgba(244,162,97,.08)', borderWidth: 2, pointRadius: 0, tension: .3, fill: true }
+        { label: 'Cas cumul\u00e9s',   data: cumCases,  borderColor: '#e63946', backgroundColor: 'rgba(230,57,70,.08)', borderWidth: 2, pointRadius: 0, tension: .3, fill: true },
+        { label: 'D\u00e9c\u00e8s cumul\u00e9s', data: cumDeaths, borderColor: '#f4a261', backgroundColor: 'rgba(244,162,97,.08)', borderWidth: 2, pointRadius: 0, tension: .3, fill: true }
       ]
     },
     options: { ...baseOpts }
@@ -549,6 +535,7 @@ function initCharts(){
 }
 
 function switchTrend(mode, btn){
+  if(typeof Chart === 'undefined' || !trendChart) return;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
   btn.classList.add('on');
   activeTrend = mode;
@@ -562,7 +549,7 @@ function switchTrend(mode, btn){
     trendChart.data.datasets[0] = { label:'Cas/jour', data:cases, backgroundColor:'rgba(230,57,70,.35)', borderRadius:2, type:'bar' };
     trendChart.data.datasets[1] = { label:'Moy. 7j',  data:ma7c,  type:'line', borderColor:'#e63946', borderWidth:2, pointRadius:0, tension:.4, fill:false };
   } else if(mode === 'deaths'){
-    trendChart.data.datasets[0] = { label:'Décès/jour', data:deaths, backgroundColor:'rgba(244,162,97,.35)', borderRadius:2, type:'bar' };
+    trendChart.data.datasets[0] = { label:'D\u00e9c\u00e8s/jour', data:deaths, backgroundColor:'rgba(244,162,97,.35)', borderRadius:2, type:'bar' };
     trendChart.data.datasets[1] = { label:'Moy. 7j',   data:ma7d,   type:'line', borderColor:'#f4a261', borderWidth:2, pointRadius:0, tension:.4, fill:false };
   } else {
     trendChart.data.datasets[0] = { label:'CFR%', data:cfrArr, backgroundColor:'rgba(72,149,239,.35)', borderRadius:2, type:'bar' };
@@ -600,10 +587,10 @@ function initContactTracing(){
 
 function initResponseGrid(){
   const items = [
-    {title:'Contacts identifiés', val:'6 022', sub:'N°26 cumulatif', bar:61, color:'var(--blue)'},
+    {title:'Contacts identifi\u00e9s', val:'6 022', sub:'N\u00b026 cumulatif', bar:61, color:'var(--blue)'},
     {title:'Taux de suivi',       val:'61.1%', sub:'Sur contacts actifs', bar:61, color:'var(--green)'},
-    {title:'Isolation cas',       val:'89%',   sub:'Cas isolés dans 24h', bar:89, color:'var(--amber)'},
-    {title:'Létalité soins',      val:'14.2%', sub:'Cas pris en charge', bar:14, color:'var(--red)'}
+    {title:'Isolation cas',       val:'89%',   sub:'Cas isol\u00e9s dans 24h', bar:89, color:'var(--amber)'},
+    {title:'L\u00e9talit\u00e9 soins',      val:'14.2%', sub:'Cas pris en charge', bar:14, color:'var(--red)'}
   ];
   document.getElementById('respGrid').innerHTML = items.map(i => `
     <div class="risk-card">
@@ -647,7 +634,7 @@ function renderTable(){
   const pages = Math.max(1, Math.ceil(total / pageSize));
   const start = (curPage-1) * pageSize;
   const rows  = filtered.slice(start, start + pageSize);
-  document.getElementById('tblInfo').textContent = `${total} zones — page ${curPage}/${pages}`;
+  document.getElementById('tblInfo').textContent = `${total} zones \u2014 page ${curPage}/${pages}`;
   document.getElementById('mainTblBody').innerHTML = rows.map(r => `
     <tr>
       <td>${r.zone}</td>
@@ -661,13 +648,12 @@ function renderTable(){
       <td>${r.statut==='active'?'<span class="tag-on">ACTIF</span>':'<span class="tag-ov">SURVEILL.</span>'}</td>
       <td><span class="src-tag" title="${r.src}">${r.src.split(' ')[0]}</span></td>
     </tr>`).join('');
-  // pager
   let p = '';
   for(let i=1;i<=pages;i++){
-    if(pages>7 && i>2 && i<pages-1 && Math.abs(i-curPage)>1){ if(i===3||i===pages-2) p+='<span class="pager-ellipsis">…</span>'; continue; }
+    if(pages>7 && i>2 && i<pages-1 && Math.abs(i-curPage)>1){ if(i===3||i===pages-2) p+='<span class="pager-ellipsis">\u2026</span>'; continue; }
     p += `<button class="${i===curPage?'on':''}" onclick="goPage(${i})">${i}</button>`;
   }
-  document.getElementById('pager').innerHTML = `<button onclick="goPage(${curPage-1})" ${curPage===1?'disabled':''}>‹</button>${p}<button onclick="goPage(${curPage+1})" ${curPage===pages?'disabled':''}>›</button>`;
+  document.getElementById('pager').innerHTML = `<button onclick="goPage(${curPage-1})" ${curPage===1?'disabled':''}>\u2039</button>${p}<button onclick="goPage(${curPage+1})" ${curPage===pages?'disabled':''}>\u203a</button>`;
 }
 function goPage(n){ const pages=Math.ceil(filtered.length/pageSize); if(n<1||n>pages)return; curPage=n; renderTable(); }
 
@@ -701,22 +687,17 @@ function initMap(){
   const provinces = [
     {id:'ituri',   label:'Ituri',     fill:'#e63946', opacity:.8, path:'M 480 180 L 540 160 L 580 190 L 570 250 L 530 280 L 480 260 L 460 220 Z', zs:18},
     {id:'nk',      label:'Nord-Kivu', fill:'#f4a261', opacity:.7, path:'M 440 260 L 480 260 L 530 280 L 520 340 L 480 370 L 430 350 L 410 300 Z', zs:7},
-    {id:'sk',      label:'Sud-Kivu',  fill:'#4895ef', opacity:.5, path:'M 410 350 L 480 370 L 470 430 L 430 460 L 390 440 L 380 390 Z', zs:1},
-    {id:'autres',  label:'Autres provinces', fill:'#1b222b', opacity:1, path:'M 100 80 L 700 80 L 700 620 L 100 620 Z', zs:0}
+    {id:'sk',      label:'Sud-Kivu',  fill:'#4895ef', opacity:.5, path:'M 410 350 L 480 370 L 470 430 L 430 460 L 390 440 L 380 390 Z', zs:1}
   ];
-  // draw background first
   const bg = document.createElementNS('http://www.w3.org/2000/svg','path');
   bg.setAttribute('d','M 100 80 L 700 80 L 700 620 L 100 620 Z');
-  bg.setAttribute('fill','#1b222b'); bg.setAttribute('opacity','1');
+  bg.setAttribute('fill','#1b222b');
   svg.appendChild(bg);
-  // DRC outline simplified
   const outline = document.createElementNS('http://www.w3.org/2000/svg','path');
   outline.setAttribute('d','M 150 100 L 300 85 L 450 90 L 580 110 L 660 160 L 680 250 L 670 360 L 640 450 L 580 530 L 480 580 L 360 600 L 250 590 L 160 550 L 110 460 L 100 350 L 110 230 L 130 140 Z');
   outline.setAttribute('fill','#141a21'); outline.setAttribute('stroke','rgba(255,255,255,.1)'); outline.setAttribute('stroke-width','1.5');
   svg.appendChild(outline);
-  // affected provinces
   [provinces[2],provinces[1],provinces[0]].forEach(p => {
-    if(p.zs === 0) return;
     const el = document.createElementNS('http://www.w3.org/2000/svg','path');
     el.setAttribute('d', p.path);
     el.setAttribute('fill', p.fill);
@@ -725,10 +706,9 @@ function initMap(){
     el.setAttribute('stroke-width','1');
     el.style.cursor = 'pointer';
     const title = document.createElementNS('http://www.w3.org/2000/svg','title');
-    title.textContent = `${p.label} — ${p.zs} ZS actives`;
+    title.textContent = `${p.label} \u2014 ${p.zs} ZS actives`;
     el.appendChild(title);
     svg.appendChild(el);
-    // label
     const bb = {ituri:[510,225],nk:[475,315],sk:[430,405]};
     const coords = bb[p.id];
     if(coords){
@@ -741,7 +721,6 @@ function initMap(){
       svg.appendChild(txt);
     }
   });
-  // legend
   const legData = [
     {color:'#e63946',label:'Ituri (18 ZS)'},
     {color:'#f4a261',label:'Nord-Kivu (7 ZS)'},
@@ -758,17 +737,35 @@ function checkStaleness(){
   if(diff >= 3){
     const b = document.getElementById('stalenessBanner');
     b.style.display = 'flex';
-    b.textContent = `⚠ Données de SitRep N°${SITREP.n} (${SITREP.dateLabel}) — ${diff} jours depuis la dernière mise à jour. Vérifier insp.cd`;
+    b.innerHTML = `&#9888; Donn&eacute;es de SitRep N&deg;${SITREP.n} (${SITREP.dateLabel}) &mdash; ${diff} jours depuis la derni&egrave;re mise &agrave; jour. <a href="https://insp.cd/blog-2/" target="_blank" style="color:#ffaaaa;margin-left:8px">V&eacute;rifier insp.cd &rarr;</a>`;
   }
 }
 
-// ─── ANIMATE ─────────────────────────────────────────────────────────────
+// ─── ANIMATE (safe — éléments déjà visibles par défaut) ───────────────────
 function animateFi(){
+  // Ajoute la classe .anim uniquement si IntersectionObserver est disponible
+  // et que le layout est non-nul (évite le piège iframe/sandbox)
+  if(!window.IntersectionObserver) return;
   const els = document.querySelectorAll('.fi');
+  // Vérifie que le body a une hauteur réelle
+  if(document.body.offsetHeight < 10) return;
+  els.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    // Elements déjà dans le viewport : visibles immédiatement
+    if(rect.top < window.innerHeight * 1.2){
+      el.classList.add('anim','vis');
+    } else {
+      el.classList.add('anim');
+    }
+  });
   const obs = new IntersectionObserver(entries => {
     entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('vis'); obs.unobserve(e.target); } });
-  }, { threshold: 0.08 });
-  els.forEach(el => obs.observe(el));
+  }, { threshold: 0.05 });
+  document.querySelectorAll('.fi.anim:not(.vis)').forEach(el => obs.observe(el));
+  // Safety-net : force tout visible après 1200ms quoi qu'il arrive
+  setTimeout(() => {
+    document.querySelectorAll('.fi.anim:not(.vis)').forEach(el => el.classList.add('vis'));
+  }, 1200);
 }
 </script>
 </body>
