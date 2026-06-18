@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>EBOLA-MONITOR v5.2 — RDC 2026</title>
+<title>EBOLA-MONITOR v5.3 — RDC 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600&display=swap" rel="stylesheet">
@@ -27,7 +27,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(230,57,70,.07) 0,transparent 70%);pointer-events:none;z-index:0;}
 .app{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:0 20px 60px;}
 a{color:var(--blue);}
-#stalenessBanner{display:none;background:#7b0000;color:#ffcccc;padding:10px 20px;font-family:var(--mono);font-size:11px;align-items:center;justify-content:center;text-align:center;border-bottom:2px solid var(--red);position:sticky;top:0;z-index:9999;width:100%;gap:10px;}
+/* ── FIX PRINCIPAL : tous les .fi sont visibles par défaut, TOUJOURS ── */
+.fi{opacity:1 !important;transform:none !important;visibility:visible !important;}
+/* Animation scroll optionnelle — seulement si JS l'active explicitement ── */
+.fi.anim-ready{opacity:0 !important;transform:translateY(14px) !important;transition:opacity .5s,transform .5s;}
+.fi.anim-ready.vis{opacity:1 !important;transform:none !important;}
+/* Staleness banner — non-bloquant, hauteur auto, pas de sticky ── */
+#stalenessBanner{display:none;background:#7b0000;color:#ffcccc;padding:10px 20px;font-family:var(--mono);font-size:11px;align-items:center;justify-content:center;text-align:center;border-bottom:2px solid var(--red);width:100%;gap:10px;min-height:38px;}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
 .topbar-brand{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);letter-spacing:-.01em;display:flex;align-items:center;gap:8px;}
 .topbar-brand .dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:blink 1.5s ease-in-out infinite;}
@@ -96,7 +102,7 @@ a{color:var(--blue);}
 .province-list tr:last-child td{border-bottom:none;}
 .province-list tr:hover td{background:rgba(255,255,255,.02);}
 .bar-cell{display:flex;align-items:center;gap:8px;}
-.mini-bar{height:5px;border-radius:3px;background:var(--red);min-width:2px;transition:width .4s;}
+.mini-bar{height:5px;border-radius:3px;background:var(--red);min-width:4px;transition:width .4s;flex-shrink:0;}
 .status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;}
 .active-dot{background:var(--red);animation:blink 1.5s infinite;}
 .monitoring-dot{background:var(--amber);}
@@ -162,10 +168,6 @@ mtt strong{display:block;margin-bottom:6px;font-family:var(--mono);font-size:11p
 .ct-bar{height:100%;border-radius:99px;background:var(--blue);transition:width .6s;}
 .ct-pct{font-family:var(--mono);font-size:10px;color:var(--text2);min-width:42px;text-align:right;}
 .ct-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;text-align:right;min-width:70px;}
-/* ── FIX PAGE NOIRE : .fi visible par défaut, animation en bonus ── */
-.fi{opacity:1;transform:none;}
-.fi.anim{opacity:0;transform:translateY(14px);transition:opacity .5s,transform .5s;}
-.fi.anim.vis{opacity:1;transform:none;}
 .footer-src{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.04em;line-height:1.8;}
 .footer-src a{color:var(--text2);text-decoration:none;}
 .footer-src a:hover{color:var(--text);}
@@ -173,18 +175,22 @@ mtt strong{display:block;margin-bottom:6px;font-family:var(--mono);font-size:11p
 footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);}
 toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:11px;padding:10px 18px;border-radius:var(--rl);z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
 toast.show{opacity:1;transform:translateY(0);}
+.staleness-inline{background:#7b0000;color:#ffcccc;padding:10px 20px;font-family:var(--mono);font-size:11px;text-align:center;border-bottom:2px solid var(--red);width:100%;margin-bottom:16px;border-radius:var(--r);}
 </style>
 </head>
 <body>
 <mtt id="mtt"></mtt>
 <toast id="toast">Export ready</toast>
-<div id="stalenessBanner"></div>
+
 <div class="app">
+
+<!-- Staleness banner inline (non-bloquant, dans le flux normal) -->
+<div id="stalenessBanner" style="display:none"></div>
 
 <div class="topbar fi">
   <div class="topbar-brand">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 1 0 20M12 2a7 7 0 0 0 0 20M2 12h20"/><path d="M12 6c1.5 2 2 4 2 6s-.5 4-2 6M12 6c-1.5 2-2 4-2 6s.5 4 2 6"/></svg>
-    <span class="dot"></span> EBOLA-MONITOR v5.2.0
+    <span class="dot"></span> EBOLA-MONITOR v5.3.0
   </div>
   <div class="topbar-right">
     <span class="pheic-badge">PHEIC DECLARED 17 MAY 2026</span>
@@ -356,7 +362,7 @@ toast.show{opacity:1;transform:translateY(0);}
     <a href="https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda" target="_blank">ECDC</a> &bull;
     <a href="https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak" target="_blank">MSF</a> &bull;
     <a href="https://reliefweb.int/" target="_blank">ReliefWeb</a>
-    <span class="footer-tag">EBOLA-MONITOR v5.2.0 &mdash; dashboard &eacute;pid&eacute;mique temps r&eacute;el &mdash; RDC 2026</span>
+    <span class="footer-tag">EBOLA-MONITOR v5.3.0 &mdash; dashboard &eacute;pid&eacute;mique &mdash; RDC 2026</span>
   </div>
 </footer>
 </div>
@@ -427,7 +433,9 @@ const TREND = [
 let sortCol='cas', sortDir=-1, pageSize=25, curPage=1;
 let provFilter='all', statFilter='all', searchQ='';
 
-document.addEventListener('DOMContentLoaded', () => {
+// Lancement immédiat — pas d'attente DOMContentLoaded pour éviter les
+// problèmes de timing dans les environnements sandboxés (Vercel edge, iframes).
+function bootstrap(){
   try { initHero(); } catch(e){ console.warn('initHero',e); }
   try { initKpis(); } catch(e){ console.warn('initKpis',e); }
   try { initProvinceTable(); } catch(e){ console.warn('initProvinceTable',e); }
@@ -437,8 +445,13 @@ document.addEventListener('DOMContentLoaded', () => {
   try { initFilters(); } catch(e){ console.warn('initFilters',e); }
   try { initMap(); } catch(e){ console.warn('initMap',e); }
   try { checkStaleness(); } catch(e){ console.warn('checkStaleness',e); }
-  try { animateFi(); } catch(e){ console.warn('animateFi',e); }
-});
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', bootstrap);
+} else {
+  bootstrap();
+}
 
 function initHero(){
   document.getElementById('heroDate').textContent = SITREP.dateLabel;
@@ -476,11 +489,11 @@ function initKpis(){
 function initProvinceTable(){
   const tbody = document.getElementById('provinceTable');
   tbody.innerHTML = SITREP.provinces.map(p => {
-    const pct = Math.round(p.cas / SITREP.totalCas * 100);
+    const pct = Math.max(4, Math.round(p.cas / SITREP.totalCas * 100));
     return `<tr>
       <td>${p.nom}</td>
       <td>${p.zs}</td>
-      <td><div class="bar-cell"><div class="mini-bar" style="width:${pct}%"></div>${p.cas}</div></td>
+      <td><div class="bar-cell"><div class="mini-bar" style="width:${pct}px"></div>${p.cas}</div></td>
       <td>${p.deces}</td>
       <td>${p.cfr}%</td>
       <td><span class="active-dot status-dot"></span> Actif</td>
@@ -729,43 +742,17 @@ function initMap(){
   document.getElementById('mapLeg').innerHTML = legData.map(l=>`<span class="leg-i"><span class="leg-sw" style="background:${l.color}"></span>${l.label}</span>`).join('');
 }
 
-// ─── STALENESS ────────────────────────────────────────────────────────────
+// ─── STALENESS (non-bloquant — inline dans le flux, pas sticky) ──────────
 function checkStaleness(){
   const lastDate = new Date(SITREP.date);
   const now = new Date();
   const diff = Math.floor((now - lastDate)/(1000*60*60*24));
   if(diff >= 3){
     const b = document.getElementById('stalenessBanner');
-    b.style.display = 'flex';
+    b.style.display = 'block';
+    b.className = 'staleness-inline';
     b.innerHTML = `&#9888; Donn&eacute;es de SitRep N&deg;${SITREP.n} (${SITREP.dateLabel}) &mdash; ${diff} jours depuis la derni&egrave;re mise &agrave; jour. <a href="https://insp.cd/blog-2/" target="_blank" style="color:#ffaaaa;margin-left:8px">V&eacute;rifier insp.cd &rarr;</a>`;
   }
-}
-
-// ─── ANIMATE (safe — éléments déjà visibles par défaut) ───────────────────
-function animateFi(){
-  // Ajoute la classe .anim uniquement si IntersectionObserver est disponible
-  // et que le layout est non-nul (évite le piège iframe/sandbox)
-  if(!window.IntersectionObserver) return;
-  const els = document.querySelectorAll('.fi');
-  // Vérifie que le body a une hauteur réelle
-  if(document.body.offsetHeight < 10) return;
-  els.forEach(el => {
-    const rect = el.getBoundingClientRect();
-    // Elements déjà dans le viewport : visibles immédiatement
-    if(rect.top < window.innerHeight * 1.2){
-      el.classList.add('anim','vis');
-    } else {
-      el.classList.add('anim');
-    }
-  });
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('vis'); obs.unobserve(e.target); } });
-  }, { threshold: 0.05 });
-  document.querySelectorAll('.fi.anim:not(.vis)').forEach(el => obs.observe(el));
-  // Safety-net : force tout visible après 1200ms quoi qu'il arrive
-  setTimeout(() => {
-    document.querySelectorAll('.fi.anim:not(.vis)').forEach(el => el.classList.add('vis'));
-  }, 1200);
 }
 </script>
 </body>
