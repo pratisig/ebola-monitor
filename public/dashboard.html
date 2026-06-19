@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -148,9 +150,7 @@ a{color:var(--blue);}
 .risk-meter{height:6px;background:var(--bg4);border-radius:99px;overflow:hidden;margin-bottom:5px;}
 .risk-bar{height:100%;border-radius:99px;transition:width .6s;}
 .risk-level{font-family:var(--mono);font-size:10px;}
-#mapDrc{width:100%;height:380px;display:block;background:var(--bg3);border-radius:var(--r);}
-#mapDrc path{transition:opacity .15s;}
-#mapDrc path:hover{opacity:.75;}
+#mapLeaflet{width:100%;height:460px;border-radius:var(--r);background:var(--bg3);}
 .map-leg{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center;}
 .leg-i{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--text3);}
 .leg-sw{width:10px;height:10px;border-radius:2px;display:inline-block;}
@@ -173,6 +173,13 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);}
 toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:11px;padding:10px 18px;border-radius:var(--rl);z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
 toast.show{opacity:1;transform:translateY(0);}
 .staleness-inline{background:#7b0000;color:#ffcccc;padding:10px 20px;font-family:var(--mono);font-size:11px;text-align:center;border-bottom:2px solid var(--red);width:100%;margin-bottom:16px;border-radius:var(--r);}
+/* Leaflet dark overrides */
+.leaflet-container{background:var(--bg3) !important;}
+.leaflet-popup-content-wrapper{background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:var(--rl);box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.leaflet-popup-tip{background:var(--bg3);}
+.leaflet-popup-content{font-family:var(--mono);font-size:11px;color:var(--text);}
+.leaflet-control-zoom a{background:var(--bg2) !important;color:var(--text) !important;border-color:var(--border2) !important;}
+.leaflet-control-attribution{background:rgba(7,9,12,.7) !important;color:var(--text3) !important;font-size:9px !important;}
 </style>
 </head>
 <body>
@@ -302,27 +309,6 @@ toast.show{opacity:1;transform:translateY(0);}
       <div class="discrepancy-item"><span class="discrepancy-label">~350 cas non localis&eacute;s</span><span class="discrepancy-detail">Processus DHIS2 de r&eacute;conciliation en cours — dont 17 cas Ituri sans ventilation pr&eacute;cise par ZS. Donn&eacute;es r&eacute;actualis&eacute;es au fil du nettoyage.</span></div>
     </div>
     <div class="consensus">&#10003; Consensus : INSP N&deg;34 (17/06/2026) = r&eacute;f&eacute;rence &mdash; 896 cas / 232 d&eacute;c&egrave;s / CFR 26,3% / 33 ZS / 3 provinces</div>
-  </div>
-</div>
-
-<div class="section fi">
-  <div class="section-head"><span class="section-title">Epidemic curves</span></div>
-  <div class="grid2">
-    <div class="panel">
-      <div class="panel-head">
-        <span class="panel-title">Daily new cases &amp; 7-day average</span>
-        <div class="tabs">
-          <button class="tab on" onclick="switchTrend('cases',this)">Cases</button>
-          <button class="tab" onclick="switchTrend('deaths',this)">Deaths</button>
-          <button class="tab" onclick="switchTrend('cfr',this)">CFR</button>
-        </div>
-      </div>
-      <div class="chart-box"><canvas id="trendChart" height="200"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><span class="panel-title">Cumulative cases &amp; deaths</span></div>
-      <div class="chart-box"><canvas id="cumulChart" height="200"></canvas></div>
-    </div>
   </div>
 </div>
 
@@ -465,6 +451,22 @@ toast.show{opacity:1;transform:translateY(0);}
   </div>
 </div>
 
+<!-- CARTE CHOROPLÈTHE -->
+<div class="section fi">
+  <div class="section-head">
+    <span class="section-title">Carte choroplèthe &mdash; Distribution géographique (SitRep N°34)</span>
+    <div class="tabs" id="mapTabs">
+      <button class="tab on" onclick="setMapMode('cases',this)">Cas</button>
+      <button class="tab" onclick="setMapMode('deaths',this)">Décès</button>
+      <button class="tab" onclick="setMapMode('cfr',this)">CFR</button>
+    </div>
+  </div>
+  <div class="panel" style="padding:14px;">
+    <div id="mapLeaflet"></div>
+    <div class="map-leg" id="mapLeg"></div>
+  </div>
+</div>
+
 <div class="section fi">
   <div class="section-head"><span class="section-title">Risk assessment &mdash; facteurs aggravants</span></div>
   <div class="grid2">
@@ -581,7 +583,7 @@ const SITREP = {
   casProbables: 56
 };
 
-// Données hebdomadaires cumulatives (reconstruction à partir des SitReps disponibles)
+// Données hebdomadaires cumulatives
 const WEEKLY = [
   { w:'S1 (15-21/05)', cas:42,  deces:8,   cfr:19.0 },
   { w:'S2 (22-28/05)', cas:148, deces:28,  cfr:18.9 },
@@ -590,12 +592,11 @@ const WEEKLY = [
   { w:'S5 (12-17/06)', cas:896, deces:232, cfr:25.9 }
 ];
 
-// Nouveaux cas journaliers (approximatifs — basés sur les incréments inter-SitReps)
+// Nouveaux cas journaliers
 const DAILY_CASES  = [6,8,5,7,9,7,5, 14,18,22,19,16,20,24, 28,35,30,38,32,28,35, 38,42,45,48,40,36,44, 32,38,46,52,40,44,21];
 const DAILY_DEATHS = [1,1,1,1,2,1,1,  2, 3, 4, 3, 2, 4, 4,  5, 6, 5, 7, 5, 4, 6,  7, 8, 9,10, 7, 6, 8,  12,14,16,18,14,12,6];
 const DAILY_LABELS = DAILY_CASES.map((_,i)=> `J+${i+1}`);
 
-// MA7
 function ma7(arr){return arr.map((_,i,a)=>i<6?null:a.slice(i-6,i+1).reduce((s,v)=>s+v,0)/7);}
 const MA7_CASES  = ma7(DAILY_CASES);
 const MA7_DEATHS = ma7(DAILY_DEATHS);
@@ -609,7 +610,6 @@ function buildCharts(){
   Chart.defaults.font.family=mono;
   Chart.defaults.font.size=10;
 
-  // Trend
   const ctxT = document.getElementById('trendChart');
   if(!ctxT) return;
   trendChart = new Chart(ctxT,{
@@ -631,7 +631,6 @@ function buildCharts(){
     }
   });
 
-  // Cumul
   const ctxC = document.getElementById('cumulChart');
   if(!ctxC) return;
   cumulChart = new Chart(ctxC,{
@@ -681,7 +680,16 @@ function switchTrend(mode, btn){
   trendChart.update();
 }
 
-// Staleness check (>72h depuis le 17/06/2026 = alerte)
+// Mode carte — exposé globalement pour map-patch-v46.js
+window.mapMode = 'cases';
+function setMapMode(mode, btn){
+  window.mapMode = mode;
+  document.querySelectorAll('#mapTabs .tab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  if(typeof window.drawDrcMap === 'function') window.drawDrcMap();
+}
+
+// Staleness check (>72h depuis le 17/06/2026)
 function checkStaleness(){
   const lastUpdate = new Date('2026-06-17T18:00:00Z');
   const now = new Date();
@@ -700,5 +708,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   checkStaleness();
 });
 </script>
+
+<!-- Carte choroplèthe — doit être chargé après le DOM -->
+<script src="map-patch-v46.js"></script>
+
 </body>
 </html>
