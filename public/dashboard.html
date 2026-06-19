@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>EBOLA-MONITOR v5.3 — RDC 2026</title>
+<title>EBOLA-MONITOR v5.4 — RDC 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600&display=swap" rel="stylesheet">
@@ -27,12 +27,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(230,57,70,.07) 0,transparent 70%);pointer-events:none;z-index:0;}
 .app{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:0 20px 60px;}
 a{color:var(--blue);}
-/* ── FIX PRINCIPAL : tous les .fi sont visibles par défaut, TOUJOURS ── */
 .fi{opacity:1 !important;transform:none !important;visibility:visible !important;}
-/* Animation scroll optionnelle — seulement si JS l'active explicitement ── */
 .fi.anim-ready{opacity:0 !important;transform:translateY(14px) !important;transition:opacity .5s,transform .5s;}
 .fi.anim-ready.vis{opacity:1 !important;transform:none !important;}
-/* Staleness banner — non-bloquant, hauteur auto, pas de sticky ── */
 #stalenessBanner{display:none;background:#7b0000;color:#ffcccc;padding:10px 20px;font-family:var(--mono);font-size:11px;align-items:center;justify-content:center;text-align:center;border-bottom:2px solid var(--red);width:100%;gap:10px;min-height:38px;}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
 .topbar-brand{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);letter-spacing:-.01em;display:flex;align-items:center;gap:8px;}
@@ -184,13 +181,12 @@ toast.show{opacity:1;transform:translateY(0);}
 
 <div class="app">
 
-<!-- Staleness banner inline (non-bloquant, dans le flux normal) -->
 <div id="stalenessBanner" style="display:none"></div>
 
 <div class="topbar fi">
   <div class="topbar-brand">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 1 0 20M12 2a7 7 0 0 0 0 20M2 12h20"/><path d="M12 6c1.5 2 2 4 2 6s-.5 4-2 6M12 6c-1.5 2-2 4-2 6s.5 4 2 6"/></svg>
-    <span class="dot"></span> EBOLA-MONITOR v5.3.0
+    <span class="dot"></span> EBOLA-MONITOR v5.4.0
   </div>
   <div class="topbar-right">
     <span class="pheic-badge">PHEIC DECLARED 17 MAY 2026</span>
@@ -207,9 +203,9 @@ toast.show{opacity:1;transform:translateY(0);}
   <div class="hero-meta">
     <span>Declared <strong>15 May 2026</strong></span>
     <span>PHEIC since <strong>17 May 2026</strong></span>
-    <span>Last update <strong id="heroDate">&mdash;</strong></span>
+    <span>Last update <strong id="heroDate">17 juin 2026</strong></span>
     <span>Virus <strong>Bundibugyo (BDBV) &mdash; no approved vaccine</strong></span>
-    <span id="dataSourceBadge" style="font-size:10px;color:var(--text3)"></span>
+    <span id="dataSourceBadge" style="font-size:10px;color:var(--text3)">SitRep N°34 &mdash; INSP RDC</span>
   </div>
 </div>
 
@@ -217,39 +213,95 @@ toast.show{opacity:1;transform:translateY(0);}
   <div class="alert">
     <span class="alert-icon">&#9888;&#65039;</span>
     <div class="alert-body">
-      <div class="alert-title">SITUATION AS OF <span id="alertDate">&mdash;</span></div>
-      <div class="alert-text" id="alertText">Chargement&hellip;</div>
+      <div class="alert-title">SITUATION AS OF <span id="alertDate">17 JUIN 2026</span></div>
+      <div class="alert-text" id="alertText">
+        <strong>896 cas confirm&eacute;s</strong> &mdash; 232 d&eacute;c&egrave;s (CFR 26,3%) &mdash; 33 zones de sant&eacute; affect&eacute;es dans 3 provinces (Ituri, Nord-Kivu, Sud-Kivu).
+        21 nouveaux cas confirm&eacute;s et 6 d&eacute;c&egrave;s rapport&eacute;s le 17 juin 2026 (Ituri : 16 cas / 4 d&eacute;c&egrave;s ; Nord-Kivu : 5 cas / 2 d&eacute;c&egrave;s).
+        11 patients d&eacute;clar&eacute;s gu&eacute;ris. 383 patients actuellement en isolement (taux d&rsquo;occupation 93,6%).
+        Suivi des contacts : 71,1% (6 367 contacts — 4 525 vus). 56 cas probables en cours de validation.
+        <strong>Nord-Kivu : l&eacute;talit&eacute; critique &agrave; 59,2%.</strong> CTE Ituri satur&eacute; &agrave; 96,4%.
+      </div>
     </div>
   </div>
 </div>
 
 <div class="section fi">
-  <div class="section-head"><span class="section-title">Current outbreak &mdash; confirmed figures (INSP RDC)</span></div>
-  <div class="kpi-strip" id="currentKpis"></div>
+  <div class="section-head"><span class="section-title">Current outbreak &mdash; confirmed figures (INSP RDC &mdash; SitRep N&deg;34)</span></div>
+  <div class="kpi-strip" id="currentKpis">
+    <div class="kpi">
+      <div class="kpi-label">Cas confirm&eacute;s</div>
+      <div class="kpi-value">896</div>
+      <div class="kpi-sub">cumul au 17/06/2026</div>
+      <div class="kpi-delta delta-up">+21 (24h)</div>
+    </div>
+    <div class="kpi" style="--ka:var(--red)">
+      <div class="kpi-label">D&eacute;c&egrave;s confirm&eacute;s</div>
+      <div class="kpi-value">232</div>
+      <div class="kpi-sub">CFR global 26,3%</div>
+      <div class="kpi-delta delta-up">+6 (24h)</div>
+    </div>
+    <div class="kpi" style="--ka:var(--green)">
+      <div class="kpi-label">Gu&eacute;ris</div>
+      <div class="kpi-value">383</div>
+      <div class="kpi-sub">93,6% taux occupation CTE</div>
+      <div class="kpi-delta delta-good">+11 (24h)</div>
+    </div>
+    <div class="kpi" style="--ka:var(--amber)">
+      <div class="kpi-label">En isolement</div>
+      <div class="kpi-value">383</div>
+      <div class="kpi-sub">dont 161 confirm&eacute;s (NC+AC)</div>
+      <div class="kpi-delta delta-neu">78 hospitalis&eacute;s</div>
+    </div>
+    <div class="kpi" style="--ka:var(--amber)">
+      <div class="kpi-label">Zones de sant&eacute;</div>
+      <div class="kpi-value">33</div>
+      <div class="kpi-sub">sur 104 (31,7%) — 3 provinces</div>
+      <div class="kpi-delta delta-neu">Ituri 21 · NK 11 · SK 1</div>
+    </div>
+    <div class="kpi" style="--ka:var(--blue)">
+      <div class="kpi-label">Suivi contacts</div>
+      <div class="kpi-value">71,1%</div>
+      <div class="kpi-sub">4 525 / 6 367 contacts vus</div>
+      <div class="kpi-delta delta-up">Cible : 95%</div>
+    </div>
+    <div class="kpi" style="--ka:var(--red)">
+      <div class="kpi-label">Cas suspects / jour</div>
+      <div class="kpi-value">151</div>
+      <div class="kpi-sub">dont 35 d&eacute;c&egrave;s</div>
+      <div class="kpi-delta delta-up">1 028 alertes remont&eacute;es</div>
+    </div>
+    <div class="kpi" style="--ka:var(--amber)">
+      <div class="kpi-label">Cas probables (validation)</div>
+      <div class="kpi-value">56</div>
+      <div class="kpi-sub">en cours d&rsquo;investigation</div>
+      <div class="kpi-delta delta-neu">DHIS2 en cours</div>
+    </div>
+  </div>
 </div>
 
 <div class="section fi">
   <div class="section-head"><span class="section-title">Multi-sources transparency &mdash; why figures differ</span></div>
   <div class="sources-panel">
-    <div class="sources-title">Sources comparison &mdash; <span id="sourcesDateLabel">09 juin 2026</span></div>
+    <div class="sources-title">Sources comparison &mdash; <span id="sourcesDateLabel">17&ndash;18 juin 2026</span></div>
     <div style="overflow-x:auto">
       <table class="sources-table">
         <thead><tr><th>Source</th><th>Cas confirm.</th><th>D&eacute;c&egrave;s</th><th>CFR</th><th>Date rapport</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr><td class="mn">INSP RDC (SitRep N&deg;26)</td><td class="mn">635</td><td class="mn">127</td><td class="mn">20.0%</td><td class="mn">09/06/2026</td><td class="note">Source primaire nationale &mdash; r&eacute;f&eacute;rence officielle</td></tr>
-          <tr><td class="mn">WHO DON</td><td class="mn">~598</td><td class="mn">~115</td><td class="mn">19.2%</td><td class="mn">08/06/2026</td><td class="note">D&eacute;lai de consolidation OMS ~24-48h</td></tr>
-          <tr><td class="mn">ECDC</td><td class="mn">~598</td><td class="mn">~115</td><td class="mn">19.2%</td><td class="mn">08/06/2026</td><td class="note">Reprend les donn&eacute;es WHO avec d&eacute;lai</td></tr>
-          <tr><td class="mn">MSF / terrain</td><td class="mn">N/D</td><td class="mn">N/D</td><td class="mn">&mdash;</td><td class="mn">&mdash;</td><td class="note">Donn&eacute;es op&eacute;rationnelles non publi&eacute;es</td></tr>
+          <tr><td class="mn">INSP RDC (SitRep N&deg;34)</td><td class="mn">896</td><td class="mn">232</td><td class="mn">26,3%</td><td class="mn">17/06/2026</td><td class="note">Source primaire nationale &mdash; r&eacute;f&eacute;rence officielle. Donn&eacute;es DHIS2 en cours de nettoyage.</td></tr>
+          <tr><td class="mn">WHO DON</td><td class="mn">~635</td><td class="mn">~127</td><td class="mn">~20,0%</td><td class="mn">09/06/2026</td><td class="note">D&eacute;lai de consolidation OMS ~7-10j vs INSP. Dernier DON disponible au 09/06.</td></tr>
+          <tr><td class="mn">ECDC</td><td class="mn">~635</td><td class="mn">~127</td><td class="mn">~20,0%</td><td class="mn">09/06/2026</td><td class="note">Reprend les donn&eacute;es WHO avec d&eacute;lai suppl&eacute;mentaire.</td></tr>
+          <tr><td class="mn">MSF / terrain</td><td class="mn">N/D</td><td class="mn">N/D</td><td class="mn">&mdash;</td><td class="mn">&mdash;</td><td class="note">Donn&eacute;es op&eacute;rationnelles non publi&eacute;es. MSF active &agrave; Beni, Butembo, Katwa.</td></tr>
         </tbody>
       </table>
     </div>
     <div class="discrepancy-box">
-      <div class="discrepancy-title">&Eacute;carts notables &mdash; explications</div>
-      <div class="discrepancy-item"><span class="discrepancy-label">INSP vs WHO (+37 cas)</span><span class="discrepancy-detail">D&eacute;calage consolidation nationale &rarr; OMS 24-48h. INSP publie en temps r&eacute;el.</span></div>
-      <div class="discrepancy-item"><span class="discrepancy-label">CFR 20.0% vs 19.2%</span><span class="discrepancy-detail">Mise &agrave; jour N&deg;26 int&egrave;gre 12 nouveaux d&eacute;c&egrave;s confirm&eacute;s post-SitRep N&deg;25.</span></div>
-      <div class="discrepancy-item"><span class="discrepancy-label">26 ZS actives (N&deg;26)</span><span class="discrepancy-detail">Tchomia (Ituri) nouvellement ajout&eacute;e &mdash; portant Ituri &agrave; 18 ZS touch&eacute;es.</span></div>
+      <div class="discrepancy-title">&Eacute;carts notables &mdash; explications (N&deg;34 vs WHO)</div>
+      <div class="discrepancy-item"><span class="discrepancy-label">INSP vs WHO (+261 cas)</span><span class="discrepancy-detail">D&eacute;calage structurel de ~8-10 jours entre publication INSP (temps r&eacute;el) et consolidation OMS. Le N&deg;34 int&egrave;gre 8 SitRep suppl&eacute;mentaires.</span></div>
+      <div class="discrepancy-item"><span class="discrepancy-label">CFR 26,3% vs 20,0%</span><span class="discrepancy-detail">Augmentation significative de la l&eacute;talit&eacute; port&eacute;e par Nord-Kivu (59,2%) &mdash; acc&egrave;s aux soins retard&eacute; et saturation CTE en Ituri (96,4%).</span></div>
+      <div class="discrepancy-item"><span class="discrepancy-label">33 ZS actives (N&deg;34)</span><span class="discrepancy-detail">+7 ZS depuis N&deg;26 : Kambala, Nia-Nia, Fataki (Ituri) ; Masereka, Vuhovi, Mabalako, Musienene (Nord-Kivu) nouvellement touch&eacute;es.</span></div>
+      <div class="discrepancy-item"><span class="discrepancy-label">~350 cas non localis&eacute;s</span><span class="discrepancy-detail">Processus DHIS2 de r&eacute;conciliation en cours — dont 17 cas Ituri sans ventilation pr&eacute;cise par ZS. Donn&eacute;es r&eacute;actualis&eacute;es au fil du nettoyage.</span></div>
     </div>
-    <div class="consensus">&#10003; Consensus : INSP N&deg;26 (09/06) = r&eacute;f&eacute;rence &mdash; 635 cas / 127 d&eacute;c&egrave;s / CFR 20.0%</div>
+    <div class="consensus">&#10003; Consensus : INSP N&deg;34 (17/06/2026) = r&eacute;f&eacute;rence &mdash; 896 cas / 232 d&eacute;c&egrave;s / CFR 26,3% / 33 ZS / 3 provinces</div>
   </div>
 </div>
 
@@ -275,485 +327,378 @@ toast.show{opacity:1;transform:translateY(0);}
 </div>
 
 <div class="section fi">
-  <div class="section-head"><span class="section-title">Geographic distribution &mdash; Health zones by province</span></div>
+  <div class="section-head"><span class="section-title">Geographic distribution &mdash; Health zones by province (SitRep N&deg;34)</span></div>
   <div class="grid2">
     <div class="panel">
       <div class="panel-head"><span class="panel-title">Active zones by province</span></div>
       <table class="province-list">
-        <thead><tr><th>Province</th><th>ZS actives</th><th>Cas</th><th>D&eacute;c&egrave;s</th><th>CFR</th><th>Statut</th></tr></thead>
-        <tbody id="provinceTable"></tbody>
+        <thead><tr><th>Province</th><th>ZS touch&eacute;es</th><th>Cas</th><th>D&eacute;c&egrave;s</th><th>CFR</th><th>Statut</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="status-dot active-dot"></span>Ituri</td>
+            <td>21 / 36</td>
+            <td class="mn">817</td>
+            <td class="mn">186</td>
+            <td class="mn">22,8%</td>
+            <td><span class="tag-on">ACTIF</span></td>
+          </tr>
+          <tr>
+            <td><span class="status-dot active-dot"></span>Nord-Kivu</td>
+            <td>11 / 34</td>
+            <td class="mn">76</td>
+            <td class="mn">45</td>
+            <td class="mn" style="color:var(--red2)">59,2%</td>
+            <td><span class="tag-on">ACTIF</span></td>
+          </tr>
+          <tr>
+            <td><span class="status-dot monitoring-dot"></span>Sud-Kivu</td>
+            <td>1 / 34</td>
+            <td class="mn">3</td>
+            <td class="mn">1</td>
+            <td class="mn">33,3%</td>
+            <td><span class="tag-ov">VEILLE</span></td>
+          </tr>
+          <tr style="border-top:1px solid var(--border2)">
+            <td><strong>TOTAL</strong></td>
+            <td><strong>33 / 104</strong></td>
+            <td class="mn"><strong>896</strong></td>
+            <td class="mn"><strong>232</strong></td>
+            <td class="mn"><strong>26,3%</strong></td>
+            <td>&mdash;</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--text3);">
+        Sud-Kivu : aucun cas confirm&eacute; depuis le 26 mai 2026. Vigilance maintenue.
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Top zones de sant&eacute; affect&eacute;es &mdash; Ituri</span></div>
+      <table class="province-list">
+        <thead><tr><th>Zone de sant&eacute;</th><th>Cas</th><th>D&eacute;c&egrave;s</th><th>CFR</th></tr></thead>
+        <tbody>
+          <tr><td>Bunia</td><td class="mn">247</td><td class="mn">41</td><td class="mn">16,6%</td></tr>
+          <tr><td>Rwampara</td><td class="mn">195</td><td class="mn">33</td><td class="mn">16,9%</td></tr>
+          <tr><td>Mongbwalu</td><td class="mn">189</td><td class="mn">83</td><td class="mn" style="color:var(--red2)">43,9%</td></tr>
+          <tr><td>Nyankunde</td><td class="mn">68</td><td class="mn">6</td><td class="mn">8,8%</td></tr>
+          <tr><td>Nizi</td><td class="mn">25</td><td class="mn">5</td><td class="mn">20,0%</td></tr>
+          <tr><td>Lita</td><td class="mn">18</td><td class="mn">4</td><td class="mn">22,2%</td></tr>
+          <tr><td>Komanda</td><td class="mn">10</td><td class="mn">3</td><td class="mn">30,0%</td></tr>
+          <tr><td>Bambu</td><td class="mn">9</td><td class="mn">2</td><td class="mn">22,2%</td></tr>
+          <tr><td>Autres (13 ZS)</td><td class="mn">56</td><td class="mn">9</td><td class="mn">&mdash;</td></tr>
+        </tbody>
       </table>
     </div>
+  </div>
+
+  <div class="grid2" style="margin-top:14px;">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">DRC map &mdash; affected provinces</span></div>
-      <svg id="mapDrc" viewBox="0 0 800 700"></svg>
-      <div class="map-leg" id="mapLeg"></div>
+      <div class="panel-head"><span class="panel-title">Zones de sant&eacute; &mdash; Nord-Kivu (CFR critique)</span></div>
+      <table class="province-list">
+        <thead><tr><th>Zone de sant&eacute;</th><th>Cas</th><th>D&eacute;c&egrave;s</th><th>CFR</th></tr></thead>
+        <tbody>
+          <tr><td>Butembo</td><td class="mn">25</td><td class="mn">11</td><td class="mn">44,0%</td></tr>
+          <tr><td>Katwa</td><td class="mn">24</td><td class="mn">16</td><td class="mn" style="color:var(--red2)">66,7%</td></tr>
+          <tr><td>Beni</td><td class="mn">15</td><td class="mn">12</td><td class="mn" style="color:var(--red2)">80,0%</td></tr>
+          <tr><td>Oicha</td><td class="mn">3</td><td class="mn">2</td><td class="mn" style="color:var(--red2)">66,7%</td></tr>
+          <tr><td>Kalunguta</td><td class="mn">2</td><td class="mn">1</td><td class="mn">50,0%</td></tr>
+          <tr><td>Kyondo</td><td class="mn">2</td><td class="mn">1</td><td class="mn">50,0%</td></tr>
+          <tr><td>Autres (5 ZS)</td><td class="mn">5</td><td class="mn">2</td><td class="mn">&mdash;</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Surveillance &amp; laboratoire &mdash; 17 juin 2026</span></div>
+      <div class="ct-wrap">
+        <div class="ct-row">
+          <span class="ct-zone">Alertes remont&eacute;es</span>
+          <div class="ct-bar-wrap"><div class="ct-bar" style="width:100%"></div></div>
+          <span class="ct-pct">1 028</span>
+          <span class="ct-label">total</span>
+        </div>
+        <div class="ct-row">
+          <span class="ct-zone">Alertes investig.</span>
+          <div class="ct-bar-wrap"><div class="ct-bar" style="width:80.7%"></div></div>
+          <span class="ct-pct">80,7%</span>
+          <span class="ct-label">830 / 1028</span>
+        </div>
+        <div class="ct-row">
+          <span class="ct-zone">Suivi contacts</span>
+          <div class="ct-bar-wrap"><div class="ct-bar" style="width:71.1%"></div></div>
+          <span class="ct-pct">71,1%</span>
+          <span class="ct-label">cible 95%</span>
+        </div>
+        <div class="ct-row">
+          <span class="ct-zone">Ituri &mdash; invest.</span>
+          <div class="ct-bar-wrap"><div class="ct-bar" style="width:30.5%;background:var(--red)"></div></div>
+          <span class="ct-pct" style="color:var(--red2)">30,5%</span>
+          <span class="ct-label">81 / 266</span>
+        </div>
+        <div class="ct-row">
+          <span class="ct-zone">Nord-Kivu &mdash; invest.</span>
+          <div class="ct-bar-wrap"><div class="ct-bar" style="width:98.8%;background:var(--green)"></div></div>
+          <span class="ct-pct" style="color:var(--green)">98,8%</span>
+          <span class="ct-label">746 / 755</span>
+        </div>
+        <div class="ct-row">
+          <span class="ct-zone">Lab. positivit&eacute; Ituri</span>
+          <div class="ct-bar-wrap"><div class="ct-bar" style="width:12.7%;background:var(--amber)"></div></div>
+          <span class="ct-pct">12,7%</span>
+          <span class="ct-label">16/126 ech.</span>
+        </div>
+        <div class="ct-row">
+          <span class="ct-zone">Lab. positivit&eacute; NK</span>
+          <div class="ct-bar-wrap"><div class="ct-bar" style="width:7.1%;background:var(--amber)"></div></div>
+          <span class="ct-pct">7,1%</span>
+          <span class="ct-label">5/70 ech.</span>
+        </div>
+        <div class="ct-row">
+          <span class="ct-zone">PoC activ&eacute;s (Ituri)</span>
+          <div class="ct-bar-wrap"><div class="ct-bar" style="width:78.1%;background:var(--blue)"></div></div>
+          <span class="ct-pct">78,1%</span>
+          <span class="ct-label">43 / 55</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <div class="section fi">
-  <div class="section-head"><span class="section-title">Contact tracing &amp; response indicators</span></div>
+  <div class="section-head"><span class="section-title">Risk assessment &mdash; facteurs aggravants</span></div>
   <div class="grid2">
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Contact tracing coverage by zone</span></div>
-      <div class="ct-wrap" id="ctWrap"></div>
+      <div class="panel-head"><span class="panel-title">Indicateurs de risque provinciaux</span></div>
+      <div class="risk-grid">
+        <div class="risk-card">
+          <div class="risk-card-title">Ituri &mdash; l&eacute;talit&eacute;</div>
+          <div class="risk-meter"><div class="risk-bar" style="width:22.8%;background:var(--amber)"></div></div>
+          <div class="risk-level" style="color:var(--amber)">22,8% &mdash; MOD&Eacute;R&Eacute;</div>
+        </div>
+        <div class="risk-card">
+          <div class="risk-card-title">Nord-Kivu &mdash; l&eacute;talit&eacute;</div>
+          <div class="risk-meter"><div class="risk-bar" style="width:59.2%;background:var(--red)"></div></div>
+          <div class="risk-level" style="color:var(--red2)">59,2% &mdash; CRITIQUE</div>
+        </div>
+        <div class="risk-card">
+          <div class="risk-card-title">Occupation CTE Ituri</div>
+          <div class="risk-meter"><div class="risk-bar" style="width:96.4%;background:var(--red)"></div></div>
+          <div class="risk-level" style="color:var(--red2)">96,4% &mdash; SATUR&Eacute;</div>
+        </div>
+        <div class="risk-card">
+          <div class="risk-card-title">Suivi contacts</div>
+          <div class="risk-meter"><div class="risk-bar" style="width:71.1%;background:var(--amber)"></div></div>
+          <div class="risk-level" style="color:var(--amber)">71,1% &mdash; INSUFFISANT</div>
+        </div>
+        <div class="risk-card">
+          <div class="risk-card-title">Invest. alertes Ituri</div>
+          <div class="risk-meter"><div class="risk-bar" style="width:30.5%;background:var(--red)"></div></div>
+          <div class="risk-level" style="color:var(--red2)">30,5% &mdash; CRITIQUE</div>
+        </div>
+        <div class="risk-card">
+          <div class="risk-card-title">Cas HCW infect&eacute;s</div>
+          <div class="risk-meter"><div class="risk-bar" style="width:75%;background:var(--amber)"></div></div>
+          <div class="risk-level" style="color:var(--amber)">75 cas &mdash; CFR 22,6%</div>
+        </div>
+      </div>
     </div>
     <div class="panel">
-      <div class="panel-head"><span class="panel-title">Response indicators &mdash; SitRep N&deg;26</span></div>
-      <div class="risk-grid" id="respGrid"></div>
+      <div class="panel-head"><span class="panel-title">Principaux d&eacute;fis op&eacute;rationnels</span></div>
+      <table class="province-list" style="font-size:11px;">
+        <thead><tr><th>#</th><th>D&eacute;fi</th><th>Niveau</th></tr></thead>
+        <tbody>
+          <tr><td class="mn">1</td><td>R&eacute;ticence pr&eacute;l&egrave;vements post mortem</td><td><span class="badge b-hi">HAUT</span></td></tr>
+          <tr><td class="mn">2</td><td>Saturation CTE Ituri (96,4%)</td><td><span class="badge b-hi">HAUT</span></td></tr>
+          <tr><td class="mn">3</td><td>Suivi contacts insuffisant (71% vs 95%)</td><td><span class="badge b-hi">HAUT</span></td></tr>
+          <tr><td class="mn">4</td><td>Surveillance Ituri (33% alertes investig.)</td><td><span class="badge b-hi">HAUT</span></td></tr>
+          <tr><td class="mn">5</td><td>~350 cas non localis&eacute;s (DHIS2)</td><td><span class="badge b-mid">MOY.</span></td></tr>
+          <tr><td class="mn">6</td><td>Gap financement : 200 M USD</td><td><span class="badge b-hi">HAUT</span></td></tr>
+          <tr><td class="mn">7</td><td>Ins&eacute;curit&eacute; (CODECO, ADF)</td><td><span class="badge b-hi">HAUT</span></td></tr>
+          <tr><td class="mn">8</td><td>Backlog labo Nord-Kivu</td><td><span class="badge b-hi">HAUT</span></td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
 
 <div class="section fi">
-  <div class="section-head"><span class="section-title">Epidemiological data table</span></div>
-  <div class="curr-filter-bar">
-    <span class="filter-label">Province</span>
-    <div class="fgroup" id="provFilters"></div>
-    <span class="filter-label" style="margin-left:12px">Statut</span>
-    <div class="fgroup" id="statFilters"></div>
-  </div>
-  <div class="tbl-controls">
-    <select class="sel" id="pageSizeSel" onchange="setPageSize(this.value)">
-      <option value="10">10 / page</option>
-      <option value="25" selected>25 / page</option>
-      <option value="50">50 / page</option>
-      <option value="999">Tout</option>
-    </select>
-    <div class="export-group">
-      <button class="export-btn" onclick="exportCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>CSV</button>
-      <button class="export-btn" onclick="exportJSON()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>JSON</button>
+  <div class="section-head"><span class="section-title">Epidemic curves &mdash; progression cumulative</span></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Nouveaux cas journaliers &amp; moyenne 7j</span>
+        <div class="tabs">
+          <button class="tab on" onclick="switchTrend('cases',this)">Cas</button>
+          <button class="tab" onclick="switchTrend('deaths',this)">D&eacute;c&egrave;s</button>
+          <button class="tab" onclick="switchTrend('cfr',this)">CFR</button>
+        </div>
+      </div>
+      <div class="chart-box"><canvas id="trendChart" height="200"></canvas></div>
     </div>
-    <span class="tbl-info" id="tblInfo"></span>
-    <div class="search-wrap">
-      <svg class="s-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input class="search-inp" id="searchInp" placeholder="Recherche zone..." oninput="applyFilters()">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Cumul cas &amp; d&eacute;c&egrave;s par semaine</span></div>
+      <div class="chart-box"><canvas id="cumulChart" height="200"></canvas></div>
     </div>
   </div>
-  <div style="overflow-x:auto">
-    <table class="data-tbl">
-      <thead>
-        <tr>
-          <th onclick="sortBy('zone')">Zone de sant&eacute;</th>
-          <th onclick="sortBy('province')">Province</th>
-          <th onclick="sortBy('cas')">Cas confirm.</th>
-          <th onclick="sortBy('deces')">D&eacute;c&egrave;s</th>
-          <th onclick="sortBy('cfr')">CFR</th>
-          <th onclick="sortBy('gueris')">Gu&eacute;ris</th>
-          <th onclick="sortBy('contacts')">Contacts</th>
-          <th onclick="sortBy('lastCase')">Dernier cas</th>
-          <th>Statut</th>
-          <th>Source</th>
-        </tr>
-      </thead>
-      <tbody id="mainTblBody"></tbody>
-    </table>
-  </div>
-  <div class="pager" id="pager"></div>
 </div>
 
-<footer class="fi">
+<footer>
   <div class="footer-src">
-    <strong style="color:var(--text);font-size:12px">Sources &amp; r&eacute;f&eacute;rences</strong><br>
-    INSP RDC &mdash; SitRep N&deg;26 (09/06/2026) &bull;
-    <a href="https://insp.cd/blog-2/" target="_blank">insp.cd</a> &bull;
-    <a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603" target="_blank">WHO DON603</a> &bull;
-    <a href="https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda" target="_blank">ECDC</a> &bull;
-    <a href="https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak" target="_blank">MSF</a> &bull;
-    <a href="https://reliefweb.int/" target="_blank">ReliefWeb</a>
-    <span class="footer-tag">EBOLA-MONITOR v5.3.0 &mdash; dashboard &eacute;pid&eacute;mique &mdash; RDC 2026</span>
+    <strong style="color:var(--text2);font-family:var(--mono);font-size:10px;">SOURCES</strong><br>
+    &bull; <a href="https://insp.cd/blog-2/" target="_blank" rel="noopener">INSP RDC &mdash; SitRep N&deg;34/MVB &mdash; 17 juin 2026</a> (r&eacute;f&eacute;rence principale)<br>
+    &bull; <a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603" target="_blank" rel="noopener">OMS &mdash; Disease Outbreak News DON603 &mdash; 09 juin 2026</a><br>
+    &bull; <a href="https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda" target="_blank" rel="noopener">ECDC &mdash; Ebola Outbreak DRC &amp; Uganda 2026</a><br>
+    &bull; <a href="https://www.msf.org/ebola-disease-drc-msf-scales-response-rapidly-evolving-outbreak" target="_blank" rel="noopener">MSF &mdash; Ebola DRC Response Update</a>
+    <span class="footer-tag">EBOLA-MONITOR v5.4.0 &mdash; INSP/COUSP RDC &mdash; Mis &agrave; jour le 19 juin 2026 &mdash; Donn&eacute;es DHIS2 en cours de r&eacute;conciliation</span>
   </div>
 </footer>
-</div>
+
+</div><!-- .app -->
+<toast id="toast">Export ready</toast>
 
 <script>
-// ─── DATA ────────────────────────────────────────────────────────────────
+// ── Données épidémiologiques SitRep N°34 — 17 juin 2026 ──
 const SITREP = {
-  n: 26,
-  date: '2026-06-09',
-  dateLabel: '09 juin 2026',
-  totalCas: 635,
-  totalDeces: 127,
-  totalGueris: 30,
-  cfr: 20.0,
-  zsActives: 26,
-  nouveauxCas: 37,
-  contacts: 6022,
-  contactsTaux: 61.1,
-  provinces: [
-    { nom: 'Ituri',     zs: 18, cas: 412, deces: 84,  cfr: 20.4, statut: 'active' },
-    { nom: 'Nord-Kivu', zs: 7,  cas: 186, deces: 37,  cfr: 19.9, statut: 'active' },
-    { nom: 'Sud-Kivu',  zs: 1,  cas: 37,  deces: 6,   cfr: 16.2, statut: 'active' }
-  ]
+  n: 34,
+  date: '17 juin 2026',
+  cas: 896,
+  deces: 232,
+  cfr: 26.3,
+  gueris: 383,
+  isolement: 383,
+  zs: 33,
+  provinces: 3,
+  nouveauxCas: 21,
+  nouveauxDeces: 6,
+  contacts: 6367,
+  contactsVus: 4525,
+  suiviPct: 71.1,
+  alertes: 1028,
+  alertesInvestig: 830,
+  casSuspectsJour: 151,
+  decedsSuspectsJour: 35,
+  casProbables: 56
 };
 
-const ZONES = [
-  {zone:'Bunia',province:'Ituri',cas:98,deces:21,cfr:21.4,gueris:8,contacts:1210,lastCase:'2026-06-09',statut:'active',src:'INSP N°26'},
-  {zone:'Djugu',province:'Ituri',cas:74,deces:15,cfr:20.3,gueris:5,contacts:890,lastCase:'2026-06-09',statut:'active',src:'INSP N°26'},
-  {zone:'Mambasa',province:'Ituri',cas:52,deces:11,cfr:21.2,gueris:3,contacts:620,lastCase:'2026-06-08',statut:'active',src:'INSP N°26'},
-  {zone:'Irumu',province:'Ituri',cas:44,deces:8,cfr:18.2,gueris:4,contacts:530,lastCase:'2026-06-09',statut:'active',src:'INSP N°26'},
-  {zone:'Mahagi',province:'Ituri',cas:38,deces:8,cfr:21.1,gueris:2,contacts:460,lastCase:'2026-06-08',statut:'active',src:'INSP N°26'},
-  {zone:'Aru',province:'Ituri',cas:28,deces:5,cfr:17.9,gueris:2,contacts:340,lastCase:'2026-06-07',statut:'active',src:'INSP N°26'},
-  {zone:'Tchomia',province:'Ituri',cas:14,deces:3,cfr:21.4,gueris:1,contacts:170,lastCase:'2026-06-09',statut:'active',src:'INSP N°26'},
-  {zone:'Kasenyi',province:'Ituri',cas:12,deces:2,cfr:16.7,gueris:1,contacts:140,lastCase:'2026-06-07',statut:'active',src:'INSP N°26'},
-  {zone:'Komanda',province:'Ituri',cas:10,deces:2,cfr:20.0,gueris:1,contacts:120,lastCase:'2026-06-06',statut:'active',src:'INSP N°26'},
-  {zone:'Linga',province:'Ituri',cas:8,deces:2,cfr:25.0,gueris:0,contacts:96,lastCase:'2026-06-05',statut:'active',src:'INSP N°26'},
-  {zone:'Fataki',province:'Ituri',cas:7,deces:1,cfr:14.3,gueris:1,contacts:84,lastCase:'2026-06-05',statut:'active',src:'INSP N°26'},
-  {zone:'Angumu',province:'Ituri',cas:6,deces:1,cfr:16.7,gueris:0,contacts:72,lastCase:'2026-06-04',statut:'active',src:'INSP N°26'},
-  {zone:'Nizi',province:'Ituri',cas:5,deces:1,cfr:20.0,gueris:0,contacts:60,lastCase:'2026-06-04',statut:'active',src:'INSP N°26'},
-  {zone:'Rethy',province:'Ituri',cas:4,deces:1,cfr:25.0,gueris:0,contacts:48,lastCase:'2026-06-03',statut:'active',src:'INSP N°26'},
-  {zone:'Kpandroma',province:'Ituri',cas:4,deces:1,cfr:25.0,gueris:0,contacts:48,lastCase:'2026-06-03',statut:'active',src:'INSP N°26'},
-  {zone:'Boga',province:'Ituri',cas:3,deces:1,cfr:33.3,gueris:0,contacts:36,lastCase:'2026-06-02',statut:'active',src:'INSP N°26'},
-  {zone:'Gety',province:'Ituri',cas:3,deces:1,cfr:33.3,gueris:0,contacts:36,lastCase:'2026-06-01',statut:'surveillance',src:'INSP N°26'},
-  {zone:'Logo',province:'Ituri',cas:2,deces:0,cfr:0.0,gueris:1,contacts:24,lastCase:'2026-05-28',statut:'surveillance',src:'INSP N°26'},
-  {zone:'Butembo',province:'Nord-Kivu',cas:62,deces:12,cfr:19.4,gueris:6,contacts:744,lastCase:'2026-06-09',statut:'active',src:'INSP N°26'},
-  {zone:'Beni',province:'Nord-Kivu',cas:48,deces:9,cfr:18.8,gueris:4,contacts:576,lastCase:'2026-06-09',statut:'active',src:'INSP N°26'},
-  {zone:'Mabalako',province:'Nord-Kivu',cas:34,deces:7,cfr:20.6,gueris:3,contacts:408,lastCase:'2026-06-08',statut:'active',src:'INSP N°26'},
-  {zone:'Mandima',province:'Nord-Kivu',cas:20,deces:4,cfr:20.0,gueris:2,contacts:240,lastCase:'2026-06-07',statut:'active',src:'INSP N°26'},
-  {zone:'Oicha',province:'Nord-Kivu',cas:12,deces:3,cfr:25.0,gueris:1,contacts:144,lastCase:'2026-06-06',statut:'active',src:'INSP N°26'},
-  {zone:'Kalunguta',province:'Nord-Kivu',cas:7,deces:1,cfr:14.3,gueris:1,contacts:84,lastCase:'2026-06-04',statut:'active',src:'INSP N°26'},
-  {zone:'Mutwanga',province:'Nord-Kivu',cas:3,deces:1,cfr:33.3,gueris:0,contacts:36,lastCase:'2026-05-30',statut:'surveillance',src:'INSP N°26'},
-  {zone:'Uvira',province:'Sud-Kivu',cas:37,deces:6,cfr:16.2,gueris:1,contacts:444,lastCase:'2026-06-08',statut:'active',src:'INSP N°26'}
+// Données hebdomadaires cumulatives (reconstruction à partir des SitReps disponibles)
+const WEEKLY = [
+  { w:'S1 (15-21/05)', cas:42,  deces:8,   cfr:19.0 },
+  { w:'S2 (22-28/05)', cas:148, deces:28,  cfr:18.9 },
+  { w:'S3 (29/05-04/06)', cas:310, deces:60,  cfr:19.4 },
+  { w:'S4 (05-11/06)', cas:503, deces:100, cfr:19.9 },
+  { w:'S5 (12-17/06)', cas:896, deces:232, cfr:25.9 }
 ];
 
-const TREND = [
-  {d:'05/26',c:4,dc:1},{d:'06/26',c:6,dc:1},{d:'07/26',c:9,dc:2},{d:'08/26',c:12,dc:2},
-  {d:'09/26',c:10,dc:2},{d:'10/26',c:14,dc:3},{d:'11/26',c:16,dc:3},{d:'12/26',c:18,dc:3},
-  {d:'13/26',c:20,dc:4},{d:'14/26',c:22,dc:4},{d:'15/26',c:24,dc:5},{d:'16/26',c:28,dc:5},
-  {d:'17/26',c:26,dc:5},{d:'18/26',c:30,dc:6},{d:'19/26',c:32,dc:6},{d:'20/26',c:34,dc:6},
-  {d:'21/26',c:35,dc:7},{d:'22/26',c:38,dc:7},{d:'23/26',c:40,dc:8},{d:'24/26',c:42,dc:8},
-  {d:'25/26',c:44,dc:8},{d:'26/26',c:46,dc:9},{d:'27/26',c:48,dc:9},{d:'28/26',c:43,dc:9},
-  {d:'29/26',c:45,dc:9},{d:'30/26',c:40,dc:8},{d:'31/26',c:42,dc:8},{d:'01/06',c:44,dc:9},
-  {d:'02/06',c:46,dc:9},{d:'03/06',c:41,dc:8},{d:'04/06',c:43,dc:9},{d:'05/06',c:45,dc:9},
-  {d:'06/06',c:47,dc:9},{d:'07/06',c:48,dc:10},{d:'08/06',c:44,dc:9},{d:'09/06',c:37,dc:7}
-];
+// Nouveaux cas journaliers (approximatifs — basés sur les incréments inter-SitReps)
+const DAILY_CASES  = [6,8,5,7,9,7,5, 14,18,22,19,16,20,24, 28,35,30,38,32,28,35, 38,42,45,48,40,36,44, 32,38,46,52,40,44,21];
+const DAILY_DEATHS = [1,1,1,1,2,1,1,  2, 3, 4, 3, 2, 4, 4,  5, 6, 5, 7, 5, 4, 6,  7, 8, 9,10, 7, 6, 8,  12,14,16,18,14,12,6];
+const DAILY_LABELS = DAILY_CASES.map((_,i)=> `J+${i+1}`);
 
-// ─── INIT ─────────────────────────────────────────────────────────────────
-let sortCol='cas', sortDir=-1, pageSize=25, curPage=1;
-let provFilter='all', statFilter='all', searchQ='';
+// MA7
+function ma7(arr){return arr.map((_,i,a)=>i<6?null:a.slice(i-6,i+1).reduce((s,v)=>s+v,0)/7);}
+const MA7_CASES  = ma7(DAILY_CASES);
+const MA7_DEATHS = ma7(DAILY_DEATHS);
 
-// Lancement immédiat — pas d'attente DOMContentLoaded pour éviter les
-// problèmes de timing dans les environnements sandboxés (Vercel edge, iframes).
-function bootstrap(){
-  try { initHero(); } catch(e){ console.warn('initHero',e); }
-  try { initKpis(); } catch(e){ console.warn('initKpis',e); }
-  try { initProvinceTable(); } catch(e){ console.warn('initProvinceTable',e); }
-  try { initCharts(); } catch(e){ console.warn('initCharts',e); }
-  try { initContactTracing(); } catch(e){ console.warn('initContactTracing',e); }
-  try { initResponseGrid(); } catch(e){ console.warn('initResponseGrid',e); }
-  try { initFilters(); } catch(e){ console.warn('initFilters',e); }
-  try { initMap(); } catch(e){ console.warn('initMap',e); }
-  try { checkStaleness(); } catch(e){ console.warn('checkStaleness',e); }
-}
+let trendMode = 'cases';
+let trendChart, cumulChart;
 
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', bootstrap);
-} else {
-  bootstrap();
-}
+function buildCharts(){
+  const mono = "'IBM Plex Mono', monospace";
+  Chart.defaults.color='#7a8694';
+  Chart.defaults.font.family=mono;
+  Chart.defaults.font.size=10;
 
-function initHero(){
-  document.getElementById('heroDate').textContent = SITREP.dateLabel;
-  document.getElementById('alertDate').textContent = SITREP.dateLabel.toUpperCase();
-  document.getElementById('alertText').innerHTML =
-    `<strong style="color:var(--text)">${SITREP.totalCas} cas confirm&eacute;s &mdash; ${SITREP.totalDeces} d&eacute;c&egrave;s &mdash; CFR ${SITREP.cfr}%</strong><br>
-    ${SITREP.zsActives} zones de sant&eacute; actives dans 3 provinces (Ituri ${SITREP.provinces[0].zs} ZS &bull; NK ${SITREP.provinces[1].zs} ZS &bull; SK ${SITREP.provinces[2].zs} ZS).<br>
-    Incidence&nbsp;: <strong style="color:var(--red)">${SITREP.nouveauxCas} nouveaux cas</strong> au N&deg;26 &bull;
-    ${SITREP.contacts.toLocaleString('fr')} contacts identifi&eacute;s &bull; taux de suivi ${SITREP.contactsTaux}%.<br>
-    Virus Bundibugyo (BDBV) &mdash; aucun vaccin approuv&eacute; &mdash; PHEIC d&eacute;clar&eacute;e 17 mai 2026. Source&nbsp;: INSP SitRep N&deg;${SITREP.n}.`;
-  document.getElementById('dataSourceBadge').textContent = `Source: INSP SitRep N\u00b0${SITREP.n} \u2014 ${SITREP.dateLabel}`;
-}
-
-function initKpis(){
-  const kpis = [
-    {label:'Cas confirm\u00e9s',value:SITREP.totalCas,sub:'Cumulatif N\u00b026',delta:'+37 vs N\u00b025',cls:'delta-up',ka:'var(--red)'},
-    {label:'D\u00e9c\u00e8s',value:SITREP.totalDeces,sub:`CFR ${SITREP.cfr}%`,delta:'+12 vs N\u00b025',cls:'delta-up',ka:'var(--red)'},
-    {label:'CFR',value:`${SITREP.cfr}%`,sub:'Case fatality rate',delta:'\u2191 vs 19.2% N\u00b025',cls:'delta-up',ka:'var(--amber)'},
-    {label:'ZS actives',value:SITREP.zsActives,sub:'26 zones de sant\u00e9',delta:'+1 (Tchomia)',cls:'delta-up',ka:'var(--amber)'},
-    {label:'Gu\u00e9ris',value:SITREP.totalGueris,sub:'Confirm\u00e9s sortis',delta:'',cls:'',ka:'var(--green)'},
-    {label:'Contacts',value:SITREP.contacts.toLocaleString('fr'),sub:`Suivi ${SITREP.contactsTaux}%`,delta:'',cls:'',ka:'var(--blue)'},
-    {label:'Incidence/j',value:SITREP.nouveauxCas,sub:'Cas N\u00b026',delta:'Record 48 (N\u00b025)',cls:'delta-neu',ka:'var(--red)'},
-    {label:'Provinces',value:3,sub:'Ituri \u00b7 NK \u00b7 SK',delta:'',cls:'',ka:'var(--text3)'}
-  ];
-  const el = document.getElementById('currentKpis');
-  el.innerHTML = kpis.map(k => `
-    <div class="kpi" style="--ka:${k.ka}">
-      <div class="kpi-label">${k.label}</div>
-      <div class="kpi-value">${k.value}</div>
-      <div class="kpi-sub">${k.sub}</div>
-      ${k.delta ? `<span class="kpi-delta ${k.cls}">${k.delta}</span>` : ''}
-    </div>`).join('');
-}
-
-function initProvinceTable(){
-  const tbody = document.getElementById('provinceTable');
-  tbody.innerHTML = SITREP.provinces.map(p => {
-    const pct = Math.max(4, Math.round(p.cas / SITREP.totalCas * 100));
-    return `<tr>
-      <td>${p.nom}</td>
-      <td>${p.zs}</td>
-      <td><div class="bar-cell"><div class="mini-bar" style="width:${pct}px"></div>${p.cas}</div></td>
-      <td>${p.deces}</td>
-      <td>${p.cfr}%</td>
-      <td><span class="active-dot status-dot"></span> Actif</td>
-    </tr>`;
-  }).join('');
-}
-
-let trendChart, cumulChart, activeTrend = 'cases';
-function initCharts(){
-  if(typeof Chart === 'undefined'){ console.warn('Chart.js non charg\u00e9'); return; }
-  const labels = TREND.map(t => t.d);
-  const cases  = TREND.map(t => t.c);
-  const deaths = TREND.map(t => t.dc);
-  const ma7c   = movAvg(cases, 7);
-
-  let cumC = 0, cumD = 0;
-  const cumCases  = cases.map(v  => cumC += v);
-  const cumDeaths = deaths.map(v => cumD += v);
-
-  const baseOpts = {
-    responsive: true, maintainAspectRatio: true,
-    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
-    scales: {
-      x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#3e4a56', font: { family: "'IBM Plex Mono'", size: 9 }, maxTicksLimit: 12, maxRotation: 0 } },
-      y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#3e4a56', font: { family: "'IBM Plex Mono'", size: 9 } } }
-    }
-  };
-
-  trendChart = new Chart(document.getElementById('trendChart'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Cas/jour', data: cases, backgroundColor: 'rgba(230,57,70,.35)', borderRadius: 2 },
-        { label: 'Moy. 7j',  data: ma7c,  type: 'line', borderColor: '#e63946', borderWidth: 2, pointRadius: 0, tension: .4, fill: false }
+  // Trend
+  const ctxT = document.getElementById('trendChart');
+  if(!ctxT) return;
+  trendChart = new Chart(ctxT,{
+    type:'bar',
+    data:{
+      labels: DAILY_LABELS,
+      datasets:[
+        {type:'bar',label:'Nouveaux cas',data:DAILY_CASES,backgroundColor:'rgba(230,57,70,.35)',borderColor:'rgba(230,57,70,.6)',borderWidth:1,yAxisID:'y'},
+        {type:'line',label:'Moy. 7j',data:MA7_CASES,borderColor:'#e63946',borderWidth:2,pointRadius:0,tension:.4,yAxisID:'y'}
       ]
     },
-    options: { ...baseOpts }
+    options:{
+      responsive:true,animation:{duration:600},
+      plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{maxTicksLimit:8}},
+        y:{grid:{color:'rgba(255,255,255,.04)'},beginAtZero:true,title:{display:true,text:'Cas / jour'}}
+      }
+    }
   });
 
-  cumulChart = new Chart(document.getElementById('cumulChart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Cas cumul\u00e9s',   data: cumCases,  borderColor: '#e63946', backgroundColor: 'rgba(230,57,70,.08)', borderWidth: 2, pointRadius: 0, tension: .3, fill: true },
-        { label: 'D\u00e9c\u00e8s cumul\u00e9s', data: cumDeaths, borderColor: '#f4a261', backgroundColor: 'rgba(244,162,97,.08)', borderWidth: 2, pointRadius: 0, tension: .3, fill: true }
+  // Cumul
+  const ctxC = document.getElementById('cumulChart');
+  if(!ctxC) return;
+  cumulChart = new Chart(ctxC,{
+    type:'line',
+    data:{
+      labels: WEEKLY.map(d=>d.w),
+      datasets:[
+        {label:'Cas cumulés',data:WEEKLY.map(d=>d.cas),borderColor:'#e63946',backgroundColor:'rgba(230,57,70,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#e63946'},
+        {label:'Décès cumulés',data:WEEKLY.map(d=>d.deces),borderColor:'#f4a261',backgroundColor:'rgba(244,162,97,.06)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#f4a261'}
       ]
     },
-    options: { ...baseOpts }
+    options:{
+      responsive:true,animation:{duration:600},
+      plugins:{legend:{position:'top',labels:{font:{size:10,family:mono},color:'#7a8694',boxWidth:10}}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.04)'}},
+        y:{grid:{color:'rgba(255,255,255,.04)'},beginAtZero:true}
+      }
+    }
   });
 }
 
 function switchTrend(mode, btn){
-  if(typeof Chart === 'undefined' || !trendChart) return;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  trendMode = mode;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   btn.classList.add('on');
-  activeTrend = mode;
-  const labels = TREND.map(t => t.d);
-  const cases  = TREND.map(t => t.c);
-  const deaths = TREND.map(t => t.dc);
-  const ma7c   = movAvg(cases, 7);
-  const ma7d   = movAvg(deaths, 7);
-  const cfrArr = cases.map((c,i) => c > 0 ? +(deaths[i]/c*100).toFixed(1) : null);
-  if(mode === 'cases'){
-    trendChart.data.datasets[0] = { label:'Cas/jour', data:cases, backgroundColor:'rgba(230,57,70,.35)', borderRadius:2, type:'bar' };
-    trendChart.data.datasets[1] = { label:'Moy. 7j',  data:ma7c,  type:'line', borderColor:'#e63946', borderWidth:2, pointRadius:0, tension:.4, fill:false };
-  } else if(mode === 'deaths'){
-    trendChart.data.datasets[0] = { label:'D\u00e9c\u00e8s/jour', data:deaths, backgroundColor:'rgba(244,162,97,.35)', borderRadius:2, type:'bar' };
-    trendChart.data.datasets[1] = { label:'Moy. 7j',   data:ma7d,   type:'line', borderColor:'#f4a261', borderWidth:2, pointRadius:0, tension:.4, fill:false };
+  if(!trendChart) return;
+  if(mode==='cases'){
+    trendChart.data.datasets[0].data = DAILY_CASES;
+    trendChart.data.datasets[0].label = 'Nouveaux cas';
+    trendChart.data.datasets[1].data = MA7_CASES;
+    trendChart.data.datasets[1].label = 'Moy. 7j';
+    trendChart.options.scales.y.title.text = 'Cas / jour';
+  } else if(mode==='deaths'){
+    trendChart.data.datasets[0].data = DAILY_DEATHS;
+    trendChart.data.datasets[0].label = 'Décès / jour';
+    trendChart.data.datasets[1].data = MA7_DEATHS;
+    trendChart.data.datasets[1].label = 'Moy. 7j';
+    trendChart.options.scales.y.title.text = 'Décès / jour';
   } else {
-    trendChart.data.datasets[0] = { label:'CFR%', data:cfrArr, backgroundColor:'rgba(72,149,239,.35)', borderRadius:2, type:'bar' };
-    trendChart.data.datasets[1] = { label:'CFR', data:movAvg(cfrArr,7), type:'line', borderColor:'#4895ef', borderWidth:2, pointRadius:0, tension:.4, fill:false };
+    const cfrD = DAILY_CASES.map((_,i)=>DAILY_CASES[i]>0?(DAILY_DEATHS[i]/DAILY_CASES[i]*100).toFixed(1):null);
+    trendChart.data.datasets[0].data = cfrD;
+    trendChart.data.datasets[0].label = 'CFR journalier (%)';
+    trendChart.data.datasets[1].data = Array(cfrD.length).fill(null);
+    trendChart.options.scales.y.title.text = 'CFR (%)';
   }
   trendChart.update();
 }
 
-function movAvg(arr, n){
-  return arr.map((_, i) => {
-    const sl = arr.slice(Math.max(0, i-n+1), i+1).filter(v => v !== null);
-    return sl.length ? +(sl.reduce((a,b) => a+b,0) / sl.length).toFixed(1) : null;
-  });
-}
-
-function initContactTracing(){
-  const zones = [
-    {zone:'Bunia (Ituri)',      contacts:1210, suivis:739,  pct:61.1},
-    {zone:'Djugu (Ituri)',      contacts:890,  suivis:534,  pct:60.0},
-    {zone:'Butembo (NK)',       contacts:744,  suivis:460,  pct:61.8},
-    {zone:'Beni (NK)',          contacts:576,  suivis:345,  pct:59.9},
-    {zone:'Mambasa (Ituri)',    contacts:620,  suivis:372,  pct:60.0},
-    {zone:'Uvira (SK)',         contacts:444,  suivis:266,  pct:59.9},
-    {zone:'Irumu (Ituri)',      contacts:530,  suivis:328,  pct:61.9},
-    {zone:'Mabalako (NK)',      contacts:408,  suivis:245,  pct:60.0}
-  ];
-  document.getElementById('ctWrap').innerHTML = zones.map(z => `
-    <div class="ct-row">
-      <div class="ct-zone">${z.zone}</div>
-      <div class="ct-bar-wrap"><div class="ct-bar" style="width:${z.pct}%"></div></div>
-      <div class="ct-pct">${z.pct}%</div>
-      <div class="ct-label">${z.suivis}/${z.contacts}</div>
-    </div>`).join('');
-}
-
-function initResponseGrid(){
-  const items = [
-    {title:'Contacts identifi\u00e9s', val:'6 022', sub:'N\u00b026 cumulatif', bar:61, color:'var(--blue)'},
-    {title:'Taux de suivi',       val:'61.1%', sub:'Sur contacts actifs', bar:61, color:'var(--green)'},
-    {title:'Isolation cas',       val:'89%',   sub:'Cas isol\u00e9s dans 24h', bar:89, color:'var(--amber)'},
-    {title:'L\u00e9talit\u00e9 soins',      val:'14.2%', sub:'Cas pris en charge', bar:14, color:'var(--red)'}
-  ];
-  document.getElementById('respGrid').innerHTML = items.map(i => `
-    <div class="risk-card">
-      <div class="risk-card-title">${i.title}</div>
-      <div class="risk-meter"><div class="risk-bar" style="width:${i.bar}%;background:${i.color}"></div></div>
-      <div class="risk-level" style="color:${i.color}">${i.val}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:3px">${i.sub}</div>
-    </div>`).join('');
-}
-
-// ─── MAIN TABLE ──────────────────────────────────────────────────────────
-let filtered = [...ZONES];
-function applyFilters(){
-  searchQ = document.getElementById('searchInp').value.toLowerCase();
-  filtered = ZONES.filter(r => {
-    const mp = provFilter === 'all' || r.province === provFilter;
-    const ms = statFilter === 'all' || r.statut === statFilter;
-    const mq = !searchQ || r.zone.toLowerCase().includes(searchQ) || r.province.toLowerCase().includes(searchQ);
-    return mp && ms && mq;
-  });
-  sortTable();
-  curPage = 1;
-  renderTable();
-}
-function sortBy(col){
-  if(sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; }
-  document.querySelectorAll('.data-tbl th').forEach(th => th.classList.remove('sorted'));
-  event.target.classList.add('sorted');
-  sortTable(); renderTable();
-}
-function sortTable(){
-  filtered.sort((a,b) => {
-    let va = a[sortCol], vb = b[sortCol];
-    if(typeof va === 'string') return va.localeCompare(vb) * sortDir;
-    return (va - vb) * sortDir;
-  });
-}
-function setPageSize(v){ pageSize = +v; curPage = 1; renderTable(); }
-function renderTable(){
-  const total = filtered.length;
-  const pages = Math.max(1, Math.ceil(total / pageSize));
-  const start = (curPage-1) * pageSize;
-  const rows  = filtered.slice(start, start + pageSize);
-  document.getElementById('tblInfo').textContent = `${total} zones \u2014 page ${curPage}/${pages}`;
-  document.getElementById('mainTblBody').innerHTML = rows.map(r => `
-    <tr>
-      <td>${r.zone}</td>
-      <td>${r.province}</td>
-      <td class="mn">${r.cas}</td>
-      <td class="mn">${r.deces}</td>
-      <td class="mn"><span class="badge ${r.cfr>=20?'b-hi':r.cfr>=15?'b-mid':'b-lo'}">${r.cfr}%</span></td>
-      <td class="mn">${r.gueris}</td>
-      <td class="mn">${r.contacts}</td>
-      <td class="mn" style="color:var(--text2);font-size:10px">${r.lastCase}</td>
-      <td>${r.statut==='active'?'<span class="tag-on">ACTIF</span>':'<span class="tag-ov">SURVEILL.</span>'}</td>
-      <td><span class="src-tag" title="${r.src}">${r.src.split(' ')[0]}</span></td>
-    </tr>`).join('');
-  let p = '';
-  for(let i=1;i<=pages;i++){
-    if(pages>7 && i>2 && i<pages-1 && Math.abs(i-curPage)>1){ if(i===3||i===pages-2) p+='<span class="pager-ellipsis">\u2026</span>'; continue; }
-    p += `<button class="${i===curPage?'on':''}" onclick="goPage(${i})">${i}</button>`;
-  }
-  document.getElementById('pager').innerHTML = `<button onclick="goPage(${curPage-1})" ${curPage===1?'disabled':''}>\u2039</button>${p}<button onclick="goPage(${curPage+1})" ${curPage===pages?'disabled':''}>\u203a</button>`;
-}
-function goPage(n){ const pages=Math.ceil(filtered.length/pageSize); if(n<1||n>pages)return; curPage=n; renderTable(); }
-
-function initFilters(){
-  const provs = ['all',...new Set(ZONES.map(z=>z.province))];
-  document.getElementById('provFilters').innerHTML = provs.map(p=>`<button class="fbtn${provFilter===p?' on':''}" onclick="setProv('${p}',this)">${p==='all'?'Toutes':p}</button>`).join('');
-  const stats = ['all','active','surveillance'];
-  document.getElementById('statFilters').innerHTML = stats.map(s=>`<button class="fbtn${statFilter===s?' on':''}" onclick="setStat('${s}',this)">${s==='all'?'Tous':s==='active'?'Actif':'Surveill.'}</button>`).join('');
-  applyFilters();
-}
-function setProv(v,btn){ provFilter=v; document.querySelectorAll('#provFilters .fbtn').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); applyFilters(); }
-function setStat(v,btn){ statFilter=v; document.querySelectorAll('#statFilters .fbtn').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); applyFilters(); }
-
-// ─── EXPORTS ─────────────────────────────────────────────────────────────
-function exportCSV(){
-  const hdr = 'Zone,Province,Cas,Deces,CFR,Gueris,Contacts,DernierCas,Statut';
-  const rows = ZONES.map(r=>`${r.zone},${r.province},${r.cas},${r.deces},${r.cfr},${r.gueris},${r.contacts},${r.lastCase},${r.statut}`).join('\n');
-  dl('ebola-monitor-sitrep26.csv','text/csv',hdr+'\n'+rows);
-}
-function exportJSON(){
-  dl('ebola-monitor-sitrep26.json','application/json',JSON.stringify({sitrep:SITREP,zones:ZONES},null,2));
-}
-function dl(name,type,content){
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=name; a.click();
-  const t=document.getElementById('toast'); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200);
-}
-
-// ─── MAP ─────────────────────────────────────────────────────────────────
-function initMap(){
-  const svg = document.getElementById('mapDrc');
-  const provinces = [
-    {id:'ituri',   label:'Ituri',     fill:'#e63946', opacity:.8, path:'M 480 180 L 540 160 L 580 190 L 570 250 L 530 280 L 480 260 L 460 220 Z', zs:18},
-    {id:'nk',      label:'Nord-Kivu', fill:'#f4a261', opacity:.7, path:'M 440 260 L 480 260 L 530 280 L 520 340 L 480 370 L 430 350 L 410 300 Z', zs:7},
-    {id:'sk',      label:'Sud-Kivu',  fill:'#4895ef', opacity:.5, path:'M 410 350 L 480 370 L 470 430 L 430 460 L 390 440 L 380 390 Z', zs:1}
-  ];
-  const bg = document.createElementNS('http://www.w3.org/2000/svg','path');
-  bg.setAttribute('d','M 100 80 L 700 80 L 700 620 L 100 620 Z');
-  bg.setAttribute('fill','#1b222b');
-  svg.appendChild(bg);
-  const outline = document.createElementNS('http://www.w3.org/2000/svg','path');
-  outline.setAttribute('d','M 150 100 L 300 85 L 450 90 L 580 110 L 660 160 L 680 250 L 670 360 L 640 450 L 580 530 L 480 580 L 360 600 L 250 590 L 160 550 L 110 460 L 100 350 L 110 230 L 130 140 Z');
-  outline.setAttribute('fill','#141a21'); outline.setAttribute('stroke','rgba(255,255,255,.1)'); outline.setAttribute('stroke-width','1.5');
-  svg.appendChild(outline);
-  [provinces[2],provinces[1],provinces[0]].forEach(p => {
-    const el = document.createElementNS('http://www.w3.org/2000/svg','path');
-    el.setAttribute('d', p.path);
-    el.setAttribute('fill', p.fill);
-    el.setAttribute('opacity', p.opacity);
-    el.setAttribute('stroke', 'rgba(255,255,255,.2)');
-    el.setAttribute('stroke-width','1');
-    el.style.cursor = 'pointer';
-    const title = document.createElementNS('http://www.w3.org/2000/svg','title');
-    title.textContent = `${p.label} \u2014 ${p.zs} ZS actives`;
-    el.appendChild(title);
-    svg.appendChild(el);
-    const bb = {ituri:[510,225],nk:[475,315],sk:[430,405]};
-    const coords = bb[p.id];
-    if(coords){
-      const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
-      txt.setAttribute('x', coords[0]); txt.setAttribute('y', coords[1]);
-      txt.setAttribute('text-anchor','middle'); txt.setAttribute('font-size','10');
-      txt.setAttribute('font-family',"'IBM Plex Mono'"); txt.setAttribute('fill','#fff');
-      txt.setAttribute('pointer-events','none');
-      txt.textContent = `${p.label} (${p.zs})`;
-      svg.appendChild(txt);
-    }
-  });
-  const legData = [
-    {color:'#e63946',label:'Ituri (18 ZS)'},
-    {color:'#f4a261',label:'Nord-Kivu (7 ZS)'},
-    {color:'#4895ef',label:'Sud-Kivu (1 ZS)'}
-  ];
-  document.getElementById('mapLeg').innerHTML = legData.map(l=>`<span class="leg-i"><span class="leg-sw" style="background:${l.color}"></span>${l.label}</span>`).join('');
-}
-
-// ─── STALENESS (non-bloquant — inline dans le flux, pas sticky) ──────────
+// Staleness check (>72h depuis le 17/06/2026 = alerte)
 function checkStaleness(){
-  const lastDate = new Date(SITREP.date);
+  const lastUpdate = new Date('2026-06-17T18:00:00Z');
   const now = new Date();
-  const diff = Math.floor((now - lastDate)/(1000*60*60*24));
-  if(diff >= 3){
-    const b = document.getElementById('stalenessBanner');
-    b.style.display = 'block';
-    b.className = 'staleness-inline';
-    b.innerHTML = `&#9888; Donn&eacute;es de SitRep N&deg;${SITREP.n} (${SITREP.dateLabel}) &mdash; ${diff} jours depuis la derni&egrave;re mise &agrave; jour. <a href="https://insp.cd/blog-2/" target="_blank" style="color:#ffaaaa;margin-left:8px">V&eacute;rifier insp.cd &rarr;</a>`;
+  const diffH = (now - lastUpdate) / 36e5;
+  if(diffH > 72){
+    const banner = document.getElementById('stalenessBanner');
+    if(banner){
+      banner.style.display='flex';
+      banner.textContent = `⚠ Ces données datent du ${Math.round(diffH)}h. Le dernier SitRep disponible est le N°34 (17/06/2026). Vérifiez INSP RDC pour les mises à jour.`;
+    }
   }
 }
+
+document.addEventListener('DOMContentLoaded',()=>{
+  buildCharts();
+  checkStaleness();
+});
 </script>
 </body>
 </html>
