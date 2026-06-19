@@ -1,5 +1,21 @@
 /**
- * /api/ebola-data — EBOLA-MONITOR v5.5.0
+ * /api/ebola-data — EBOLA-MONITOR v5.6.0
+ *
+ * CHANGELOG v5.6.0 (19/06/2026) — SitRep N°34 INSP (17/06/2026) enrichissement complet :
+ *  Ajout décès + CFR par zone de santé (Tableau 2 SitRep N°34)
+ *  Contacts détaillés par province : Ituri 4659 (suivi 70.8%), Nord-Kivu 1628 (70.5%), Sud-Kivu 80 (100%)
+ *  Total contacts sous suivi : 6367, vus : 4525, taux : 71.1%
+ *  Laboratoire : Ituri 126 éch. (positivité 12.7%), Nord-Kivu 70 éch. (positivité 7.1%), Sud-Kivu 2 éch. (100% négatifs)
+ *  CTE : 383 patients en isolement, taux occupation 93.6% (Ituri 99.1%, Nord-Kivu 67.6%)
+ *  Admissions 24h : 67 (Ituri 61, Nord-Kivu 6). Sorties : 40 (7 décès, 11 guéris, 18 non-cas, 3 évadés, 1 transféré)
+ *  Alertes : 1028 remontées, 830 investiguées (80.7%). Alertes validées : 116 vivantes + 35 décédées = 151 suspects
+ *  Taux d'investigation : Ituri 30.5%, Nord-Kivu 98.8%, Sud-Kivu 42.9%
+ *  PoC Ituri : 43/55 activés (78.1%), 62104 voyageurs screenés (96%), 4 alertes notifiées
+ *  56 cas probables en validation : Bunia(18), Rwampara(15), Nyankunde(6), Mongbwalu(6), Aru(3), Katwa(4), Lita(1), Mangala(1), Mambasa(1), Miti-Murhesa(1)
+ *  Cas HCW : 75 (létalité 22.6%) — mis à jour depuis données PCI Nord-Kivu
+ *  Principaux défis : 15 défis documentés dont gap financement 200M USD, saturation CTE Ituri (96.4%), ~350 cas non localisés
+ *  zones_detail Ituri : décès et CFR complétés depuis Tableau 2
+ *  zones_detail Nord-Kivu : décès et CFR complétés depuis Tableau 2
  *
  * CHANGELOG v5.5.0 (19/06/2026) — SitRep N°34 INSP (17/06/2026) :
  *  confirmed_cases : 837 → 896 (+59)
@@ -9,18 +25,6 @@
  *  Ituri : 763 → 817 cas, 20 → 21 ZS (nouvelle: Fataki)
  *  Nord-Kivu: 71 → 76 cas, 10 → 11 ZS (nouvelle: Musienene)
  *  Sud-Kivu: 3 cas / 1 décès — inchangé
- *  Nouveaux cas 24h : 21 (Ituri 16, Nord-Kivu 5)
- *  Guéris du jour : 11
- *  Cas suspects du jour : 151 (dont 35 décès)
- *  Cas probables en validation : 56
- *  Patients en isolement/hospitalisation : 78
- *  Taux de suivi des contacts (3 provinces) : 71.1%
- *  Uganda : 19 cas / 2 décès — inchangé (WHO/ONU 17/06)
- *  WHO (ONU 18/06): 896 cas, 232 décès confirmés au 17/06 — concordance parfaite avec INSP N°34
- *  ECDC (17/06): déploiement d'experts supplémentaires sur le terrain, risque EU/EEA très faible
- *  MSF (14/06): lacunes dangereuses persistent — CTE 65 lits en construction Bunia, taux suivi contacts <56%
- *  isSupabaseDataSane baseline relevée à 896
- *  FALLBACK_STATIC_DATE mis à jour au 17/06
  *
  * CHANGELOG v5.4.0 (18/06/2026) — SitRep N°33 INSP (16/06/2026) :
  *  confirmed_cases : 635 → 837 (+202)
@@ -95,9 +99,12 @@ const FALLBACK_SNAPSHOT = {
   uganda_local_transmission: 5,
   uganda_last_case_date   : '2026-06-05',
   uganda_days_no_new_case : 14,
-  hcw_cases               : 16,
+  hcw_cases               : 75,
+  hcw_deaths              : 17,
+  hcw_cfr                 : 22.6,
   countries_affected      : 1,
   health_zones_affected   : 33,
+  probable_cases_validation: 56,
   data_as_of              : FALLBACK_STATIC_DATE,
   source                  : 'INSP RDC SitRep MVE N°34/MVB_17/2026 — 17 juin 2026 [SOURCE OFFICIELLE]',
   source_url              : 'https://insp.cd/sitrep-n34-mvb_17-06-2026/',
@@ -127,25 +134,44 @@ const FALLBACK_SNAPSHOT = {
     suspects_deces_communaute  : 35,
     cas_probables_validation   : 56,
     confirmes_actifs_isolement : 78,
-    total_en_isolement         : 78,
+    total_en_isolement         : 383,
+    isolement_confirmes        : 161,
+    isolement_suspects         : 222,
     gueris_cumul               : null,
-    contacts_sous_suivi        : null,
-    contacts_vus_24h           : null,
+    gueris_du_jour             : 11,
+    // Contacts détaillés par province (Tableau 4)
+    contacts_sous_suivi        : 6367,
+    contacts_vus_24h           : 4525,
     contact_tracing_rate_pct   : 71.1,
     contact_tracing_target_pct : 95.0,
-    alertes_remontees_24h      : null,
-    alertes_investiguees_24h   : null,
-    taux_investigation_pct     : null,
+    nouveaux_contacts_listes   : 319,
+    // Alertes (Tableau 3)
+    alertes_remontees_24h      : 1028,
+    alertes_investiguees_24h   : 830,
+    taux_investigation_pct     : 80.7,
+    alertes_validees_vivantes  : 116,
+    alertes_validees_decedees  : 35,
     suspects_du_jour           : 151,
+    // Laboratoire (24h)
     echantillons_positifs_24h  : 21,
-    echantillons_analyses_24h  : null,
-    taux_positivite_labo       : null,
-    source                     : 'INSP RDC N°34 (17 juin 2026) — 21 cas confirmés, 6 décès, 11 guéris, 78 en isolement, taux contacts 71.1%',
+    echantillons_analyses_24h  : 198,
+    taux_positivite_labo       : 10.6,
+    // CTE (Tableau 6)
+    cte_admissions_24h         : 67,
+    cte_patients_lit_j1        : 356,
+    cte_patients_lit_fin_j     : 383,
+    cte_taux_occupation        : 93.6,
+    cte_sorties_decedes        : 7,
+    cte_sorties_non_cas        : 18,
+    cte_sorties_gueris         : 11,
+    cte_evades                 : 3,
+    cte_transferes             : 1,
+    source                     : 'INSP RDC N°34 (17 juin 2026) — 21 cas confirmés, 6 décès, 11 guéris, 383 en isolement (93.6%), suivi contacts 71.1% (6367 contacts)',
     source_date                : '2026-06-17',
     detail_provinces: {
-      ituri    : { contacts: null, vus_24h: null, taux: null, new_cases_24h: 16, new_deaths_24h: 4 },
-      nord_kivu: { contacts: null, vus_24h: null, taux: null, new_cases_24h: 5,  new_deaths_24h: 2 },
-      sud_kivu : { contacts: null, vus_24h: null, taux: null, new_cases_24h: 0,  new_deaths_24h: 0 },
+      ituri    : { contacts: 4659, vus_24h: 3297, taux: 70.8, new_cases_24h: 16, new_deaths_24h: 4, alertes_remontees: 266, alertes_investiguees: 81, taux_investigation: 30.5, labo_echantillons: 126, labo_positifs: 16, labo_positivite: 12.7, cte_admissions: 61, cte_occupation: 99.1 },
+      nord_kivu: { contacts: 1628, vus_24h: 1148, taux: 70.5, new_cases_24h: 5,  new_deaths_24h: 2, alertes_remontees: 755, alertes_investiguees: 746, taux_investigation: 98.8, labo_echantillons: 70, labo_positifs: 5, labo_positivite: 7.1, cte_admissions: 6, cte_occupation: 67.6 },
+      sud_kivu : { contacts: 80,   vus_24h: 80,   taux: 100.0, new_cases_24h: 0,  new_deaths_24h: 0, alertes_remontees: 7, alertes_investiguees: 3, taux_investigation: 42.9, labo_echantillons: 2, labo_positifs: 0, labo_positivite: 0, cte_admissions: null, cte_occupation: null },
     },
   },
 
@@ -181,29 +207,31 @@ const FALLBACK_SNAPSHOT = {
         'Nia-Nia','Nizi','Nyankunde','Rimba','Rwampara','Tchomia'
       ],
       zones_detail: [
-        { zone:'Bunia',     cases:247, deaths:null, cfr:null },
-        { zone:'Rwampara',  cases:195, deaths:null, cfr:null },
-        { zone:'Mongbwalu', cases:189, deaths:null, cfr:null },
-        { zone:'Nyankunde', cases:68,  deaths:null, cfr:null },
-        { zone:'Nizi',      cases:25,  deaths:null, cfr:null },
-        { zone:'Lita',      cases:18,  deaths:null, cfr:null },
-        { zone:'Komanda',   cases:10,  deaths:null, cfr:null },
-        { zone:'Bambu',     cases:9,   deaths:null, cfr:null },
-        { zone:'Kilo',      cases:7,   deaths:null, cfr:null },
-        { zone:'Mangala',   cases:5,   deaths:null, cfr:null },
-        { zone:'Tchomia',   cases:5,   deaths:null, cfr:null },
-        { zone:'Damas',     cases:4,   deaths:null, cfr:null },
-        { zone:'Aungba',    cases:4,   deaths:null, cfr:null },
-        { zone:'Rimba',     cases:3,   deaths:null, cfr:null },
-        { zone:'Aru',       cases:3,   deaths:null, cfr:null },
-        { zone:'Mambasa',   cases:2,   deaths:null, cfr:null },
-        { zone:'Logo',      cases:2,   deaths:null, cfr:null },
-        { zone:'Gety',      cases:1,   deaths:null, cfr:null },
-        { zone:'Kambala',   cases:1,   deaths:null, cfr:null },
-        { zone:'Nia-Nia',   cases:1,   deaths:null, cfr:null },
-        { zone:'Fataki',    cases:null, deaths:null, cfr:null }, // Nouvelle ZS N°34
+        { zone:'Bunia',     cases:247, deaths:41,  cfr:16.6 },
+        { zone:'Rwampara',  cases:195, deaths:33,  cfr:16.9 },
+        { zone:'Mongbwalu', cases:189, deaths:83,  cfr:43.9 },
+        { zone:'Nyankunde', cases:68,  deaths:6,   cfr:8.8  },
+        { zone:'Nizi',      cases:25,  deaths:5,   cfr:20.0 },
+        { zone:'Lita',      cases:18,  deaths:4,   cfr:22.2 },
+        { zone:'Komanda',   cases:10,  deaths:3,   cfr:30.0 },
+        { zone:'Bambu',     cases:9,   deaths:2,   cfr:22.2 },
+        { zone:'Kilo',      cases:7,   deaths:1,   cfr:14.3 },
+        { zone:'Mangala',   cases:5,   deaths:3,   cfr:60.0 },
+        { zone:'Tchomia',   cases:5,   deaths:0,   cfr:0.0  },
+        { zone:'Damas',     cases:4,   deaths:0,   cfr:0.0  },
+        { zone:'Aungba',    cases:4,   deaths:1,   cfr:25.0 },
+        { zone:'Rimba',     cases:3,   deaths:0,   cfr:0.0  },
+        { zone:'Aru',       cases:3,   deaths:1,   cfr:33.3 },
+        { zone:'Mambasa',   cases:2,   deaths:1,   cfr:50.0 },
+        { zone:'Logo',      cases:2,   deaths:0,   cfr:0.0  },
+        { zone:'Drodro',    cases:1,   deaths:1,   cfr:100.0 },
+        { zone:'Gety',      cases:1,   deaths:0,   cfr:0.0  },
+        { zone:'Kambala',   cases:1,   deaths:1,   cfr:100.0 },
+        { zone:'Nia-Nia',   cases:1,   deaths:1,   cfr:100.0 },
+        { zone:'Fataki',    cases:1,   deaths:0,   cfr:0.0  }, // Nouvelle ZS N°34
+        { zone:'Autres (non ventilés)', cases:17, deaths:0, cfr:0.0 },
       ],
-      note: 'N°34 (17/06): 817 cas (21 ZS, ~91.2% du total). Nouvelle ZS: Fataki. Nouvelles zones actives 24h: Bunia(4), Mongbwalu(4), Nizi(2), Lita(2), Komanda(1), Mangala(1), Nyankunde(1), Kilo(1). Ventilation détaillée par ZS au 18/06/2026 (cumul).',
+      note: 'N°34 (17/06): 817 cas (21 ZS, ~91.2% du total). Nouvelle ZS: Fataki. Zones actives 24h: Bunia(4), Mongbwalu(4), Nizi(2), Lita(2), Komanda(1), Mangala(1), Nyankunde(1), Kilo(1). Mongbwalu: CFR 43.9% — défis PEC précoce. CTE Ituri: 99.1% occupation (saturation critique).',
     },
     {
       province      : 'Nord-Kivu',
@@ -216,23 +244,23 @@ const FALLBACK_SNAPSHOT = {
       country       : 'DRC',
       source        : 'INSP N°34 (17/06/2026)',
       source_date   : '2026-06-17',
-      note          : 'N°34: 76 cas, 11/34 ZS. Nouvelle ZS: Musienene. CFR 59.2% — létalité très élevée (insécurité ADF, délais PEC, évasions CTE). Nouvelles zones actives 24h: Beni(2), Katwa(2), Butembo(1).',
+      note          : 'N°34: 76 cas, 11/34 ZS. Nouvelle ZS: Musienene. CFR 59.2% — létalité très élevée (insécurité ADF, délais PEC, évasions CTE). Zones actives 24h: Beni(2), Katwa(2), Butembo(1). 3 prestataires santé placés en isolement. CTE: 67.6% occupation.',
       zones: [
         'Beni','Butembo','Goma','Kalunguta','Katwa',
         'Kyondo','Mabalako','Masereka','Musienene','Oicha','Vuhovi'
       ],
       zones_detail: [
-        { zone:'Butembo',  cases:25, deaths:null, cfr:null },
-        { zone:'Katwa',    cases:24, deaths:null, cfr:null },
-        { zone:'Beni',     cases:15, deaths:null, cfr:null },
-        { zone:'Oicha',    cases:3,  deaths:null, cfr:null },
-        { zone:'Kalunguta',cases:2,  deaths:null, cfr:null },
-        { zone:'Kyondo',   cases:2,  deaths:null, cfr:null },
-        { zone:'Goma',     cases:1,  deaths:null, cfr:null },
-        { zone:'Masereka', cases:1,  deaths:null, cfr:null },
-        { zone:'Vuhovi',   cases:1,  deaths:null, cfr:null },
-        { zone:'Mabalako', cases:1,  deaths:null, cfr:null },
-        { zone:'Musienene',cases:1,  deaths:null, cfr:null }, // Nouvelle ZS N°34
+        { zone:'Butembo',   cases:25, deaths:11, cfr:44.0  },
+        { zone:'Katwa',     cases:24, deaths:16, cfr:66.7  },
+        { zone:'Beni',      cases:15, deaths:12, cfr:80.0  },
+        { zone:'Oicha',     cases:3,  deaths:2,  cfr:66.7  },
+        { zone:'Kalunguta', cases:2,  deaths:1,  cfr:50.0  },
+        { zone:'Kyondo',    cases:2,  deaths:1,  cfr:50.0  },
+        { zone:'Goma',      cases:1,  deaths:0,  cfr:0.0   },
+        { zone:'Masereka',  cases:1,  deaths:0,  cfr:0.0   },
+        { zone:'Vuhovi',    cases:1,  deaths:1,  cfr:100.0 },
+        { zone:'Mabalako',  cases:1,  deaths:0,  cfr:0.0   },
+        { zone:'Musienene', cases:1,  deaths:1,  cfr:100.0 }, // Nouvelle ZS N°34
       ],
     },
     {
@@ -245,7 +273,7 @@ const FALLBACK_SNAPSHOT = {
       country       : 'DRC',
       source        : 'INSP N°34 (inchangé)',
       source_date   : '2026-06-17',
-      note          : 'Dernier cas confirmé : 26 mai 2026. Inchangé depuis N°20. Pas de transmission active. Vigilance maintenue.',
+      note          : 'Dernier cas confirmé : 26 mai 2026. Inchangé depuis N°20. Pas de transmission active. Vigilance maintenue. 1 cas probable en validation (Miti-Murhesa).',
       zones: ['Miti-Murhesa'],
       zones_detail: [
         { zone:'Miti-Murhesa', cases:3, deaths:1, cfr:33.3 },
@@ -268,6 +296,56 @@ const FALLBACK_SNAPSHOT = {
     },
   ],
 
+  // Cas probables en validation (SitRep N°34)
+  probable_cases_detail: [
+    { zone:'Bunia',        province:'Ituri',     count:18 },
+    { zone:'Rwampara',     province:'Ituri',     count:15 },
+    { zone:'Nyankunde',    province:'Ituri',     count:6  },
+    { zone:'Mongbwalu',    province:'Ituri',     count:6  },
+    { zone:'Aru',          province:'Ituri',     count:3  },
+    { zone:'Katwa',        province:'Nord-Kivu', count:4  },
+    { zone:'Lita',         province:'Ituri',     count:1  },
+    { zone:'Mangala',      province:'Ituri',     count:1  },
+    { zone:'Mambasa',      province:'Ituri',     count:1  },
+    { zone:'Miti-Murhesa', province:'Sud-Kivu',  count:1  },
+  ],
+
+  // Points d'entrée/contrôle Ituri (Tableau 5)
+  points_controle: {
+    province          : 'Ituri',
+    poc_actives       : 43,
+    poc_total         : 55,
+    poc_taux          : 78.1,
+    voyageurs_passes  : 62104,
+    pct_screnes       : 96.0,
+    pct_lave_mains    : 93.8,
+    pct_sensibilises  : 91.0,
+    alertes_notifiees : 4,
+    alertes_investiguees_pct: 100.0,
+    resultats_dispo_24h_pct : 75.0,
+    contacts_interceptes    : 0,
+    source_date       : '2026-06-17',
+  },
+
+  // Défis opérationnels majeurs (SitRep N°34 — Section 5)
+  operational_challenges: [
+    { id:1,  defi:'Réticence prélèvements post-mortem (EDS/swabs) et résistance communautaire', impact:'Retard confirmation, sous-estimation cas, perturbation activités', action:'Intensifier CREC, implication leaders religieux, renforcement sécurité équipes' },
+    { id:2,  defi:'Capacité insuffisante CTE et saturation Ituri (99.1%)', impact:'Retards admission, risque transmission nosocomiale', action:'Accélérer construction/expansion CTE, structures temporaires supplémentaires' },
+    { id:3,  defi:'Faible suivi contacts (71.1% vs cible 95%)', impact:'Chaînes de transmission non interrompues', action:'Former, déployer et motiver RECO, supervision renforcée' },
+    { id:4,  defi:'Surveillance insuffisante (30.5% alertes investiguées en Ituri)', impact:'Transmission non détectée, expansion silencieuse', action:'Renforcer surveillance communautaire, améliorer remontée et investigation rapide' },
+    { id:5,  defi:'~350 cas non localisés ou non classifiés', impact:'Lacunes majeures dans reconstruction chaînes de transmission', action:'Réconciliation données, élimination doublons, reclassification ZS et statuts' },
+    { id:6,  defi:'Insuffisance approvisionnement MEG et intrants médicaux', impact:'Fragilisation prise en charge globale', action:'Plaidoyer et approvisionnement urgent médicaments essentiels' },
+    { id:7,  defi:'Insuffisance intrants PCI (EPI, chlore) et formation limitée', impact:'Risque élevé infections nosocomiales (75 cas HCW, létalité 22.6%)', action:'Approvisionnement urgent, renforcement formations PCI' },
+    { id:8,  defi:'Backlog échantillons laboratoire Nord-Kivu, diagnostic tardif', impact:'Retard confirmation, létalité élevée (59.2%)', action:'Plan de rattrapage laboratoire, renforcement capacités diagnostiques' },
+    { id:9,  defi:'Insuffisance ambulances et structures isolement (gap 20 centres)', impact:'Retards transfert, augmentation risque transmission', action:'Déploiement urgent moyens logistiques et infrastructures' },
+    { id:10, defi:'Coordination insuffisante, faible utilisation cadres COUSP', impact:'Inefficience opérationnelle, décisions retardées', action:'Renforcer mécanismes coordination tous niveaux, opérationnaliser COUSP' },
+    { id:11, defi:'Insuffisance ressources financières (gap 200 millions USD)', impact:'Limitation mise en œuvre tous piliers riposte', action:'Mobilisation urgente ressources, plaidoyer partenaires' },
+    { id:12, defi:'Insécurité et accès limité (CODECO, ADF)', impact:'Restriction opérations, accès limité zones à haut risque', action:'Renforcement coordination sécuritaire et accès humanitaire' },
+    { id:13, defi:'Faible remontée alertes (notamment Sud-Kivu)', impact:'Retard détection cas', action:'Renforcement surveillance communautaire et système alerte' },
+    { id:14, defi:'Continuité services essentiels (CEHS) compromise', impact:'Augmentation mortalité indirecte (non Ebola)', action:'Mise en œuvre effective gratuité soins, renforcement CEHS' },
+    { id:15, defi:'Forte mobilité des populations', impact:'Risque élevé expansion géographique rapide', action:'Renforcer surveillance aux PoE/PoC et coordination transfrontalière' },
+  ],
+
   sources_comparison: [
     {
       name            : 'INSP RDC SitRep N°34/MVB_17/2026 (source primaire officielle)',
@@ -275,12 +353,12 @@ const FALLBACK_SNAPSHOT = {
       confirmed_cases : 896,
       suspected_cases : 151,
       confirmed_deaths: 232,
-      confirmed_active: 78,
+      confirmed_active: 383,
       confirmed_recovered: null,
       contact_tracing_rate_pct: 71.1,
       health_zones    : 33,
       new_cases_24h   : 21,
-      note            : 'SOURCE OFFICIELLE RDC (17/06). 896 cas cumulés (+59 vs N°33), 232 décès (+36), CFR 26.3%. 2 nouvelles ZS: Fataki (Ituri), Musienene (Nord-Kivu). Total 33/104 ZS touchées. 78 en isolement. Suivi contacts 71.1%.',
+      note            : 'SOURCE OFFICIELLE RDC (17/06). 896 cas cumulés (+59 vs N°33), 232 décès (+36), CFR 26.3%. 2 nouvelles ZS: Fataki (Ituri), Musienene (Nord-Kivu). Total 33/104 ZS touchées. 383 en isolement (93.6%). Suivi contacts 71.1% (6367 contacts). 1028 alertes remontées.',
       url             : 'https://insp.cd/sitrep-n34-mvb_17-06-2026/',
       is_primary      : true,
     },
@@ -310,7 +388,7 @@ const FALLBACK_SNAPSHOT = {
       confirmed_deaths: null,
       contact_tracing_rate_pct: 56,
       note            : 'MSF alerte: lacunes dangereuses persistent après 1 mois. Taux contacts <56% (cible OMS: 90–95%). CTE 65 lits en construction à Bunia (Ituri). Ituri: ~95% des cas. Transmission active Ituri et Nord-Kivu. Urgence escalade de la réponse.',
-      url             : 'https://msfsouthasia.org/drc-one-month-on-msf-warns-dangerous-gaps-persist-in-ebola-disease-response/',
+      url             : 'https://msfsouthasia.org/drc-one-month-msf-warns-dangerous-gaps-persist-in-ebola-disease-response/',
     },
     {
       name            : 'Conseil EU — ECDC/Commission (8 juin 2026)',
@@ -434,13 +512,19 @@ function mergeWithFallback(raw) {
     uganda_last_case_date   : raw.uganda_last_case_date   ?? FALLBACK_SNAPSHOT.uganda_last_case_date,
     uganda_days_no_new_case : raw.uganda_days_no_new_case ?? FALLBACK_SNAPSHOT.uganda_days_no_new_case,
     hcw_cases               : raw.hcw_cases               ?? FALLBACK_SNAPSHOT.hcw_cases,
+    hcw_deaths              : raw.hcw_deaths              ?? FALLBACK_SNAPSHOT.hcw_deaths,
+    hcw_cfr                 : raw.hcw_cfr                 ?? FALLBACK_SNAPSHOT.hcw_cfr,
     countries_affected      : raw.countries_affected      ?? FALLBACK_SNAPSHOT.countries_affected,
     health_zones_affected   : raw.health_zones_affected   ?? FALLBACK_SNAPSHOT.health_zones_affected,
+    probable_cases_validation: raw.probable_cases_validation ?? FALLBACK_SNAPSHOT.probable_cases_validation,
     data_as_of              : raw.data_as_of              || FALLBACK_SNAPSHOT.data_as_of,
     source                  : raw.source                  || FALLBACK_SNAPSHOT.source,
     source_url              : raw.source_url              || FALLBACK_SNAPSHOT.source_url,
     risk_levels             : FALLBACK_SNAPSHOT.risk_levels,
     continental_plan        : FALLBACK_SNAPSHOT.continental_plan,
+    probable_cases_detail   : FALLBACK_SNAPSHOT.probable_cases_detail,
+    points_controle         : FALLBACK_SNAPSHOT.points_controle,
+    operational_challenges  : FALLBACK_SNAPSHOT.operational_challenges,
     provinces               : (provinces && Array.isArray(provinces) && provinces.length) ? provinces : FALLBACK_SNAPSHOT.provinces,
     trend                   : normalizedTrend || FALLBACK_SNAPSHOT.trend,
     contact_tracing         : (contact_tracing && contact_tracing.contact_tracing_rate_pct != null) ? contact_tracing : FALLBACK_SNAPSHOT.contact_tracing,
@@ -534,7 +618,7 @@ export default async function handler(req, res) {
     external_sources : extSources,
 
     meta: {
-      version       : '5.5.0',
+      version       : '5.6.0',
       sitrep        : 'N°34/MVB_17/06/2026',
       sources_used  : [
         'INSP RDC N°34 (17/06/2026)',
@@ -543,7 +627,7 @@ export default async function handler(req, res) {
         'MSF 14/06/2026',
         'Conseil EU — ECDC 8/06/2026',
       ],
-      note          : 'N°34 (17/06): 896 cas (+59 vs N°33), 232 décès (+36), CFR 26.3%, 33 ZS (Fataki+Musienene nouvelles). Ituri 817 (21 ZS, 91.2%), Nord-Kivu 76 (11 ZS, CFR 59.2%), Sud-Kivu 3. 21 nouveaux cas/j, 11 guéris, 78 en isolement, suivi contacts 71.1%. Uganda: 14 jours sans nouveau cas. WHO/ONU 18/06: concordance parfaite. ECDC: experts déployés, risque EU très faible. MSF: alerte lacunes persistantes, CTE 65 lits en construction.',
+      note          : 'N°34 enrichi (19/06): 896 cas, 232 décès, CFR 26.3%, 33 ZS. Ituri 817 (21 ZS, 91.2%, CTE 99.1%), Nord-Kivu 76 (11 ZS, CFR 59.2%, CTE 67.6%), Sud-Kivu 3. 21 nouveaux cas/j, 11 guéris, 383 en isolement (93.6%), 6367 contacts (71.1%). 1028 alertes, 80.7% investiguées. Ituri: 30.5% alertes investiguées (défi majeur). Labo: Ituri 12.7%, NK 7.1%. 15 défis opérationnels documentés dont gap 200M USD. 75 cas HCW (CFR 22.6%). Uganda: 14j sans nouveau cas.',
     },
   });
 }
