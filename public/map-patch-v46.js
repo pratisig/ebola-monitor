@@ -1,6 +1,7 @@
 // EBOLA-MONITOR — Leaflet choropleth v46
 // Charge /drc-provinces.geojson (26 provinces, coordonnees reelles GADM/NaturalEarth)
 // Corrections v46 : GeoJSON embarque dans le repo, lookup ADM1_FR/EN, LayerGroup labels, fallback data
+// STATIC_DATA mis a jour — SitRep N°34 (17/06/2026)
 
 (function () {
   'use strict';
@@ -51,10 +52,14 @@
     return PROV_ALIAS[n.trim()] || n.trim();
   };
 
+  // STATIC_DATA — SitRep N°34 (INSP RDC, 17/06/2026)
+  // Ituri : 817 cas / 186 décès / CFR 22.8% / 21 ZS
+  // Nord-Kivu : 76 cas / 45 décès / CFR 59.2% / 11 ZS
+  // Sud-Kivu : 3 cas / 1 décès / CFR 33.3% / 1 ZS (Uvira)
   var STATIC_DATA = [
-    { province: 'Ituri',     cases: 412, deaths: 84, recovered: 8,  suspected: 0, cfr: 20.4, status: 'Active', zone: 'Multi-ZS' },
-    { province: 'Nord-Kivu', cases: 186, deaths: 37, recovered: 6,  suspected: 0, cfr: 19.9, status: 'Active', zone: 'Multi-ZS' },
-    { province: 'Sud-Kivu',  cases: 37,  deaths: 6,  recovered: 1,  suspected: 0, cfr: 16.2, status: 'Active', zone: 'Uvira'    },
+    { province: 'Ituri',     cases: 817, deaths: 186, recovered: 281, suspected: 56, cfr: 22.8, status: 'Active', zone: '21 ZS' },
+    { province: 'Nord-Kivu', cases: 76,  deaths: 45,  recovered: 6,   suspected: 0,  cfr: 59.2, status: 'Active', zone: '11 ZS' },
+    { province: 'Sud-Kivu',  cases: 3,   deaths: 1,   recovered: 0,   suspected: 0,  cfr: 33.3, status: 'Veille', zone: 'Uvira'  },
   ];
 
   window.getProvDataByName = function () {
